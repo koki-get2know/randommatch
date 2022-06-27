@@ -143,7 +143,7 @@ check_azuresp_json
 _information "Creating Azure resources..."
 create_azure_resources
 
-_organization_repository_fullname="https://github.com/orgs/expressoa2"
+_organization_repository_fullname="https://github.com/orgs/expressoa2/randommatch"
 
 _information "Creating repository secrets..."
 gh_create_repository_secrets "${_organization_repository_fullname}"
