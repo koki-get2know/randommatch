@@ -1,6 +1,6 @@
 
 locals {
-  _default = {
-    name_prefix    = "randommatch"
-  }
+    _default = {
+        name_prefix = "randommatch"
+    }
 }
