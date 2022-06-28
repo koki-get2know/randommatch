@@ -6,9 +6,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
 
   default_node_pool {
-    name       = "agentpool"
-    node_count = "1"
-    vm_size    = "Standard_DS2_v2"
+    name               = "agentpool"
+    node_count         = "1"
+    vm_size            = "Standard_DS2_v2"
+    availability_zones = ["1", "2"]
   }
 
   identity {

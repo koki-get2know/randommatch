@@ -33,7 +33,7 @@ jobs:
           uses: azure/login@v1
           with:
             creds: ${{ secrets.AZURE_CREDENTIALS }}
-        - name: 'Validate format of the Iac'
+        - name: 'Terraform validation and deployment'
           env:
             TFSTATE_KEY: ${{ secrets.TFSTATE_KEY }}
             TFSTATE_RESOURCES_GROUP_NAME: ${{ secrets.TFSTATE_RESOURCES_GROUP_NAME }}
