@@ -5,4 +5,6 @@ locals {
   container_registry_name      = "${local.resources_prefix}akscr"
   log_analytics_workspace_name = "${local.resources_prefix}aksmonitor"
   log_analytics_workspace_sku  = "PerGB2018"
+  aks_cluster_name             = "${local.resources_prefix}aksk8s"
+  aks_dns_prefix               = "ps-${local.aks_cluster_name}"
 }
