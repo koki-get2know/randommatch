@@ -77,14 +77,26 @@ lint_terraform() {
 
 init_terrafrom() {
     terraform init -backend-config=storage_account_name="${TFSTATE_STORAGE_ACCOUNT_NAME}" -backend-config=container_name="${TFSTATE_STORAGE_CONTAINER_NAME}" -backend-config=key="${TFSTATE_KEY}" -backend-config=resource_group_name="${TFSTATE_RESOURCES_GROUP_NAME}"
+    if [ $? -ne 0 ]; then
+        _error "Terraform initialisation failed"
+        exit 1
+    fi
 }
 
 init_terrafrom_local() {
     terraform init -backend=false
+    if [ $? -ne 0 ]; then
+        _error "Terraform initialisation failed"
+        exit 1
+    fi
 }
 
 validate_terraform() {
     terraform validate
+    if [ $? -ne 0 ]; then
+        _error "Terraform validation failed"
+        exit 1
+    fi
 }
 
 preview_terraform() {
