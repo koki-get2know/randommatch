@@ -32,7 +32,7 @@ jobs:
 
     - name: Test
       id: test
-      continue-on-error: true
+      continue-on-error: false
       run: |
        cd ./application/core 
        GIN_MODE=release go test -v
