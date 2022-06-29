@@ -1,0 +1,38 @@
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'application/core/**'
+      - '.github/workflows/workflow.build.core.yml'
+
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'application/core/**'
+      - '.github/workflows/workflow.build.core.yml'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.16
+
+    - name: Build    
+      run: |
+        cd ./application/core
+        go get
+        go build
+
+    - name: Test
+      id: test
+      continue-on-error: true
+      run: |
+       cd ./application/core 
+       GIN_MODE=release go test -v
