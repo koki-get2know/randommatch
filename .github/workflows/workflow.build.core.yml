@@ -43,7 +43,8 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: 'Build image for Azure container registry'
-      run: | 
+      run: |
+        ls
         az acr build --image randommatch/api-core:${{ github.sha }}${{ github.run_id }} \
-        --registry randommatchakscr.azurecr.io \
+        --registry randommatchakscr \
         --build-arg build_version=${{ github.sha }}${{ github.run_id }} --file ./Dockerfile .
