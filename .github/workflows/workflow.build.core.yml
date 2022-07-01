@@ -36,3 +36,14 @@ jobs:
       run: |
        cd ./application/core 
        GIN_MODE=release go test -v
+    
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Build image for Azure container registry'
+      run: | 
+        az acr build --image randommatch/api-core:${{ github.sha }}${{ github.run_id }} \
+        --registry randommatchakscr.azurecr.io \
+        --build-arg build_version=${{ github.sha }}${{ github.run_id }} --file ./Dockerfile .
