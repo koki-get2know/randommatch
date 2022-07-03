@@ -54,15 +54,16 @@ jobs:
         NAMESPACE: "randommatch"
         ACR_NAME: "randommatchakscr"
         HELM_REPO: "helm/sock-shop"
+        VERSION: "0.2.1"
       run: |
         cd ./application/sock-shop
         helm package .
         echo ${{ secrets.ARM_CLIENT_SECRET}} | helm registry login ${ACR_NAME}.azurecr.io \
         --username ${{ secrets.ARM_CLIENT_ID }} --password-stdin
-        az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:0.1.0 --yes || true
-        helm push sock-shop-0.2.1.tgz oci://${ACR_NAME}.azurecr.io/helm
+        az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
+        helm push sock-shop-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
         az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
-        helm install myhelmtest oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version 0.1.0 \
+        helm install myhelmtest oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
         helm uninstall myhelmtest --namespace ${NAMESPACE}
