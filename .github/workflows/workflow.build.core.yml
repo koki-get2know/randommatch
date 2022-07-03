@@ -55,6 +55,14 @@ jobs:
         helm package .
         echo ${{ secrets.ARM_CLIENT_SECRET}} | helm registry login randommatchakscr.azurecr.io \
         --username ${{ secrets.ARM_CLIENT_ID }} --password-stdin
+        az acr repository delete --name randommatchakscr --image helm/hello-world:0.1.0 || true
         helm push match-chart-0.1.0.tgz oci://randommatchakscr.azurecr.io/helm
         az acr repository show --name randommatchakscr  --repository helm/match-chart
+        helm install myhelmtest oci://randommatchakscr.azurecr.io/helm/hello-world --version 0.1.0
+        helm uninstall myhelmtest
+
+# helm install myhelmtest oci://$ACR_NAME.azurecr.io/helm/hello-world --version 0.1.0
+# helm uninstall myhelmtest
+# az acr repository delete --name $ACR_NAME --image helm/hello-world:0.1.0
+# https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 
