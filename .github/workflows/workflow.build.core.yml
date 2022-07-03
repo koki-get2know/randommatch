@@ -49,3 +49,11 @@ jobs:
         --registry randommatchakscr \
         --build-arg "build_version=${{ github.sha }}-${{ github.run_id }}" \
         --file ./Dockerfile .
+    
+    - name: 'Package helm chart'
+      run: |
+        cd ./application/match-chart
+        helm package .
+        helm push match-chart-0.1.0.tgz oci://randommatchakscr.azurecr.io/helm
+        az acr repository show --name randommatchakscr  --repository helm/match-chart
+
