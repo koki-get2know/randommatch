@@ -3,13 +3,13 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'application/core/**'
+      - 'application/**'
       - '.github/workflows/workflow.build.core.yml'
 
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'application/core/**'
+      - 'application/**'
       - '.github/workflows/workflow.build.core.yml'
 
 jobs:
