@@ -50,10 +50,11 @@ jobs:
         --build-arg "build_version=${{ github.sha }}-${{ github.run_id }}" \
         --file ./Dockerfile .
     
-    - name: 'Package helm chart'
+    - name: 'Package helm chart and save it to Azure container Registry'
       run: |
         cd ./application/match-chart
         helm package .
+        helm registry login randommatchakscr.azurecr.io --username ${{ secrets.ARM_CLIENT_ID }} --password ${{ secrets.ARM_CLIENT_SECRET }}
         helm push match-chart-0.1.0.tgz oci://randommatchakscr.azurecr.io/helm
         az acr repository show --name randommatchakscr  --repository helm/match-chart
 
