@@ -58,6 +58,7 @@ jobs:
         az acr repository delete --name randommatchakscr --image helm/match-chart:0.1.0 || true
         helm push match-chart-0.1.0.tgz oci://randommatchakscr.azurecr.io/helm
         az acr repository show --name randommatchakscr  --repository helm/match-chart
+        az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
         helm install myhelmtest oci://randommatchakscr.azurecr.io/helm/match-chart --version 0.1.0
         helm uninstall myhelmtest
 
@@ -65,4 +66,5 @@ jobs:
 # helm uninstall myhelmtest
 # az acr repository delete --name $ACR_NAME --image helm/hello-world:0.1.0
 # https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
+# https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos
 
