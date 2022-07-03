@@ -75,4 +75,5 @@ jobs:
 # az acr repository delete --name $ACR_NAME --image helm/hello-world:0.1.0
 # https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 # https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos
+# https://github.com/microservices-demo/microservices-demo/tree/master/deploy/kubernetes/helm-chart
 
