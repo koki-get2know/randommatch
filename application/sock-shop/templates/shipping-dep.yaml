@@ -7,6 +7,9 @@ metadata:
     name: shipping
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: shipping
   template:
     metadata:
       labels:

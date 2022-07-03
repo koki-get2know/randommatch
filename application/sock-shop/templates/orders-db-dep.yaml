@@ -7,6 +7,9 @@ metadata:
     name: orders-db
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: orders-db
   template:
     metadata:
       labels:

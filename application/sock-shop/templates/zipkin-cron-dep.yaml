@@ -7,6 +7,9 @@ metadata:
     name: zipkin-cron
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: zipkin-cron
   template:
     metadata:
       labels:
