@@ -54,7 +54,7 @@ jobs:
         NAMESPACE: "randommatch"
         ACR_NAME: "randommatchakscr"
         HELM_REPO: "helm/sock-shop"
-        VERSION: "0.2.1"
+        VERSION: "0.3.0"
       run: |
         cd ./application/sock-shop
         helm package .
