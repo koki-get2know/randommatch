@@ -9,7 +9,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name                = "agentpool"
     enable_auto_scaling = true
     min_count           = 1
-    node_count          = 1
+    node_count          = 2
     max_count           = 3
     vm_size             = "Standard_DS2_v2"
     zones               = ["1", "2", "3"]
@@ -27,4 +27,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
   }
 
+}
+
+resource "azurerm_role_assignment" "aks_to_acr_role" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+  skip_service_principal_aad_check = true
 }
