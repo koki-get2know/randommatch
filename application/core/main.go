@@ -24,6 +24,11 @@ var albums = []album{
 }
 
 // getAlbums responds with the list of all albums as JSON.
+func getHealthCheck(c *gin.Context) {
+	c.Status(http.StatusNoContent)
+}
+
+// getAlbums responds with the list of all albums as JSON.
 func getAlbums(c *gin.Context) {
 	defer duration(track("getAlbums"))
 
@@ -76,6 +81,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.StaticFile("/api", "./api/swagger.yaml")
+	router.GET("health-check", getHealthCheck)
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbumByID)
 	router.POST("/albums", postAlbums)

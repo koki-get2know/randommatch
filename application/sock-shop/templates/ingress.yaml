@@ -3,7 +3,9 @@ kind: Ingress
 metadata:
   name: {{ template "fullname" .}}-ingress
   annotations:
-{{ toYaml .Values.ingress.annotations | indent 4 }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   ingressClassName: nginx
   rules:

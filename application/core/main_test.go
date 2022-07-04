@@ -73,3 +73,12 @@ func TestPostAlbums(t *testing.T) {
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
 }
+
+func TestHealthCheck(t *testing.T) {
+	r := SetUpRouter()
+	r.GET("/health-check", getHealthCheck)
+	req, _ := http.NewRequest("GET", "/health-check", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNoContent, w.Code)
+}
