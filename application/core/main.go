@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,11 +25,15 @@ var albums = []album{
 
 // getAlbums responds with the list of all albums as JSON.
 func getAlbums(c *gin.Context) {
+	defer duration(track("getAlbums"))
+
 	c.IndentedJSON(http.StatusOK, albums)
 }
 
 // postAlbums adds an album from JSON received in the request body.
 func postAlbums(c *gin.Context) {
+	defer duration(track("postAlbums"))
+
 	var newAlbum album
 
 	// Call BindJSON to bind the received JSON to
@@ -44,6 +50,7 @@ func postAlbums(c *gin.Context) {
 // getAlbumByID locates the album whose ID value matches the id
 // parameter sent by the client, then returns that album as a response.
 func getAlbumByID(c *gin.Context) {
+	defer duration(track("getAlbumByID"))
 	id := c.Param("id")
 
 	// Loop over the list of albums, looking for
@@ -57,11 +64,18 @@ func getAlbumByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
+func track(msg string) (string, time.Time) {
+	return msg, time.Now()
+}
+
+func duration(msg string, start time.Time) {
+	log.Printf("%v: %v\n", msg, time.Since(start))
+}
+
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.StaticFile("/api", "./api/swagger.yaml")
-	router.Static("/swagger", "./api/swagger-ui/dist")
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbumByID)
 	router.POST("/albums", postAlbums)
