@@ -69,7 +69,7 @@ jobs:
         az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
         helm push sock-shop-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
         az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
-        helm install myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
+        helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
         --set frontend.image.tag=${IMAGE_TAG} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
