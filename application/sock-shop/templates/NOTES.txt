@@ -1,1 +1,3 @@
-
+## Ingress basics
+* https://docs.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+* https://docs.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
