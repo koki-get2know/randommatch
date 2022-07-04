@@ -46,8 +46,9 @@ jobs:
       run: |
         cd ./application/core
         docker build -t testing .
-        docker run -d --name go_bash -p8080:8080 testing
+        docker run --name go_container -d -p8080:8080 testing
         curl localhost:8080/albums
+        docker rm go_container
         az acr build --image randommatch/api-core:${{ github.sha }}-${{ github.run_id }} \
         --registry randommatchakscr \
         --file ./Dockerfile .
