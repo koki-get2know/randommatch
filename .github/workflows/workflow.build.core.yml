@@ -46,7 +46,7 @@ jobs:
       run: |
         cd ./application/core
         docker build -t testing .
-        docker run --name go_bash --rm test bash
+        docker run --name go_bash --rm testing bash
         docker exec go_bash curl localhost:8080/albums
         az acr build --image randommatch/api-core:${{ github.sha }}-${{ github.run_id }} \
         --registry randommatchakscr \
