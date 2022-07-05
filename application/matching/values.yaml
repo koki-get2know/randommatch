@@ -6,6 +6,13 @@ ingress:
     host: ''
     tlsSecretName: ''
 
+ui:
+    replicas: 1
+    port: 80
+    image:
+        repo: randommatch/ui
+        tag: changeme
+
 frontend:
     replicas: 1
     port: 8080

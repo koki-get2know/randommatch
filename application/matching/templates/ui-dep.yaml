@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      name: ui
+  template:
+    metadata:
+      labels:
+        name: ui
+    spec:
+      containers:
+      - name: ui
+        image: {{if .Values.global.registry}}{{ .Values.global.registry }}/{{end}}{{ .Values.ui.image.repo }}:{{ .Values.ui.image.tag }}
+        ports:
+        - containerPort: {{ .Values.ui.port }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          capabilities:
+            drop:
+              - all
+          readOnlyRootFilesystem: true
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.ui.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.ui.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
