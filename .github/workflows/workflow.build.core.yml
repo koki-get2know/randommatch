@@ -50,7 +50,13 @@ jobs:
         node-version: 16
 
     - name: Install Dependencies
-      run: cd ./application/ui && npm ci
+      run: |
+        cd ./application/ui
+        if [ -e package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
     - name: Lint UI
       run: cd ./application/ui && npm run lint
     - name: Build UI
