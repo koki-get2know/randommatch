@@ -60,9 +60,9 @@ jobs:
     - name: Lint UI
       run: cd ./application/ui && npm run lint
     - name: Build UI
-      run: cd ./application/ui && npm run build -- --prod
+      run: cd ./application/ui && npm run build -- --configuration=production
     - name: Test UI
-      run: npm test -- --configuration=ci
+      run: cd ./application/ui && npm test -- --configuration=ci
     - name: Test UI Docker Image
       run: | 
         cd ./application/ui
