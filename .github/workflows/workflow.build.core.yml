@@ -24,30 +24,44 @@ jobs:
       with:
         go-version: 1.18
 
-    - name: Build    
+    - name: Build  Go Backend  
       run: |
         cd ./application/core
         go get
         go build
 
-    - name: Test
-      id: test
+    - name: Test Go Backend
       continue-on-error: false
       run: |
        cd ./application/core
        GIN_MODE=release go test -v
+
+    - name: Test Go Docker Image
+      run: | 
+        docker build -t testing .
+        docker run --name go_container -d -p8080:8080 testing
+        curl localhost:8080/albums
+        docker stop go_container && docker rm -f go_container
     
     - name: Use Node.js
       uses: actions/setup-node@v1
+      with:
+        node-version: 16
 
     - name: Install Dependencies
       run: cd ./application/ui && npm ci
-    - name: Lint
+    - name: Lint UI
       run: cd ./application/ui && npm run lint
-    - name: Build
+    - name: Build UI
       run: cd ./application/ui && npm run build -- --prod
-    - name: Test
+    - name: Test UI
       run: npm test -- --configuration=ci
+    - name: Test UI Docker Image
+      run: | 
+        docker build -t testingui .
+        docker run --name ionic_container -d -p8080:80 testingui
+        curl localhost:8080/
+        docker stop ionic_container && docker rm -f ionic_container
 
     - name: 'Az CLI login'
       uses: azure/login@v1
@@ -57,10 +71,6 @@ jobs:
     - name: 'Build Backend image for Azure container registry'
       run: |
         cd ./application/core
-        docker build -t testing .
-        docker run --name go_container -d -p8080:8080 testing
-        curl localhost:8080/albums
-        docker stop go_container && docker rm -f go_container
         az acr build --image randommatch/api-core:${{ github.sha }}-${{ github.run_id }} \
         --registry randommatchakscr \
         --file ./Dockerfile .
@@ -68,10 +78,6 @@ jobs:
     - name: 'Build ui image for Azure container registry'
       run: |
         cd ./application/ui
-        docker build -t testingui .
-        docker run --name ionic_container -d -p8080:80 testingui
-        curl localhost:8080/
-        docker stop ionic_container && docker rm -f ionic_container
         az acr build --image randommatch/ui:${{ github.sha }}-${{ github.run_id }} \
         --registry randommatchakscr \
         --file ./Dockerfile .
