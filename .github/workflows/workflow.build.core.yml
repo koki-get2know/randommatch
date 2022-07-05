@@ -37,7 +37,8 @@ jobs:
        GIN_MODE=release go test -v
 
     - name: Test Go Docker Image
-      run: | 
+      run: |
+        cd ./application/core
         docker build -t testing .
         docker run --name go_container -d -p8080:8080 testing
         curl localhost:8080/albums
@@ -58,6 +59,7 @@ jobs:
       run: npm test -- --configuration=ci
     - name: Test UI Docker Image
       run: | 
+        cd ./application/ui
         docker build -t testingui .
         docker run --name ionic_container -d -p8080:80 testingui
         curl localhost:8080/
