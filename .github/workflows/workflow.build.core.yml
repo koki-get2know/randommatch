@@ -37,6 +37,18 @@ jobs:
        cd ./application/core
        GIN_MODE=release go test -v
     
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+
+    - name: Install Dependencies
+      run: cd ./application/ui && npm ci
+    - name: Lint
+      run: cd ./application/ui && npm run lint
+    - name: Build
+      run: cd ./application/ui && npm run build -- --prod
+    - name: Test
+      run: npm test -- --configuration=ci
+
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
@@ -52,19 +64,7 @@ jobs:
         az acr build --image randommatch/api-core:${{ github.sha }}-${{ github.run_id }} \
         --registry randommatchakscr \
         --file ./Dockerfile .
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-
-    - name: Install Dependencies
-      run: cd ./application/ui && npm ci
-    - name: Lint
-      run: cd ./application/ui && npm run lint
-    - name: Build
-      run: cd ./application/ui && npm run build -- --prod
-    - name: Test
-      run: npm test -- --configuration=ci
-
+        
     - name: 'Build ui image for Azure container registry'
       run: |
         cd ./application/ui
