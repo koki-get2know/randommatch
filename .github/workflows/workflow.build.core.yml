@@ -65,8 +65,8 @@ jobs:
       run: | 
         cd ./application/ui
         docker build -t testingui .
-        docker run --name ionic_container -d -p8080:80 testingui
-        curl localhost:8080/
+        docker run --name ionic_container -d -p8081:80 testingui
+        curl localhost:8081/index.html
         docker stop ionic_container && docker rm -f ionic_container
 
     - name: 'Az CLI login'
