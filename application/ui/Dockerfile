@@ -6,9 +6,8 @@ COPY ./ /app/
 RUN npx ionic build --prod
 
 FROM nginx:alpine
+RUN rm -rf /usr/share/nginx/html/*
 COPY --from=ionic-build /app/www/ /usr/share/nginx/html/
 COPY nginx/default.conf /etc/nginx/conf.d/
-RUN ls -la /usr/share/nginx/html/*
-RUN ls -la /etc/nginx/conf.d
 STOPSIGNAL SIGTERM
 CMD ["nginx", "-g", "daemon off;"]
