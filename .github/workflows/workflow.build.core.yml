@@ -19,30 +19,30 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+    # - name: Set up Go
+    #   uses: actions/setup-go@v3
+    #   with:
+    #     go-version: 1.18
 
-    - name: Build  Go Backend  
-      run: |
-        cd ./application/core
-        go get
-        go build
+    # - name: Build  Go Backend  
+    #   run: |
+    #     cd ./application/core
+    #     go get
+    #     go build
 
-    - name: Test Go Backend
-      continue-on-error: false
-      run: |
-       cd ./application/core
-       GIN_MODE=release go test -v
+    # - name: Test Go Backend
+    #   continue-on-error: false
+    #   run: |
+    #    cd ./application/core
+    #    GIN_MODE=release go test -v
 
-    - name: Test Go Docker Image
-      run: |
-        cd ./application/core
-        docker build -t testing .
-        docker run --name go_container -d -p8080:8080 testing
-        curl localhost:8080/albums
-        docker stop go_container && docker rm -f go_container
+    # - name: Test Go Docker Image
+    #   run: |
+    #     cd ./application/core
+    #     docker build -t testing .
+    #     docker run --name go_container -d -p8080:8080 testing
+    #     curl localhost:8080/albums
+    #     docker stop go_container && docker rm -f go_container
     
     - name: Use Node.js
       uses: actions/setup-node@v1
@@ -66,47 +66,48 @@ jobs:
         cd ./application/ui
         docker build -t testingui .
         docker run --name ionic_container -d -p8081:80 testingui
+        curl localhost:8081
         docker stop ionic_container && docker rm -f ionic_container
 
-    - name: 'Az CLI login'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # - name: 'Az CLI login'
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: 'Build Backend image for Azure container registry'
-      run: |
-        cd ./application/core
-        az acr build --image randommatch/api-core:${{ github.sha }}-${{ github.run_id }} \
-        --registry randommatchakscr \
-        --file ./Dockerfile .
+    # - name: 'Build Backend image for Azure container registry'
+    #   run: |
+    #     cd ./application/core
+    #     az acr build --image randommatch/api-core:${{ github.sha }}-${{ github.run_id }} \
+    #     --registry randommatchakscr \
+    #     --file ./Dockerfile .
         
-    - name: 'Build ui image for Azure container registry'
-      run: |
-        cd ./application/ui
-        az acr build --image randommatch/ui:${{ github.sha }}-${{ github.run_id }} \
-        --registry randommatchakscr \
-        --file ./Dockerfile .
+    # - name: 'Build ui image for Azure container registry'
+    #   run: |
+    #     cd ./application/ui
+    #     az acr build --image randommatch/ui:${{ github.sha }}-${{ github.run_id }} \
+    #     --registry randommatchakscr \
+    #     --file ./Dockerfile .
 
-    - name: 'Package helm chart and save it to Azure container Registry'
-      env: 
-        NAMESPACE: "randommatch"
-        ACR_NAME: "randommatchakscr"
-        HELM_REPO: "helm/matching"
-        IMAGE_TAG: "${{ github.sha }}-${{ github.run_id }}"
-        VERSION: "0.1.0"
-      run: |
-        cd ./application/matching
-        helm dependencies build && helm lint . && helm package .
-        echo ${{ secrets.ARM_CLIENT_SECRET}} | helm registry login ${ACR_NAME}.azurecr.io \
-        --username ${{ secrets.ARM_CLIENT_ID }} --password-stdin
-        az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
-        helm push matching-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
-        az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
-        helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
-        --set frontend.image.tag=${IMAGE_TAG} \
-        --set ui.image.tag=${IMAGE_TAG} \
-        --namespace ${NAMESPACE} --create-namespace
-        kubectl get pods --namespace ${NAMESPACE}
+    # - name: 'Package helm chart and save it to Azure container Registry'
+    #   env: 
+    #     NAMESPACE: "randommatch"
+    #     ACR_NAME: "randommatchakscr"
+    #     HELM_REPO: "helm/matching"
+    #     IMAGE_TAG: "${{ github.sha }}-${{ github.run_id }}"
+    #     VERSION: "0.1.0"
+    #   run: |
+    #     cd ./application/matching
+    #     helm dependencies build && helm lint . && helm package .
+    #     echo ${{ secrets.ARM_CLIENT_SECRET}} | helm registry login ${ACR_NAME}.azurecr.io \
+    #     --username ${{ secrets.ARM_CLIENT_ID }} --password-stdin
+    #     az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
+    #     helm push matching-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
+    #     az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
+    #     helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
+    #     --set frontend.image.tag=${IMAGE_TAG} \
+    #     --set ui.image.tag=${IMAGE_TAG} \
+    #     --namespace ${NAMESPACE} --create-namespace
+    #     kubectl get pods --namespace ${NAMESPACE}
        
 
 # helm uninstall myhelmtest --namespace ${NAMESPACE}
