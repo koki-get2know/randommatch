@@ -64,8 +64,8 @@ jobs:
     - name: Test UI Docker Image
       run: | 
         cd ./application/ui
-        docker run --name some-nginx -d nginx
-        curl localhost:80
+        docker run --name some-nginx -d -p8080:80 nginx
+        curl localhost:8080
         # docker build -t testingui .
         # docker run --name ionic_container -d -p8081:80 testingui
         # curl localhost:8081
