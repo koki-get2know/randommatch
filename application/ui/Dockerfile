@@ -1,4 +1,5 @@
 FROM nginx
+CMD ["nginx", "-g", "daemon off;"]
 # FROM node:16-slim AS ionic-build
 # WORKDIR /app
 # COPY package*.json /app/
