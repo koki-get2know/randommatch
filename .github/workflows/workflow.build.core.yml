@@ -113,6 +113,8 @@ jobs:
 
 # helm uninstall myhelmtest --namespace ${NAMESPACE}
 # kubectl get ingress --namespace randommatch
+# kubectl get clusterrolebinding --namespace randommatch
+# kubectl get crd --namespace randommatch
 # kubectl delete namespace ${NAMESPACE}
 # helm install myhelmtest oci://$ACR_NAME.azurecr.io/helm/hello-world --version 0.1.0
 # helm uninstall myhelmtest
