@@ -18,13 +18,6 @@ spec:
         image: {{if .Values.global.registry}}{{ .Values.global.registry }}/{{end}}{{ .Values.ui.image.repo }}:{{ .Values.ui.image.tag }}
         ports:
         - containerPort: {{ .Values.ui.port }}
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 10001
-          capabilities:
-            drop:
-              - all
-          readOnlyRootFilesystem: true
         livenessProbe:
           httpGet:
             path: /
