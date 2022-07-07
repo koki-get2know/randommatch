@@ -66,8 +66,6 @@ jobs:
         cd ./application/ui
         docker build -t testingui .
         docker run --name ionic_container -d -p8081:80 testingui
-        docker exec ionic_container netstat -tn
-        docker ps
         curl localhost:8081/index.html
         docker stop ionic_container && docker rm -f ionic_container
 
