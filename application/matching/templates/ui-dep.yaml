@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: ui
 spec:
-  replicas: {{ .Values.frontend.replicas }}
+  replicas: {{ .Values.backend.replicas }}
   selector:
     matchLabels:
       name: ui

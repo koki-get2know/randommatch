@@ -105,7 +105,7 @@ jobs:
         helm push matching-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
         az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
-        --set frontend.image.tag=${IMAGE_TAG} \
+        --set backend.image.tag=${IMAGE_TAG} \
         --set ui.image.tag=${IMAGE_TAG} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}

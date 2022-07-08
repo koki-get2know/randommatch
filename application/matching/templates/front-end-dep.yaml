@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: front-end
 spec:
-  replicas: {{ .Values.frontend.replicas }}
+  replicas: {{ .Values.backend.replicas }}
   selector:
     matchLabels:
       name: front-end
@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
       - name: front-end
-        image: {{if .Values.global.registry}}{{ .Values.global.registry }}/{{end}}{{ .Values.frontend.image.repo }}:{{ .Values.frontend.image.tag }}
+        image: {{if .Values.global.registry}}{{ .Values.global.registry }}/{{end}}{{ .Values.backend.image.repo }}:{{ .Values.backend.image.tag }}
         resources:
-{{ toYaml .Values.frontend.resources | indent 10 }}
+{{ toYaml .Values.backend.resources | indent 10 }}
         ports:
-        - containerPort: {{ .Values.frontend.port }}
+        - containerPort: {{ .Values.backend.port }}
         env:
         - name: GIN_MODE
           value: "release"
@@ -33,12 +33,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /health-check
-            port: {{ .Values.frontend.port }}
+            port: {{ .Values.backend.port }}
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health-check
-            port: {{ .Values.frontend.port }}
+            port: {{ .Values.backend.port }}
           initialDelaySeconds: 30
           periodSeconds: 10

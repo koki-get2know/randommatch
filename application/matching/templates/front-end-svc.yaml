@@ -9,7 +9,7 @@ spec:
   type: ClusterIP
   ports:
   - port: 80
-    targetPort: {{ .Values.frontend.port }}
+    targetPort: {{ .Values.backend.port }}
   selector:
     name: front-end
 

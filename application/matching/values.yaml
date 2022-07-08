@@ -13,7 +13,7 @@ ui:
         repo: randommatch/ui
         tag: changeme
 
-frontend:
+backend:
     replicas: 1
     port: 8080
     image:
