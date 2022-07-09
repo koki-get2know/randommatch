@@ -2,14 +2,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: front-end
+  name: back-end
   labels:
-    name: front-end
+    name: back-end
 spec:
   type: ClusterIP
   ports:
   - port: 80
     targetPort: {{ .Values.backend.port }}
   selector:
-    name: front-end
+    name: back-end
 

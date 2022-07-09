@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: match-db
+  labels:
+    name: match-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: match-db
+  template:
+    metadata:
+      labels:
+        name: match-db
+    spec:
+      containers:
+      - name: match-db
+        image: {{ .Values.matchdb.image.repo }}:{{ .Values.matchdb.image.tag }}
+        ports:
+        - name: neo4j
+          containerPort: 7687
+        resources:
+{{ toYaml .Values.matchdb.resources | indent 10 }}
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory

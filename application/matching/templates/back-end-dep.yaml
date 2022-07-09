@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: front-end
+  name: back-end
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
     matchLabels:
-      name: front-end
+      name: back-end
   template:
     metadata:
       labels:
-        name: front-end
+        name: back-end
     spec:
       containers:
-      - name: front-end
+      - name: back-end
         image: {{if .Values.global.registry}}{{ .Values.global.registry }}/{{end}}{{ .Values.backend.image.repo }}:{{ .Values.backend.image.tag }}
         resources:
 {{ toYaml .Values.backend.resources | indent 10 }}

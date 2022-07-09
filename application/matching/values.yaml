@@ -26,3 +26,15 @@ backend:
         requests:
             cpu: 100m
             memory: 300Mi
+
+matchdb:
+    image:
+        repo: neo4j
+        tag: 4.4.8
+    resources:
+        requests:
+            cpu: 500m
+            memory: 512Mi
+        limits:
+            cpu: 500m
+            memory: 512Mi

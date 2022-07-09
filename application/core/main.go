@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // album represents data about a record album.
@@ -69,12 +70,53 @@ func getAlbumByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
+func helloFromNeo4j(c *gin.Context) {
+	defer duration(track("helloFromNeo4j"))
+	hello, err := helloNeo4j("bolt://match-db:7687", "neo4j", "neo4j")
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Exiting because of error" + err.Error()})
+	}
+	c.IndentedJSON(http.StatusCreated, gin.H{"message": hello})
+}
+
 func track(msg string) (string, time.Time) {
 	return msg, time.Now()
 }
 
 func duration(msg string, start time.Time) {
 	log.Printf("%v: %v\n", msg, time.Since(start))
+}
+
+func helloNeo4j(uri, username, password string) (string, error) {
+	driver, err := neo4j.NewDriver(uri, neo4j.BasicAuth(username, password, ""))
+	if err != nil {
+		return "", err
+	}
+	defer driver.Close()
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+
+	defer session.Close()
+
+	greeting, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+		result, err := transaction.Run(
+			"CREATE (a:Greeting) SET a.message = $message RETURN a.message + ', from node ' + id(a)",
+			map[string]interface{}{"message": "hello, world from neo4j"})
+		if err != nil {
+			return nil, err
+		}
+
+		if result.Next() {
+			return result.Record().Values[0], nil
+		}
+
+		return nil, result.Err()
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return greeting.(string), nil
 }
 
 func main() {
@@ -85,6 +127,8 @@ func main() {
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbumByID)
 	router.POST("/albums", postAlbums)
+	router.GET("/neo4j", helloFromNeo4j)
 
 	router.Run()
+
 }
