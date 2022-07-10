@@ -72,7 +72,7 @@ func getAlbumByID(c *gin.Context) {
 
 func helloFromNeo4j(c *gin.Context) {
 	defer duration(track("helloFromNeo4j"))
-	hello, err := helloNeo4j("bolt://match-db:7687", "neo4j", "neo4j")
+	hello, err := helloNeo4j("bolt://match-db:7687", "neo4j", "test")
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Exiting because of error" + err.Error()})
 	}

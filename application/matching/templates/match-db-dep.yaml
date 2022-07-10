@@ -18,6 +18,9 @@ spec:
       containers:
       - name: match-db
         image: {{ .Values.matchdb.image.repo }}:{{ .Values.matchdb.image.tag }}
+        env:
+            - name: NEO4J_AUTH
+              value: neo4j/test
         ports:
         - name: neo4j
           containerPort: 7687
