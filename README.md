@@ -7,3 +7,6 @@
 * Add and commit: `git add -u && git commit -m '[feature] I have done this feature' && git push origin HEAD`
 * Open a pull request from your fork to the main repository
 * Ask for review, after 2 approvals the changes will be merged
+
+# Tools
+We recommend you work with https://code.visualstudio.com/ It has various plugins for various languages: (golang, angular, terraform etc.)
