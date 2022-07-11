@@ -10,3 +10,14 @@
 
 # Tools
 We recommend you work with https://code.visualstudio.com/ It has various plugins for various languages: (golang, angular, terraform etc.)
+
+# Resources
+## Golang
+* https://go.dev/tour/list
+* https://go.dev/learn/
+* https://gobyexample.com/
+* https://www.youtube.com/c/JustForFunc
+
+## Ionic
+* https://ionicframework.com/docs/developing/starting
+* https://www.youtube.com/c/SimonGrimmDev
