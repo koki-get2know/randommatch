@@ -26,19 +26,19 @@ spec:
           containerPort: 7687
         resources:
 {{ toYaml .Values.matchdb.resources | indent 10 }}
-        securityContext:
-          capabilities:
-            drop:
-              - all
-            add:
-              - CHOWN
-              - SETGID
-              - SETUID
-          readOnlyRootFilesystem: true
-        volumeMounts:
-        - mountPath: /tmp
-          name: tmp-volume
-      volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+      #   securityContext:
+      #     capabilities:
+      #       drop:
+      #         - all
+      #       add:
+      #         - CHOWN
+      #         - SETGID
+      #         - SETUID
+      #     readOnlyRootFilesystem: true
+      #   volumeMounts:
+      #   - mountPath: /tmp
+      #     name: tmp-volume
+      # volumes:
+      #   - name: tmp-volume
+      #     emptyDir:
+      #       medium: Memory
