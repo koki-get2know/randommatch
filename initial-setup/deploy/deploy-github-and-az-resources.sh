@@ -6,7 +6,7 @@ source _common.sh
 source _gh.sh
 
 declare AZURE_LOCATION=""
-declare GITHUB_ORG_NAME="expressoa2"
+declare GITHUB_ORG_NAME="koki-get2know"
 declare TEAM_NAME=""
 declare AZURE_DEPLOYMENT=true
 
@@ -143,7 +143,7 @@ check_azuresp_json
 _information "Creating Azure resources..."
 create_azure_resources
 
-_organization_repository_fullname="https://github.com/expressoa2/randommatch"
+_organization_repository_fullname="https://github.com/koki-get2know/randommatch"
 
 _information "Creating repository secrets..."
 gh_create_repository_secrets "${_organization_repository_fullname}"
@@ -151,9 +151,9 @@ gh_create_repository_secrets "${_organization_repository_fullname}"
 _information "GitHub logout..."
 gh_logout
 
-_team_url="https://github.com/orgs/expressoa2/teams/coremembers"
-_repository_url="https://github.com/expressoa2/randommatch"
-_project_url="https://github.com/expressoa2"
+_team_url="https://github.com/orgs/koki-get2know/teams/coremembers"
+_repository_url="https://github.com/koki-get2know/randommatch"
+_project_url="https://github.com/koki-get2know"
 
 _information "Saving details to ${DETAILS_FILE} file..."
 save_details "${_project_url}" "${_team_url}" "${_repository_url}"

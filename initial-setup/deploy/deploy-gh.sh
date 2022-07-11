@@ -6,7 +6,7 @@ source _common.sh
 source _gh.sh
 
 declare AZURE_LOCATION=""
-declare GITHUB_ORG_NAME="expressoa2"
+declare GITHUB_ORG_NAME="koki-get2know"
 declare TEAM_NAME=""
 declare AZURE_DEPLOYMENT=true
 

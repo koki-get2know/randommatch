@@ -19,7 +19,7 @@ This deploys to a single resource group within an Azure subscription. To deploy 
 
 ### GitHub Organization membership
 
-Default GitHub Org for this project is: [expressoa2](https://github.com/expressoa2)
+Default GitHub Org for this project is: [kôki](https://github.com/koki-get2know)
 
 
 Make sure your team members are part of a dedicated GitHub organization. If not, then invite them. Follow this guide on how to do it: [Inviting users to join your organization](https://docs.github.com/en/organizations/managing-membership-in-your-organization/inviting-users-to-join-your-organization)
@@ -97,7 +97,7 @@ export GITHUB_TOKEN="<GitHubPAT>"
 Clone GitHub repo with resources.
 
 ```bash
-git clone https://github.com/expressoa2/randommatch.git
+git clone https://github.com/koki-get2know/randommatch.git
 ```
 
 Go to deployments scripts.
@@ -135,7 +135,7 @@ Run `deploy-github-and-az-resources.sh` bash script to start Azure & GitHub conf
 
 > **Defaults for optional parameters**
 >
-> -o GitHubOrgName = expressoa2
+> -o GitHubOrgName = koki-get2know
 >
 > -t TeamName = randomly generated number with 5 digits
 >
@@ -152,7 +152,7 @@ Add OpenHack team members to Azure Subscription with **Contributor** role, follo
 
 ### GitHub post-deployment steps
 
-Note your Team name - you can find it under deploy script summary like `Team Name: expressoa212345`, where **12345** is a random number.
+Note your Team name - you can find it under deploy script summary like `Team Name: koki12345`, where **12345** is a random number.
 
 Add team members to GitHub Team, follow guide: [Adding organization members to a team
 ](https://docs.github.com/en/organizations/organizing-members-into-teams/adding-organization-members-to-a-team)
