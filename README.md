@@ -16,6 +16,7 @@ We recommend you work with https://code.visualstudio.com/ It has various plugins
 * https://go.dev/tour/list
 * https://go.dev/learn/
 * https://gobyexample.com/
+* https://go.dev/doc/tutorial/web-service-gin
 * https://www.youtube.com/c/JustForFunc
 
 ## Ionic
