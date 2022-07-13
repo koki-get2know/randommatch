@@ -1,0 +1,43 @@
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'application/ui/**'
+      - '.github/workflows/workflow.ionic.pr.yml'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16
+
+    - name: Install Dependencies
+      run: |
+        cd ./application/ui
+        if [ -e package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
+    - name: Lint UI
+      run: cd ./application/ui && npm run lint
+    - name: Build UI
+      run: cd ./application/ui && npm run build -- --configuration=production
+    - name: Test UI Docker Image
+      run: | 
+        cd ./application/ui
+        docker build -t ionic-tag .
+        docker run --name some-nginx -d ionic-tag
+        until [ "`docker inspect -f {{.State.Running}} CONTAINERNAME`"=="true" ]; do
+          sleep 0.1;
+        done;
+        docker exec some-nginx curl localhost
+        docker exec some-nginx cat /etc/nginx/conf.d/default.conf
+        docker stop some-nginx && docker rm -f some-nginx

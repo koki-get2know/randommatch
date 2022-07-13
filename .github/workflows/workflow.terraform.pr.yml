@@ -5,7 +5,7 @@ on:
     - main
     paths:
     - 'iac/terraform/**'
-    - '.github/workflows/workflow.x.pr.yml'
+    - '.github/workflows/workflow.terraform.pr.yml'
 jobs:
   build:
       runs-on: ubuntu-latest

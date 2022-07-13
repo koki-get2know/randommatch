@@ -4,7 +4,7 @@ on:
     - main
     paths:
     - 'iac/terraform/**'
-    - '.github/workflows/workflow.x.deploy.yml'
+    - '.github/workflows/workflow.terraform.deploy.yml'
 
 jobs:
   resource_prefix:
