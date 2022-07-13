@@ -1,4 +1,4 @@
-module github.com/koki-get2know/randommatch/core/matcher
+module github.com/koki/randommatch/matcher
 
 go 1.18
 
