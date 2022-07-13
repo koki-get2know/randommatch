@@ -28,13 +28,13 @@ jobs:
       run: |
         cd ./application/core
         go get
-        go build
+        go build ./...
 
     - name: Test Go Backend
       continue-on-error: false
       run: |
        cd ./application/core
-       GIN_MODE=release go test -v
+       GIN_MODE=release go test ./... -v
 
     - name: Test Go Docker Image
       run: |
