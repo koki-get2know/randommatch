@@ -6,12 +6,6 @@ on:
       - 'application/**'
       - '.github/workflows/workflow.build.core.yml'
 
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'application/**'
-      - '.github/workflows/workflow.build.core.yml'
-
 jobs:
 
   build:
