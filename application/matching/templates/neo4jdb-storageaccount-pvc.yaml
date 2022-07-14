@@ -30,4 +30,4 @@ spec:
   storageClassName: neo4j-azurefile-csi
   resources:
     requests:
-      storage: 50Gi
+      storage: 20Gi
