@@ -32,4 +32,4 @@ spec:
       volumes:
         - name: data-volume
           persistentVolumeClaim:
-            claimName: azurefile-pvc
+            claimName: neo4j-azurefile-pvc
