@@ -29,12 +29,7 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: data-volume
-        - mountPath: /logs
-          name: logs-volume
       volumes:
         - name: data-volume
-          persistentVolumeClaim:
-            claimName: azurefile-pvc
-        - name: logs-volume
           persistentVolumeClaim:
             claimName: azurefile-pvc
