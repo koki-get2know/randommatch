@@ -8,11 +8,12 @@ reclaimPolicy: Delete
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
 mountOptions:
-  - dir_mode=0640
-  - file_mode=0640
-  - uid=0
-  - gid=0
+  - dir_mode=0755
+  - file_mode=0755
+  - uid=7474
+  - gid=7474
   - mfsymlinks
+  - nobrl
   - cache=strict # https://linux.die.net/man/8/mount.cifs
   - nosharesock # reduce probability of reconnect race
   - actimeo=30  # reduce latency for metadata-heavy workload
@@ -30,4 +31,4 @@ spec:
   storageClassName: neo4j-azurefile-csi
   resources:
     requests:
-      storage: 2Gi
+      storage: 1Gi
