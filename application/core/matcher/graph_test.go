@@ -3,23 +3,24 @@ package matcher
 import (
     "testing"
     
+    
 )
 
-var g ItemGraph
+var g UserGraph
 
 func fillGraph() {
-    nA := Node{"A"}
-    nB := Node{"B"}
-    nC := Node{"C"}
-    nD := Node{"D"}
-    nE := Node{"E"}
-    nF := Node{"F"}
-    g.AddNode(&nA)
-    g.AddNode(&nB)
-    g.AddNode(&nC)
-    g.AddNode(&nD)
-    g.AddNode(&nE)
-    g.AddNode(&nF)
+    nA := User{"1"}
+    nB := User{"2"}
+    nC := User{"3"}
+    nD := User{"4"}
+    nE := User{"5"}
+    nF := User{"6"}
+    g.AddUser(&nA)
+    g.AddUser(&nB)
+    g.AddUser(&nC)
+    g.AddUser(&nD)
+    g.AddUser(&nE)
+    g.AddUser(&nF)
 
     g.AddEdge(&nA, &nB)
     g.AddEdge(&nA, &nC)
@@ -32,4 +33,6 @@ func fillGraph() {
 func TestAdd(t *testing.T) {
     fillGraph()
     g.String()
+    
+    
 }

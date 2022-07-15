@@ -6,9 +6,16 @@ import (
     
 )
 
+
 func TestRandomChoices(t *testing.T) {
-   id := []int{2, 5, 6, 8, 10, 12, 24, 25}
-    match_1, match_2 := RandomChoices(id)
-    fmt.Printf("id:%d match id:%d\n", match_1,match_2)
+   //id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
+    g.String()
+    matchedUsers := RandomChoices(&g,3)
+    fmt.Printf("Match of %d: [" ,len(matchedUsers))
+    for i := 0; i < len(matchedUsers); i++{
+       fmt.Printf("%s,",matchedUsers[i].String())
+    }
+    
+    fmt.Printf("]")
 }
 
