@@ -1,0 +1,4 @@
+UserId,Name,Email,Password,Groups,Genre,Birthday,Hobbies,MatchPreference,MatchPreferenceTime,PositionHeld,MultiMatch,PhoneNumber,Departement,Location,Seniority,Role,NumberOfMatching,NumberMatchingAccepted,NumberMatchingDeclined,AverageMatchingRate
+1,Pins Prestilien,pinsdev24@gmail.com,pins@237,,Male,10/01/,DataScience Space,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,null,super-user,25,10,15,3
+2,Pins Prestilien,pinsdev24@gmail.com,pins@237,DS,Male,10/01/,DataScience Space,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,null,super-user,25,10,15,3
+4,Pins Prestilien,pinsdev24@gmail.com,pins@237,Foot,Male,10/01/,DataScience Space,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,null,super-user,25,10,15,3
