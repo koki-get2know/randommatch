@@ -53,7 +53,7 @@ func Search(s []*User, n *User)(bool,int){
     index := -1 
     find := false
     for i := 0; i < len(s); i++ {
-            if(g.users[i].userId == n.userId){
+            if(s[i].userId == n.userId){
                   find = true
                   index = i
                   break
