@@ -37,3 +37,8 @@ matchdb:
         limits:
             cpu: 1000m
             memory: 2Gi
+# https://artifacthub.io/packages/helm/cert-manager/cert-manager
+cert-manager:
+    installCRDs: true
+    nodeSelector:
+        "kubernetes.io/os": linux
