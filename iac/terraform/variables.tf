@@ -10,3 +10,8 @@ variable "resources_prefix" {
   default     = null
 }
 
+variable "dns_zone" {
+  description = "dnz zone"
+  type        = string
+  default     = "sheno.ca"
+}
