@@ -39,6 +39,6 @@ matchdb:
             memory: 2Gi
 # https://artifacthub.io/packages/helm/cert-manager/cert-manager
 cert-manager:
-    installCRDs: false
+    installCRDs: true
     nodeSelector:
         "kubernetes.io/os": linux
