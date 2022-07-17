@@ -100,7 +100,8 @@ jobs:
         az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
         helm push matching-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
         az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
-        kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml
+        kubectl label namespace ${NAMESPACE} cert-manager.io/disable-validation=true
+        kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
         kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
         --set backend.image.tag=${IMAGE_TAG} \
