@@ -37,34 +37,34 @@ jobs:
     #     curl localhost:8080/albums
     #     docker stop go_container && docker rm -f go_container
     
-    # - name: Use Node.js
-    #   uses: actions/setup-node@v1
-    #   with:
-    #     node-version: 16
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16
 
-    # - name: Install Dependencies
-    #   run: |
-    #     cd ./application/ui
-    #     if [ -e package-lock.json ]; then
-    #       npm ci
-    #     else
-    #       npm install
-    #     fi
-    # - name: Lint UI
-    #   run: cd ./application/ui && npm run lint
-    # - name: Build UI
-    #   run: cd ./application/ui && npm run build -- --configuration=production
-    # - name: Test UI Docker Image
-    #   run: | 
-    #     cd ./application/ui
-    #     docker build -t ionic-tag .
-    #     docker run --name some-nginx -d ionic-tag
-    #     until [ "`docker inspect -f {{.State.Running}} CONTAINERNAME`"=="true" ]; do
-    #       sleep 0.1;
-    #     done;
-    #     docker exec some-nginx curl localhost
-    #     docker exec some-nginx cat /etc/nginx/conf.d/default.conf
-    #     docker stop some-nginx && docker rm -f some-nginx
+    - name: Install Dependencies
+      run: |
+        cd ./application/ui
+        if [ -e package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
+    - name: Lint UI
+      run: cd ./application/ui && npm run lint
+    - name: Build UI
+      run: cd ./application/ui && npm run build -- --configuration=production
+    - name: Test UI Docker Image
+      run: | 
+        cd ./application/ui
+        docker build -t ionic-tag .
+        docker run --name some-nginx -d ionic-tag
+        until [ "`docker inspect -f {{.State.Running}} CONTAINERNAME`"=="true" ]; do
+          sleep 0.1;
+        done;
+        docker exec some-nginx curl localhost
+        docker exec some-nginx cat /etc/nginx/conf.d/default.conf
+        docker stop some-nginx && docker rm -f some-nginx
 
     - name: 'Az CLI login'
       uses: azure/login@v1
@@ -78,19 +78,20 @@ jobs:
     #     --registry randommatchakscr \
     #     --file ./Dockerfile .
         
-    # - name: 'Build ui image for Azure container registry'
-    #   run: |
-    #     cd ./application/ui
-    #     az acr build --image randommatch/ui:${{ github.sha }}-${{ github.run_id }} \
-    #     --registry randommatchakscr \
-    #     --file ./Dockerfile .
+    - name: 'Build ui image for Azure container registry'
+      run: |
+        cd ./application/ui
+        az acr build --image randommatch/ui:${{ github.sha }}-${{ github.run_id }} \
+        --registry randommatchakscr \
+        --file ./Dockerfile .
 
     - name: 'Package helm chart and save it to Azure container Registry'
       env:
         NAMESPACE: "randommatch"
         ACR_NAME: "randommatchakscr"
         HELM_REPO: "helm/matching"
-        IMAGE_TAG: "ab0cb97ba28e35941c4dc535c40ecf531e1c5c89-2682462904" #"${{ github.sha }}-${{ github.run_id }}"
+        IMAGE_BE_TAG: "ab0cb97ba28e35941c4dc535c40ecf531e1c5c89-2682462904" 
+        IMAGE_UI_TAG: "${{ github.sha }}-${{ github.run_id }}"
         VERSION: "0.1.0"
       run: |
         cd ./application/matching
@@ -103,8 +104,8 @@ jobs:
         kubectl label namespace ${NAMESPACE} cert-manager.io/disable-validation=true --overwrite=true
         kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
-        --set backend.image.tag=${IMAGE_TAG} \
-        --set ui.image.tag=${IMAGE_TAG} \
+        --set backend.image.tag=${IMAGE_BE_TAG} \
+        --set ui.image.tag=${IMAGE_UI_TAG} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
        

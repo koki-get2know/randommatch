@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 
@@ -10,6 +10,10 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { Storage } from '@ionic/storage';
 
 import { UserData } from './providers/user-data';
+import { MsalBroadcastService, MsalGuardConfiguration, MsalService, MSAL_GUARD_CONFIG } from '@azure/msal-angular';
+import { InteractionStatus, PopupRequest } from '@azure/msal-browser';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +21,7 @@ import { UserData } from './providers/user-data';
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   appPages = [
     {
       title: 'Schedule',
@@ -42,6 +46,9 @@ export class AppComponent implements OnInit {
   ];
   loggedIn = false;
   dark = false;
+  isIframe = false;
+  private readonly _destroying$ = new Subject<void>();
+
 
   constructor(
     private menu: MenuController,
@@ -51,15 +58,25 @@ export class AppComponent implements OnInit {
     private userData: UserData,
     private swUpdate: SwUpdate,
     private toastCtrl: ToastController,
+    @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
+    private broadcastService: MsalBroadcastService,
+    private authService: MsalService
   ) {
     this.initializeApp();
   }
 
-  async ngOnInit() {
-    this.checkLoginStatus();
-    this.listenForLoginEvents();
+  ngOnInit() {
+    this.isIframe = window !== window.parent && !window.opener;
+    this.broadcastService.inProgress$
+    .pipe(
+      filter((status: InteractionStatus) => status === InteractionStatus.None),
+      takeUntil(this._destroying$)
+    )
+    .subscribe(() => {
+      this.setLoggedIn();
+    })
 
-    this.swUpdate.available.subscribe(async res => {
+    this.swUpdate.versionUpdates.subscribe(async res => {
       const toast = await this.toastCtrl.create({
         message: 'Update available!',
         position: 'bottom',
@@ -89,35 +106,36 @@ export class AppComponent implements OnInit {
     });
   }
 
-  checkLoginStatus() {
-    return this.userData.isLoggedIn().then(loggedIn => {
-      return this.updateLoggedInStatus(loggedIn);
-    });
+
+  login() {
+    if (this.msalGuardConfig.authRequest){
+      this.authService.loginPopup({...this.msalGuardConfig.authRequest} as PopupRequest)
+        .subscribe({
+          next: (result) => {
+            console.log(result);
+            this.setLoggedIn();
+          },
+          error: (error) => console.log(error)
+        });
+    } else {
+      this.authService.loginPopup()
+        .subscribe({
+          next: (result) => {
+            console.log(result);
+            this.setLoggedIn();
+          },
+          error: (error) => console.log(error)
+        });
+    }
   }
 
-  updateLoggedInStatus(loggedIn: boolean) {
-    setTimeout(() => {
-      this.loggedIn = loggedIn;
-    }, 300);
-  }
-
-  listenForLoginEvents() {
-    window.addEventListener('user:login', () => {
-      this.updateLoggedInStatus(true);
-    });
-
-    window.addEventListener('user:signup', () => {
-      this.updateLoggedInStatus(true);
-    });
-
-    window.addEventListener('user:logout', () => {
-      this.updateLoggedInStatus(false);
-    });
+  setLoggedIn() {
+    this.loggedIn = this.authService.instance.getAllAccounts().length > 0;
   }
 
   logout() {
-    this.userData.logout().then(() => {
-      return this.router.navigateByUrl('/app/tabs/schedule');
+    this.authService.logoutPopup({
+      mainWindowRedirectUri: "/app/tabs/schedule"
     });
   }
 
@@ -125,5 +143,10 @@ export class AppComponent implements OnInit {
     this.menu.enable(false);
     this.storage.set('ion_did_tutorial', false);
     this.router.navigateByUrl('/tutorial');
+  }
+
+  ngOnDestroy(): void {
+    this._destroying$.next(undefined);
+    this._destroying$.complete();
   }
 }
