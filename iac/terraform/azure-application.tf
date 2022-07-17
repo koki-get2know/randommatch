@@ -5,6 +5,6 @@ resource "azuread_application" "koki_app_ui" {
   sign_in_audience = "AzureADMyOrg"
 
   single_page_application {
-    redirect_uris = ["https://koki.sheno.ca", "http://localhost:4200"]
+    redirect_uris = ["https://koki.sheno.ca/", "http://localhost:4200/"]
   }
 }
