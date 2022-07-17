@@ -1,11 +1,16 @@
 package convert
 
 import (
+	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
+	"math/rand"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type User struct {
@@ -33,6 +38,20 @@ type User struct {
 	//SubjectOfInterest    []string
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$#!@")
+
+func randStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
 func ConvertRawDataToJson(filename string) {
 
 	csvFile, err := os.Open(filename)
@@ -41,6 +60,17 @@ func ConvertRawDataToJson(filename string) {
 	}
 	defer csvFile.Close()
 
+	// Skip first row data
+	row1, err := bufio.NewReader(csvFile).ReadSlice('\n')
+	if err != nil {
+		fmt.Println(err)
+	}
+	_, err = csvFile.Seek(int64(len(row1)), io.SeekStart)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Read data
 	reader := csv.NewReader(csvFile)
 	reader.FieldsPerRecord = -1
 
@@ -53,29 +83,30 @@ func ConvertRawDataToJson(filename string) {
 	var user User
 	var users []User
 
+	// Create a json data
 	for _, each := range csvData {
-		user.UserId = each[0]
-		user.Name = each[1]
-		user.Email = each[2]
-		user.Password = each[3]
-		user.Groups = []string{each[4]}
-		user.Genre = each[5]
-		user.Birthday = each[6]
-		user.Hobbies = []string{each[7]}
-		user.MatchPreference = []string{each[8]}
-		user.MatchPreferenceTime = []string{each[9]}
-		user.PositionHeld = each[10]
-		user.MultiMatch, _ = strconv.ParseBool(each[11])
-		user.PhoneNumber = each[12]
-		user.Departement = each[13]
-		user.Location = each[14]
-		user.Seniority = each[15]
-		user.Role = each[16]
+		user.UserId = randStringRunes(32)
+		user.Name = each[0]
+		user.Email = each[1]
+		user.Password = randStringRunes(32)
+		user.Groups = strings.Split(each[2], "-") //[]string{each[4]}
+		user.Genre = each[3]
+		user.Birthday = each[4]
+		user.Hobbies = strings.Split(each[5], "-")             //[]string{each[7]}
+		user.MatchPreference = strings.Split(each[6], "-")     //[]string{each[8]}
+		user.MatchPreferenceTime = strings.Split(each[7], "-") //[]string{each[9]}
+		user.PositionHeld = each[8]
+		user.MultiMatch, _ = strconv.ParseBool(each[9])
+		user.PhoneNumber = each[10]
+		user.Departement = each[11]
+		user.Location = each[12]
+		user.Seniority = each[13]
+		user.Role = each[14]
 
-		user.NumberOfMatching, _ = strconv.Atoi(each[17])
-		user.NumberMatchingAccepted, _ = strconv.Atoi(each[18])
-		user.NumberMatchingDeclined, _ = strconv.Atoi(each[19])
-		user.AverageMatchingRate, _ = strconv.Atoi(each[20])
+		user.NumberOfMatching = 0
+		user.NumberMatchingAccepted = 0
+		user.NumberMatchingDeclined = 0
+		user.AverageMatchingRate = 0
 
 		users = append(users, user)
 	}

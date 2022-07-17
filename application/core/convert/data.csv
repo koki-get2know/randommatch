@@ -1,4 +1,4 @@
-UserId,Name,Email,Password,Groups,Genre,Birthday,Hobbies,MatchPreference,MatchPreferenceTime,PositionHeld,MultiMatch,PhoneNumber,Departement,Location,Seniority,Role,NumberOfMatching,NumberMatchingAccepted,NumberMatchingDeclined,AverageMatchingRate
-1,Pins Prestilien,pinsdev24@gmail.com,pins@237,,Male,10/01/,DataScience Space,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,null,super-user,25,10,15,3
-2,Pins Prestilien,pinsdev24@gmail.com,pins@237,DS,Male,10/01/,DataScience Space,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,null,super-user,25,10,15,3
-4,Pins Prestilien,pinsdev24@gmail.com,pins@237,Foot,Male,10/01/,DataScience Space,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,null,super-user,25,10,15,3
+Name,Email,Groups,Genre,Birthday,Hobbies,MatchPreference,MatchPreferenceTime,PositionHeld,MultiMatch,PhoneNumber,Departement,Location,Seniority,Role
+Pins Prestilien,pinsdev24@gmail.com,,Male,10/01,Data science-Space-Télévison,girls,14:00PM,CEO,False,699999999,Informatique,Kao,,super-user
+Pins Prestilien,pinsdev24@gmail.com,DS-IA-SPACE,Male,10/01,Jeux vidéos-Musique,same groups,14:00PM,Admin,False,699999999,Math,Fpol,,user
+Pins Prestilien,pinsdev24@gmail.com,Foot,Male,10/01,Dance,pretty girl,14:00PM,Chef,False,699999999,Biology,Soa,,user
