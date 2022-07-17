@@ -106,7 +106,6 @@ jobs:
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
         --set backend.image.tag=${IMAGE_TAG} \
         --set ui.image.tag=${IMAGE_TAG} \
-        --set cert-manager.installCRDs=true \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
        
