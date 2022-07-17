@@ -10,7 +10,7 @@ import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { FormsModule } from '@angular/forms';
-import { MsalGuard, MsalModule, MsalInterceptor } from '@azure/msal-angular';
+import { MsalGuard, MsalModule, MsalInterceptor, MsalRedirectComponent } from '@azure/msal-angular';
 import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
 const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigator.userAgent.indexOf('Trident/') > -1;
 
@@ -29,19 +29,20 @@ const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigato
       auth: {
         clientId: environment.clientId, // Application (client) ID from the app registration
         authority: environment.authority, // The Azure cloud instance and the app's sign-in audience (tenant ID, common, organizations, or consumers)
-        redirectUri: environment.redirectUri// This is your redirect URI
+        redirectUri: environment.redirectUri,// This is your redirect URI
+        postLogoutRedirectUri: environment.redirectUri
       },
       cache: {
         cacheLocation: 'localStorage',
         storeAuthStateInCookie: isIE, // Set to true for Internet Explorer 11
       }
     }), {
-      interactionType: InteractionType.Popup, // MSAL Guard Configuration
+      interactionType: InteractionType.Redirect, // MSAL Guard Configuration
       authRequest: {
         scopes: ['user.read']
       }
     }, {
-      interactionType: InteractionType.Popup, // MSAL Interceptor Configuration
+      interactionType: InteractionType.Redirect, // MSAL Interceptor Configuration
       protectedResourceMap: new Map([ 
           ['https://graph.microsoft.com/v1.0/me', ['user.read']]
       ])
@@ -55,6 +56,6 @@ const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigato
       multi: true
     },
     MsalGuard],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent, MsalRedirectComponent]
 })
 export class AppModule {}

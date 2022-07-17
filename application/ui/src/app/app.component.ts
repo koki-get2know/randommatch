@@ -9,11 +9,11 @@ import { SplashScreen } from '@capacitor/splash-screen';
 
 import { Storage } from '@ionic/storage';
 
-import { UserData } from './providers/user-data';
 import { MsalBroadcastService, MsalGuardConfiguration, MsalService, MSAL_GUARD_CONFIG } from '@azure/msal-angular';
-import { InteractionStatus, PopupRequest } from '@azure/msal-browser';
+import { EventMessage, EventType, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -55,7 +55,6 @@ export class AppComponent implements OnInit, OnDestroy {
     private platform: Platform,
     private router: Router,
     private storage: Storage,
-    private userData: UserData,
     private swUpdate: SwUpdate,
     private toastCtrl: ToastController,
     @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
@@ -67,6 +66,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isIframe = window !== window.parent && !window.opener;
+    this.broadcastService.msalSubject$
+    .pipe(
+      filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS),
+    )
+    .subscribe((result: EventMessage) => {
+      console.log(result);
+    });
+
     this.broadcastService.inProgress$
     .pipe(
       filter((status: InteractionStatus) => status === InteractionStatus.None),
@@ -109,23 +116,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   login() {
     if (this.msalGuardConfig.authRequest){
-      this.authService.loginPopup({...this.msalGuardConfig.authRequest} as PopupRequest)
-        .subscribe({
-          next: (result) => {
-            console.log(result);
-            this.setLoggedIn();
-          },
-          error: (error) => console.log(error)
-        });
+      this.authService.loginRedirect({...this.msalGuardConfig.authRequest} as RedirectRequest);
     } else {
-      this.authService.loginPopup()
-        .subscribe({
-          next: (result) => {
-            console.log(result);
-            this.setLoggedIn();
-          },
-          error: (error) => console.log(error)
-        });
+      this.authService.loginRedirect();
     }
   }
 
@@ -134,8 +127,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.authService.logoutPopup({
-      mainWindowRedirectUri: "/app/tabs/schedule"
+    this.authService.logoutRedirect({
+      postLogoutRedirectUri: environment.redirectUri
     });
   }
 
@@ -145,7 +138,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/tutorial');
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this._destroying$.next(undefined);
     this._destroying$.complete();
   }
