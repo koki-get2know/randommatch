@@ -3,7 +3,7 @@ global:
 
 ingress:
     labels: {}
-    host: 'sheno.ca'
+    host: 'koki.sheno.ca'
     tlsSecretName: ''
 
 ui:
