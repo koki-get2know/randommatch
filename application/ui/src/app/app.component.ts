@@ -24,19 +24,20 @@ import { environment } from '../environments/environment';
 export class AppComponent implements OnInit, OnDestroy {
   appPages = [
     {
-      title: 'Schedule',
-      url: '/app/tabs/schedule',
+      title: 'Users',
+      url: '/users-list',
+      icon: 'people'
+    },
+    {
+      title: 'New Match',
+      url: 'matching',
       icon: 'calendar'
     },
+  
     {
       title: 'Speakers',
       url: '/app/tabs/speakers',
       icon: 'people'
-    },
-    {
-      title: 'Map',
-      url: '/app/tabs/map',
-      icon: 'map'
     },
     {
       title: 'About',
