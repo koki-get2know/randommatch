@@ -33,6 +33,8 @@ func fillGraph() {
 func TestAdd(t *testing.T) {
     fillGraph()
     g.String()
-    
+    //n := User{"1"}
+    //g.RemoveUser(&n)
+    //g.String()
     
 }
