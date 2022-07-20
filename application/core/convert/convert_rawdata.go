@@ -6,18 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type User struct {
 	UserId                 string
 	Name                   string
 	Email                  string
-	Password               string
 	Groups                 []string
 	Genre                  string
 	Birthday               string
@@ -38,6 +35,8 @@ type User struct {
 	//SubjectOfInterest    []string
 }
 
+/* Generate random strings
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -50,7 +49,7 @@ func randStringRunes(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
-}
+}*/
 
 func ConvertRawDataToJson(filename string) []byte {
 
@@ -88,7 +87,6 @@ func ConvertRawDataToJson(filename string) []byte {
 		user.UserId = "" //randStringRunes(32)
 		user.Name = each[0]
 		user.Email = each[1]
-		user.Password = ""                        //randStringRunes(32)
 		user.Groups = strings.Split(each[2], "-") //[]string{each[4]}
 		user.Genre = each[3]
 		user.Birthday = each[4]
