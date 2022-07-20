@@ -52,7 +52,7 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
-func ConvertRawDataToJson(filename string) {
+func ConvertRawDataToJson(filename string) []byte {
 
 	csvFile, err := os.Open(filename)
 	if err != nil {
@@ -85,10 +85,10 @@ func ConvertRawDataToJson(filename string) {
 
 	// Create a json data
 	for _, each := range csvData {
-		user.UserId = randStringRunes(32)
+		user.UserId = "" //randStringRunes(32)
 		user.Name = each[0]
 		user.Email = each[1]
-		user.Password = randStringRunes(32)
+		user.Password = ""                        //randStringRunes(32)
 		user.Groups = strings.Split(each[2], "-") //[]string{each[4]}
 		user.Genre = each[3]
 		user.Birthday = each[4]
@@ -119,7 +119,12 @@ func ConvertRawDataToJson(filename string) {
 		os.Exit(1)
 	}
 
-	fmt.Println(string(jsonData))
+	return jsonData
+}
+
+func GenerateJsonFile(filename string) {
+
+	jsonData := ConvertRawDataToJson(filename)
 
 	jsonFile, err := os.Create("./data.json")
 	if err != nil {

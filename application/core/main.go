@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/koki/randommatch/convert"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -121,7 +120,6 @@ func helloNeo4j(uri, username, password string) (string, error) {
 }
 
 func main() {
-	convert.ConvertRawDataToJson("./convert/data.csv")
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.StaticFile("/api", "./api/swagger.yaml")
