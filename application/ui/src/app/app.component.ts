@@ -35,12 +35,7 @@ export class AppComponent implements OnInit, OnDestroy {
     },
   
     {
-      title: 'Speakers',
-      url: '/app/tabs/speakers',
-      icon: 'people'
-    },
-    {
-      title: 'About',
+      title: 'Setting',
       url: '/app/tabs/about',
       icon: 'information-circle'
     }
