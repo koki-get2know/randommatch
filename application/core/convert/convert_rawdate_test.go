@@ -1,21 +1,19 @@
-package convert_test
+package convert
 
 import (
 	"testing"
 
-	"github.com/koki/randommatch/convert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestConvertRawDataToJson(t *testing.T) {
-	jsonData := convert.ConvertRawDataToJson("./data.csv")
+	jsonData := ConvertRawDataToJson("./data.csv")
 	actual := string(jsonData)
 	expected := `[
 		{
 			"UserId": "",
 			"Name": "Pins Prestilien",
 			"Email": "pinsdev24@gmail.com",
-			"Password": "",
 			"Groups": [
 				""
 			],
@@ -48,7 +46,6 @@ func TestConvertRawDataToJson(t *testing.T) {
 			"UserId": "",
 			"Name": "Pins Prestilien",
 			"Email": "pinsdev24@gmail.com",
-			"Password": "",
 			"Groups": [
 				"DS",
 				"IA",
