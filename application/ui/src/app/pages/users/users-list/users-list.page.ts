@@ -58,7 +58,7 @@ export class UsersListPage implements OnInit {
       },
       {
         name: "Prestilien Pindoh",
-        groupe: "Service client",
+        groupe: "Service client2",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
