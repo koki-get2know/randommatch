@@ -35,7 +35,20 @@ const routes: Routes = [
     path: 'tutorial',
     loadChildren: () => import('./pages/tutorial/tutorial.module').then(m => m.TutorialModule),
     canLoad: [CheckTutorial]
-  }
+  },
+  {
+    path: 'users-list',
+    loadChildren: () => import('./pages/users/users-list/users-list.module').then( m => m.UsersListPageModule)
+  },
+  {
+    path: 'matching',
+    loadChildren: () => import('./pages/matching/matching.module').then( m => m.MatchingPageModule)
+  },
+  {
+    path: 'matching-result',
+    loadChildren: () => import('./pages/matching-result/matching-result.module').then( m => m.MatchingResultPageModule)
+  },
+
 ];
 
 const isIframe = window !== window.parent && !window.opener;

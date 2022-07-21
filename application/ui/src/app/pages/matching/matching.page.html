@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>matching</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <form [formGroup]="createForm" (submit)="ramdommatch()">
+          <ion-list lines="none">
+            <ion-item>
+              <ion-label position="stacked" color="primary">Matchin size</ion-label>
+              <ion-input name="username" formControlName="matchingsize" type="text">
+              </ion-input>
+            </ion-item>
+
+            <ion-datetime locale="en-GB-u-hc-h12"></ion-datetime>
+
+          </ion-list>
+
+          <div class="ion-padding">
+            <ion-button type="submit" expand="block">Match Users Randomly</ion-button>
+          </div>
+        </form>
+      </ion-col>
+
+      <ion-col>
+        <!-- Searchbar with cancel button always shown -->
+        <ion-searchbar showCancelButton="always"></ion-searchbar>
+        <ion-list>
+          <ion-item-group *ngFor="let group of usersgroups">
+            <ion-item-divider sticky>
+              <ion-label>
+                {{group.groupe}}
+              </ion-label>
+              <ion-checkbox slot="start" (click)="selectGroup($event,group)" color="primary"></ion-checkbox>
+            </ion-item-divider>
+
+            <ion-item-sliding *ngFor="let user of group.users">
+              <ion-item>
+                <ion-avatar slot="start">
+                  <img [src]="user.avatar" alt="">
+                </ion-avatar>
+                <ion-label>
+                  <h3>{{user.name}}</h3>
+                  <p>
+                    {{user.groupe}}
+                  </p>
+                </ion-label>
+                <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
+              </ion-item>
+              <ion-item-options>
+                <ion-item-option color="favorite">
+                  Favorite
+                </ion-item-option>
+                <ion-item-option color="danger">
+                  Remove
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ion-item-group>
+        </ion-list>
+      </ion-col>
+      
+    </ion-row>
+  
+
+  </ion-grid>
+</ion-content>
