@@ -9,16 +9,16 @@
   <ion-grid>
     <ion-row>
       <ion-col>
-        <form #signupForm="ngForm" novalidate>
+        <form [formGroup]="createForm" (submit)="ramdommatch()">
           <ion-list lines="none">
             <ion-item>
               <ion-label position="stacked" color="primary">Matchin size</ion-label>
-              <ion-input name="username" type="text">
+              <ion-input name="username" formControlName="matchingsize" type="text">
               </ion-input>
             </ion-item>
-        
+
             <ion-datetime locale="en-GB-u-hc-h12"></ion-datetime>
-    
+
           </ion-list>
 
           <div class="ion-padding">
@@ -31,15 +31,16 @@
         <!-- Searchbar with cancel button always shown -->
         <ion-searchbar showCancelButton="always"></ion-searchbar>
         <ion-list>
-          <ion-item-group>
+          <ion-item-group *ngFor="let group of usersgroups">
             <ion-item-divider sticky>
               <ion-label>
-                Service client
+                {{group.groupe}}
               </ion-label>
+              <ion-checkbox slot="start" (click)="selectGroup($event,group)" color="primary"></ion-checkbox>
             </ion-item-divider>
 
-            <ion-item-sliding *ngFor="let user of users">
-              <ion-item routerLink="/app/tabs/schedule/session/">
+            <ion-item-sliding *ngFor="let user of group.users">
+              <ion-item>
                 <ion-avatar slot="start">
                   <img [src]="user.avatar" alt="">
                 </ion-avatar>
@@ -49,7 +50,7 @@
                     {{user.groupe}}
                   </p>
                 </ion-label>
-                <ion-checkbox color="primary"></ion-checkbox>
+                <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
               </ion-item>
               <ion-item-options>
                 <ion-item-option color="favorite">
@@ -63,7 +64,9 @@
           </ion-item-group>
         </ion-list>
       </ion-col>
+      
     </ion-row>
+  
 
   </ion-grid>
 </ion-content>

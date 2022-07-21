@@ -1,15 +1,28 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/common/http'
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
 
-  constructor () { }
+  constructor ( private http: HttpClient ) { }
   
-  getUsers () {
-    
+  urlApi = "http://koki2.com:8011";
+
+  async makematch(formData) {
+    return await this.http.post( `${ this.urlApi }/matching`, formData, {} )
+      .pipe( map( data => data ) );
+  }
+  async uploadCsv(formData) {
+    return await this.http.post( `${ this.urlApi }/matching`, formData, {} )
+      .pipe( map( data => data ) );
   }
 
-  deleteUsers()
+  async get() {
+    return await this.http.get<any>(`${this.urlApi}/matching/`)
+      .pipe(map(data => data));
+  }
+
 }

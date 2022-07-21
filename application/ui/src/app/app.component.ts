@@ -33,12 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
       url: 'matching',
       icon: 'calendar'
     },
-  
-    {
-      title: 'Setting',
-      url: '/app/tabs/about',
-      icon: 'information-circle'
-    }
+
   ];
   loggedIn = false;
   dark = false;

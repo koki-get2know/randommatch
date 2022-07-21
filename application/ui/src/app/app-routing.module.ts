@@ -44,6 +44,10 @@ const routes: Routes = [
     path: 'matching',
     loadChildren: () => import('./pages/matching/matching.module').then( m => m.MatchingPageModule)
   },
+  {
+    path: 'matching-result',
+    loadChildren: () => import('./pages/matching-result/matching-result.module').then( m => m.MatchingResultPageModule)
+  },
 
 ];
 
