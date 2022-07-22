@@ -44,6 +44,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        sudo apt install -y libvips-dev --no-install-recommends
         cd ./application/ui
         if [ -e package-lock.json ]; then
           npm install
