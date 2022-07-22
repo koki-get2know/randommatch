@@ -113,11 +113,20 @@ func (g *UserGraph) String() {
 
 }
 
-func UsersToGraph(users []User) *UserGraph {
+func UsersToGraph(users []User, forbiddenConnections [][]User) *UserGraph {
 	var graph UserGraph
 	for _, user := range users {
 		user2 := user
 		graph.AddUser(&user2)
+	}
+	for _, usersNotToMatch := range forbiddenConnections {
+		if len(usersNotToMatch) > 0 {
+			node := usersNotToMatch[0]
+			for _, user := range usersNotToMatch[1:] {
+				user2 := user
+				graph.AddEdge(&node, &user2)
+			}
+		}
 	}
 	return &graph
 }

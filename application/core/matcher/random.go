@@ -139,9 +139,9 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
 
 }
 
-func GenerateTuple(users []User, size uint) []Match {
+func GenerateTuple(users []User, forbiddenConnections [][]User, size uint) []Match {
 	var results []Match
-	graph := UsersToGraph(users)
+	graph := UsersToGraph(users, forbiddenConnections)
 	tuples := Matcher(graph, size, []Constraint{dejavu})
 	for index, matching := range tuples {
 		var matches []User
