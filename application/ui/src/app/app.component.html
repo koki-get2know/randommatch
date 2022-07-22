@@ -5,7 +5,7 @@
       <ion-content>
         <ion-list lines="none">
           <ion-list-header>
-            Conference
+            KOKI 
           </ion-list-header>
           <ion-menu-toggle autoHide="false" *ngFor="let p of appPages; let i = index">
             <ion-item [routerLink]="p.url" routerLinkActive="selected" routerDirection="root" detail="false">
@@ -58,7 +58,7 @@
           </ion-list-header>
 
           <ion-menu-toggle autoHide="false">
-            <ion-item routerLink="/login" routerLinkActive="active" routerDirection="root" detail="false">
+            <ion-item button (click)="login()" routerLinkActive="active" routerDirection="root" detail="false">
               <ion-icon slot="start" name="log-in"></ion-icon>
               <ion-label>
                 Login
@@ -106,8 +106,8 @@
         </ion-list>
       </ion-content>
     </ion-menu>
-
-    <ion-router-outlet id="main-content"></ion-router-outlet>
+    <!--This is to avoid reload during acquireTokenSilent() because of hidden iframe -->
+    <ion-router-outlet id="main-content" *ngIf="!isIframe"></ion-router-outlet>
 
   </ion-split-pane>
 
