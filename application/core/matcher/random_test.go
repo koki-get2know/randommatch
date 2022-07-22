@@ -22,10 +22,12 @@ func TestRandomChoices(t *testing.T) {
 
 
 func TestMatcher(t *testing.T) {
-   //id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
-    g.String()
+   
+    var G UserGraph
+    G.BuildFromJson()
+    G.String()
     constraint := []Constraints{dejavu}
-    matching := Matcher(&g,2,constraint)
+    matching := Matcher(&G,2,constraint)
     
     for j := 0; j < len(matching); j++{ 
       fmt.Printf("Match : [" )

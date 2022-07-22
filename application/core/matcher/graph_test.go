@@ -37,11 +37,6 @@ func TestAdd(t *testing.T) {
     
 }
 
-func TestBFJ(t *testing.T) {
-    var G UserGraph
-    G.BuildFromJson()
-   G.String()
-    
-}
+
 
 
