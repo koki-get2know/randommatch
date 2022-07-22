@@ -47,11 +47,11 @@ func (g *UserGraph) AddEdge(n1, n2 *User) {
 }
 
 // search a user in a list of user
-func Search(s []*User, n *User) (bool, int) {
+func Search(users []*User, n *User) (bool, int) {
 	index := -1
 	find := false
-	for i := 0; i < len(s); i++ {
-		if s[i].userId == n.userId {
+	for i, user := range users {
+		if user.userId == n.userId {
 			find = true
 			index = i
 			break
@@ -87,10 +87,10 @@ func Remove(s []*User, i int) []*User {
 func (g *UserGraph) RemoveEdge(n *User) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	for i := 0; i < len(g.users); i++ {
-		find, index := Search(g.edges[*g.users[i]], n)
+	for _, user := range g.users {
+		find, index := Search(g.edges[*user], n)
 		if find {
-			g.edges[*g.users[i]] = Remove(g.edges[*g.users[i]], index)
+			g.edges[*user] = Remove(g.edges[*user], index)
 		}
 		delete(g.edges, *n)
 	}
@@ -118,8 +118,8 @@ func (g *UserGraph) String() {
 	for i := 0; i < len(g.users); i++ {
 		s += g.users[i].String() + " -> "
 		near := g.edges[*g.users[i]]
-		for j := 0; j < len(near); j++ {
-			s += near[j].String() + " "
+		for _, user := range near {
+			s += user.String() + " "
 		}
 		s += "\n"
 	}

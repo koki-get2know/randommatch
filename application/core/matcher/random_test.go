@@ -11,8 +11,8 @@ func TestRandomChoices(t *testing.T) {
 	constraint := []string{"deja vu"}
 	matching := RandomChoices(&g, 2, constraint)
 	fmt.Printf("Match of %d: [", len(matching.matched))
-	for i := 0; i < len(matching.matched); i++ {
-		fmt.Printf("%s,", matching.matched[i].String())
+	for _, user := range matching.matched {
+		fmt.Printf("%s,", user.String())
 	}
 
 	fmt.Printf("]")
@@ -24,10 +24,10 @@ func TestMatcher(t *testing.T) {
 	constraint := []string{"deja vu"}
 	matching := Matcher(&g, 2, constraint)
 
-	for j := 0; j < len(matching); j++ {
+	for _, match := range matching {
 		fmt.Printf("Match : [")
-		for i := 0; i < len(matching[j].matched); i++ {
-			fmt.Printf("%s,", matching[j].matched[i].String())
+		for _, user := range match.matched {
+			fmt.Printf("%s,", user.String())
 		}
 
 		fmt.Printf("]")

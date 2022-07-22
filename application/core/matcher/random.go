@@ -26,12 +26,12 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
 	*/
 
 	ok := true
-	for i := 0; i < len(constraints); i++ {
+	for _, constraint := range constraints {
 
-		if constraints[i] == "deja vu" {
+		if constraint == "deja vu" {
 			// check if an edges exist between n and any user in matched
-			for j := 0; j < len(matched); j++ {
-				find, _ := Search(g.edges[*n], matched[j])
+			for _, user := range matched {
+				find, _ := Search(g.edges[*n], user)
 				if find {
 					ok = false
 					break
@@ -101,8 +101,8 @@ func Matcher(g *UserGraph, k int, constraints []string) map[int]*Matching {
 		i := 0
 		for len(g.users)/k > 0 {
 			matched := RandomChoices(g, k, constraints)
-			for j := 0; j < len(matched.matched); j++ {
-				g.RemoveUser(matched.matched[j])
+			for _, match := range matched.matched {
+				g.RemoveUser(match)
 			}
 			matching[i] = matched
 			i++

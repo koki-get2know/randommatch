@@ -20,54 +20,54 @@ export class MatchingPage implements OnInit {
   checked: any;
   usersgroups = [
     {
-      groupe: "Groupe A",
+      group: "group A",
       nomber:6,
       users: [
         {
         id:1,
         name: "Frank tchatseu",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
         {
         id:2,
         name: "Yannick Youmie",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
         {
         id:3,
         name: "Prestilien Pindoh",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
       ]
     },
     {
-      groupe: "Groupe B",
+      group: "group B",
       nomber:6,
       users: [
         {
         id:4,
         name: "Frank tchatseu",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
         {
         id:5,
         name: "Yannick Youmie",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
         { 
         id:6,
         name: "Prestilien Pindoh",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
