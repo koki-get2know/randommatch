@@ -115,9 +115,9 @@ func (g *UserGraph) String() {
 	g.lock.RLock()
 	defer g.lock.RUnlock()
 	s := ""
-	for i := 0; i < len(g.users); i++ {
-		s += g.users[i].String() + " -> "
-		near := g.edges[*g.users[i]]
+	for _, usernode := range g.users {
+		s += usernode.String() + " -> "
+		near := g.edges[*usernode]
 		for _, user := range near {
 			s += user.String() + " "
 		}
