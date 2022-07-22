@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Matching } from '../../services/users.service';
 
 @Component({
@@ -9,111 +9,20 @@ import { Matching } from '../../services/users.service';
 })
 export class MatchingResultPage implements OnInit {
 
-  constructor(private route: ActivatedRoute) { }
+  matchings: Matching[] = [];
+  avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
+  "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
+  "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
+  "/assets/img/speakers/mouse.jpg", "/assets/img/speakers/puppy.jpg", "/assets/img/speakers/rabbit.jpg",
+   "/assets/img/speakers/turtle.jpg"];
 
-  ngOnInit () {
-    const param: Matching[] = this.route.snapshot.params[ 'data' ];
-    console.log( param );
+  constructor() { 
   }
 
-  usersgroups = [
-    {
-      group: "Match 1",
-      number: 6,
-      users: [
-        {
-        name: "Frank tchatseu",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-      {
-        name: "Yannick Youmie",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-      {
-        name: "Prestilien Pindoh",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-    {
-      group: "Match 2",
-      number: 6,
-      users: [
-        {
-        name: "Frank tchatseu",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-      {
-        name: "Yannick Youmie",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-      {
-        name: "Prestilien Pindoh",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-    {
-      group: "Match 3",
-      number:6,
-      users: [
-        {
-        name: "Frank tchatseu",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-      {
-        name: "Yannick Youmie",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-      {
-        name: "Prestilien Pindoh",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-    {
-      group: "Match 4",
-      number:6,
-      users: [
-        {
-        name: "Frank tchatseu",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-      {
-        name: "Yannick Youmie",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-      {
-        name: "Prestilien Pindoh",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-  ];
+  ngOnInit () {
+    this.matchings = history.state.matchings;
+  }
+
 
 
 }

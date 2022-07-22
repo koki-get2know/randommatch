@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export class User {
   userId: string;
@@ -26,20 +27,20 @@ export class UsersService {
 
   constructor ( private http: HttpClient ) { }
   
-  urlApi = "http://localhost:8080";
+  urlApi = environment.serverBaseUrl;
 
   makematch(matchingReq: MatchingReq) : Observable<Matching[]> {
     return this.http.post<MatchingResponse>( `${ this.urlApi }/matchings`, matchingReq, {} )
       .pipe( map( res => res.data ) );
   }
 
-  async uploadCsv(formData) {
-    return await this.http.post( `${ this.urlApi }/matching`, formData, {} )
+  uploadCsv(formData) {
+    return this.http.post( `${ this.urlApi }/matching`, formData, {} )
       .pipe( map( data => data ) );
   }
 
-  async get() {
-    return await this.http.get<any>(`${this.urlApi}/matching/`)
+  get() {
+    return this.http.get<any>(`${this.urlApi}/matching/`)
       .pipe(map(data => data));
   }
 

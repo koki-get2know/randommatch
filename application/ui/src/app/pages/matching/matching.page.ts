@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
 import { NavController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 @Component( {
   selector: 'app-matching',
   templateUrl: './matching.page.html',
@@ -52,21 +52,21 @@ export class MatchingPage implements OnInit {
       users: [
         {
         id:4,
-        name: "Frank tchatseu",
+        name: "Ivanov Tmib",
         group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
         {
         id:5,
-        name: "Yannick Youmie",
+        name: "Alex Lexlion",
         group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
         { 
         id:6,
-        name: "Prestilien Pindoh",
+        name: "Urbain Workday",
         group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
@@ -93,13 +93,11 @@ export class MatchingPage implements OnInit {
 
   selectUsers(event,user) {
   
-    if (event.target.checked == false ) {
+    if (!!event.target.checked === false ) {
       this.usersSelected.push( user );
-      console.log( this.usersSelected );
     }
     else {
       this.onRemoveusersSelected( user.id );
-      console.log( this.usersSelected );
     }
 
   }
@@ -152,6 +150,11 @@ export class MatchingPage implements OnInit {
 
   // matching result
   matchingresult(matchings: Matching[]) {
-    this.router.navigate(['/matching-result',{'data': matchings} ]);
+    const navigationExtras: NavigationExtras = {
+      state: {
+        matchings
+      }
+    };
+    this.router.navigate(['/matching-result'],navigationExtras);
   }
 }

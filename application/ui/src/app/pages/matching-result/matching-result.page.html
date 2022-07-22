@@ -5,15 +5,14 @@
 </ion-header>
 
 <ion-content>
-
   <ion-grid>
     <ion-row>
       <ion-col>
         <ion-list>
-          <ion-item-group *ngFor="let group of usersgroups">
+          <ion-item-group *ngFor="let match of matchings; let i=index">
             <ion-item-divider sticky>
               <ion-label>
-                {{group.group}}
+                Match {{match.id}}
               </ion-label>
             </ion-item-divider>
 
@@ -21,21 +20,21 @@
               <ion-item routerLink="/app/tabs/schedule/session/">
                 <ion-grid>
                   <ion-row>
-                    <ion-col *ngFor="let user of group.users">
+                    <ion-col *ngFor="let user of match.users; let j=index">
                       <ion-avatar>
-                        <img [src]=" user.avatar" alt="">
+                        <img [src]="avatars[i+j]" alt="">
                       </ion-avatar>
                       <ion-label>
-                        <h3>{{user.name}}</h3>
+                        <h3>{{user.userId}}</h3>
                         <p>
-                          {{user.group}}
+                          Generic
                         </p>
                       </ion-label>
                     </ion-col>
                   </ion-row>
                 </ion-grid>
 
-                <ion-badge color="primary">3</ion-badge>
+                <ion-badge color="primary">{{match.users.length}}</ion-badge>
               </ion-item>
               <ion-item-options>
                 <ion-item-option color="favorite">

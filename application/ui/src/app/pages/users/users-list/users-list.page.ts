@@ -74,25 +74,20 @@ export class UsersListPage implements OnInit {
   formData.append("photo", photo, photo.name);
   console.log( photo.name );
   this.userService.uploadCsv( formData )
-    .then( resp => {
+    .subscribe( resp => {
       console.log( resp );
       this.getUsers();
         
-      } )
-    .catch( err => {
-      console.log( err );
-    });
+      } );
     
  }
   getUsers() {
     this.userService.get()
-    .then( resp => {
+    .subscribe( resp => {
       console.log( resp );
       //this.usersgroups = resp;
-      } )
-    .catch( err => {
-      console.log( err );
-    });
+      } );
+
   }
 
 }
