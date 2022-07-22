@@ -33,8 +33,15 @@ func fillGraph() {
 func TestAdd(t *testing.T) {
     fillGraph()
     g.String()
-    //n := User{"1"}
-    //g.RemoveUser(&n)
-    //g.String()
+   
     
 }
+
+func TestBFJ(t *testing.T) {
+    var G UserGraph
+    G.BuildFromJson()
+   G.String()
+    
+}
+
+

@@ -7,11 +7,18 @@ import (
 // TODO the selector paramater should be a config variable
 const SELECTOR = "random"
 
+type Constraints int64
+
+const (
+	dejavu Constraints = iota
+	
+)
+
 type Matching struct {
-       matched []*User
+       Matched []*User
 }
 
-func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
+func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraints) bool {
    /* Filter
      
       input : 
@@ -27,7 +34,7 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
       ok := true
       for i := 0; i < len(constraints); i++{
       
-            if constraints[i] == "deja vu"{
+            if constraints[i] == dejavu {
               // check if an edges exist between n and any user in matched
              for j:=0; j< len(matched); j++{
                 find, _ := Search(g.edges[*n], matched[j] )
@@ -44,7 +51,7 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
 }
 
     
-func RandomChoices(g *UserGraph, k int, constraints []string) *Matching {
+func RandomChoices(g *UserGraph, k int, constraints []Constraints) *Matching {
 
      /* random choice without constraint
      
@@ -69,7 +76,7 @@ func RandomChoices(g *UserGraph, k int, constraints []string) *Matching {
           i--
         }
      }
-     matching.matched = matchedUsers
+     matching.Matched = matchedUsers
      return matching
 }
 
@@ -81,7 +88,7 @@ func RandomChoices(g *UserGraph, k int, constraints []string) *Matching {
 
 
     
-func Matcher(g *UserGraph, k int, constraints[]string) map[int]*Matching {
+func Matcher(g *UserGraph, k int, constraints[]Constraints) map[int]*Matching {
 
 /* Matcher without constraint 
 
@@ -103,13 +110,15 @@ func Matcher(g *UserGraph, k int, constraints[]string) map[int]*Matching {
            i:=0
            for len(g.users)/k>0{ 
              matched := RandomChoices(g,k,constraints)
-             for j:=0;j<len(matched.matched);j++{
-                 g.RemoveUser(matched.matched[j])
+             for j:=0;j<len(matched.Matched);j++{
+                 g.RemoveUser(matched.Matched[j])
              }
              matching[i] = matched 
              i++
            }
         }
+        
+        //TODO handle single/n-upplet person(s)
               
      return matching 
 

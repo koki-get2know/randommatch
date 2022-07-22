@@ -4,23 +4,26 @@ package matcher
 import (
     "fmt"
     "sync"
+    
+    
 
-    //"github.com/cheekybits/genny/generic"
+    
 )
 
-// Item the type of the binary search tree
-//type Item generic.Type
+//TODO the PATH paramater should be a config variable
+const PATH = "users.json" //path to the json file 
 
-// Node a single node that composes the tree
+
+// User a single node that composes the graph
 type User struct {
-    userId string       
+    UserId string    
 }
 
 
 
 
 func (n *User) String() string {
-    return fmt.Sprintf("%s", n.userId)
+    return fmt.Sprintf("%s", n.UserId)
 }
 
 // UserGraph the Items graph
@@ -55,7 +58,7 @@ func Search(s []*User, n *User)(bool,int){
     index := -1 
     find := false
     for i := 0; i < len(s); i++ {
-            if(s[i].userId == n.userId){
+            if(s[i].UserId == n.UserId){
                   find = true
                   index = i
                   break
@@ -116,6 +119,11 @@ func (g *UserGraph) RemoveUser(n *User){
       
 
 }
+
+
+
+
+
 
 
 // print the graph
