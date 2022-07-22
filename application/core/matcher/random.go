@@ -20,8 +20,8 @@ type Matching struct {
 }
 
 type Match struct {
-	Id    string
-	Users []User
+	Id    string `json:"id"`
+	Users []User `json:"users"`
 }
 
 func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bool {
@@ -54,7 +54,16 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bo
 	return ok
 }
 
-func RandomChoices(g *UserGraph, k int, constraints []Constraint) *Matching {
+func remove[T comparable](l []T, item T) []T {
+	for i, elem := range l {
+		if elem == item {
+			return append(l[:i], l[i+1:]...)
+		}
+	}
+	return l
+}
+
+func RandomChoices(g *UserGraph, k uint, constraints []Constraint) *Matching {
 
 	/* random choice without constraint
 
@@ -67,17 +76,23 @@ func RandomChoices(g *UserGraph, k int, constraints []Constraint) *Matching {
 	var matching = &Matching{}
 	var matchedUsers []*User
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
-	for i := 0; i < k; i++ {
-		index := rand.Intn(len(g.users))
-		find, _ := Search(matchedUsers, g.users[index])            // check if g.users[index] already exist in matchedUsers
+
+	var indices []int
+	for i := range g.users {
+		indices = append(indices, i)
+	}
+
+	for uint(len(matchedUsers)) < k && len(indices) > 0 {
+		rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
+		index := indices[0]
+
+		find, _ := Search(matchedUsers, g.users[index]) // check if g.users[index] already exist in matchedUsers
+
 		ok := Filter(g, matchedUsers, g.users[index], constraints) // check the constraints
 		if !find && ok {
-
 			matchedUsers = append(matchedUsers, g.users[index])
-
-		} else {
-			i--
 		}
+		indices = remove(indices, index)
 	}
 	matching.matched = matchedUsers
 	return matching
@@ -89,7 +104,7 @@ func RandomChoices(g *UserGraph, k int, constraints []Constraint) *Matching {
 
 }*/
 
-func Matcher(g *UserGraph, k int, constraints []Constraint) map[int]*Matching {
+func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
 
 	/* Matcher without constraint
 
@@ -110,7 +125,7 @@ func Matcher(g *UserGraph, k int, constraints []Constraint) map[int]*Matching {
 
 		*/
 		i := 0
-		for len(g.users)/k > 0 {
+		for k > 0 && uint(len(g.users))/k > 0 {
 			matched := RandomChoices(g, k, constraints)
 			for _, match := range matched.matched {
 				g.RemoveUser(match)
@@ -118,14 +133,13 @@ func Matcher(g *UserGraph, k int, constraints []Constraint) map[int]*Matching {
 			matching[i] = matched
 			i++
 		}
-
 	}
 
 	return matching
 
 }
 
-func GenerateTuple(users []User, size int) []Match {
+func GenerateTuple(users []User, size uint) []Match {
 	var results []Match
 	graph := UsersToGraph(users)
 	tuples := Matcher(graph, size, []Constraint{dejavu})

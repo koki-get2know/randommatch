@@ -3,7 +3,6 @@ package matcher
 
 import (
 	"fmt"
-	"sync"
 	//"github.com/cheekybits/genny/generic"
 )
 
@@ -12,24 +11,23 @@ import (
 
 // Node a single node that composes the tree
 type User struct {
-	userId string
+	UserId string `json:"userId"`
 }
 
 func (n *User) String() string {
-	return n.userId
+	return n.UserId
 }
 
 // UserGraph the Items graph
 type UserGraph struct {
 	users []*User
 	edges map[User][]*User
-	lock  sync.RWMutex
+	// lock  sync.RWMutex
 }
 
 // AddNode adds a node to the graph
 func (g *UserGraph) AddUser(n *User) {
 	g.users = append(g.users, n)
-
 }
 
 // AddEdge adds an edge to the graph
@@ -47,7 +45,7 @@ func Search(users []*User, n *User) (bool, int) {
 	index := -1
 	find := false
 	for i, user := range users {
-		if user.userId == n.userId {
+		if user.UserId == n.UserId {
 			find = true
 			index = i
 			break
@@ -118,7 +116,8 @@ func (g *UserGraph) String() {
 func UsersToGraph(users []User) *UserGraph {
 	var graph UserGraph
 	for _, user := range users {
-		graph.AddUser(&user)
+		user2 := user
+		graph.AddUser(&user2)
 	}
 	return &graph
 }
