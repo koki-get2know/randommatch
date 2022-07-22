@@ -9,6 +9,12 @@ import (
 // TODO the selector paramater should be a config variable
 const SELECTOR = "random"
 
+type Constraint uint8
+
+const (
+	dejavu Constraint = iota
+)
+
 type Matching struct {
 	matched []*User
 }
@@ -18,7 +24,7 @@ type Match struct {
 	Users []User
 }
 
-func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
+func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bool {
 	/* Filter
 
 	   input :
@@ -34,7 +40,7 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
 	ok := true
 	for _, constraint := range constraints {
 		switch constraint {
-		case "deja vu":
+		case dejavu:
 			// check if an edges exist between n and any user in matched
 			for _, user := range matched {
 				if find, _ := Search(g.edges[*n], user); find {
@@ -48,7 +54,7 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
 	return ok
 }
 
-func RandomChoices(g *UserGraph, k int, constraints []string) *Matching {
+func RandomChoices(g *UserGraph, k int, constraints []Constraint) *Matching {
 
 	/* random choice without constraint
 
@@ -83,7 +89,7 @@ func RandomChoices(g *UserGraph, k int, constraints []string) *Matching {
 
 }*/
 
-func Matcher(g *UserGraph, k int, constraints []string) map[int]*Matching {
+func Matcher(g *UserGraph, k int, constraints []Constraint) map[int]*Matching {
 
 	/* Matcher without constraint
 
@@ -122,7 +128,7 @@ func Matcher(g *UserGraph, k int, constraints []string) map[int]*Matching {
 func GenerateTuple(users []User, size int) []Match {
 	var results []Match
 	graph := UsersToGraph(users)
-	tuples := Matcher(graph, size, []string{"deja vu"})
+	tuples := Matcher(graph, size, []Constraint{dejavu})
 	for index, matching := range tuples {
 		var matches []User
 		for _, user := range matching.matched {

@@ -8,7 +8,7 @@ import (
 func TestRandomChoices(t *testing.T) {
 	//id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
 	g.String()
-	constraint := []string{"deja vu"}
+	constraint := []Constraint{dejavu}
 	matching := RandomChoices(&g, 2, constraint)
 	fmt.Printf("Match of %d: [", len(matching.matched))
 	for _, user := range matching.matched {
@@ -21,7 +21,7 @@ func TestRandomChoices(t *testing.T) {
 func TestMatcher(t *testing.T) {
 	//id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
 	g.String()
-	constraint := []string{"deja vu"}
+	constraint := []Constraint{dejavu}
 	matching := Matcher(&g, 2, constraint)
 
 	for _, match := range matching {
