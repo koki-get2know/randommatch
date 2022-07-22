@@ -28,16 +28,12 @@ type UserGraph struct {
 
 // AddNode adds a node to the graph
 func (g *UserGraph) AddUser(n *User) {
-	g.lock.Lock()
-	defer g.lock.Unlock()
 	g.users = append(g.users, n)
 
 }
 
 // AddEdge adds an edge to the graph
 func (g *UserGraph) AddEdge(n1, n2 *User) {
-	g.lock.Lock()
-	defer g.lock.Unlock()
 	if g.edges == nil {
 		g.edges = make(map[User][]*User)
 	}
@@ -64,8 +60,6 @@ func Search(users []*User, n *User) (bool, int) {
 // SearchNode findout a specifique node in a graph
 
 func (g *UserGraph) SearchUser(n *User) (bool, int) {
-	g.lock.RLock()
-	defer g.lock.RUnlock()
 	index := -1
 	find := false
 	if g.users != nil {
@@ -85,8 +79,6 @@ func Remove(s []*User, i int) []*User {
 
 // RemoveEdge remove an edge from the graph
 func (g *UserGraph) RemoveEdge(n *User) {
-	g.lock.Lock()
-	defer g.lock.Unlock()
 	for _, user := range g.users {
 		find, index := Search(g.edges[*user], n)
 		if find {
@@ -101,8 +93,6 @@ func (g *UserGraph) RemoveUser(n *User) {
 
 	g.RemoveEdge(n)
 	find, index := g.SearchUser(n) // find out the index of this node
-	g.lock.Lock()
-	defer g.lock.Unlock()
 	if find {
 		g.users = Remove(g.users, index)
 
@@ -112,8 +102,6 @@ func (g *UserGraph) RemoveUser(n *User) {
 
 // print the graph
 func (g *UserGraph) String() {
-	g.lock.RLock()
-	defer g.lock.RUnlock()
 	s := ""
 	for _, usernode := range g.users {
 		s += usernode.String() + " -> "
@@ -125,4 +113,12 @@ func (g *UserGraph) String() {
 	}
 	fmt.Println(s)
 
+}
+
+func UsersToGraph(users []User) *UserGraph {
+	var graph UserGraph
+	for _, user := range users {
+		graph.AddUser(&user)
+	}
+	return &graph
 }

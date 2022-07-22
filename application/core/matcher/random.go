@@ -2,6 +2,7 @@ package matcher
 
 import (
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -10,6 +11,11 @@ const SELECTOR = "random"
 
 type Matching struct {
 	matched []*User
+}
+
+type Match struct {
+	Id    string
+	Users []User
 }
 
 func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
@@ -27,17 +33,15 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []string) bool {
 
 	ok := true
 	for _, constraint := range constraints {
-
-		if constraint == "deja vu" {
+		switch constraint {
+		case "deja vu":
 			// check if an edges exist between n and any user in matched
 			for _, user := range matched {
-				find, _ := Search(g.edges[*n], user)
-				if find {
+				if find, _ := Search(g.edges[*n], user); find {
 					ok = false
 					break
 				}
 			}
-
 		}
 	}
 
@@ -90,7 +94,8 @@ func Matcher(g *UserGraph, k int, constraints []string) map[int]*Matching {
 	*/
 	matching := make(map[int]*Matching)
 
-	if SELECTOR == "random" {
+	switch SELECTOR {
+	case "random":
 		/*
 		   repeat
 		     1 - random choices k users
@@ -107,8 +112,23 @@ func Matcher(g *UserGraph, k int, constraints []string) map[int]*Matching {
 			matching[i] = matched
 			i++
 		}
+
 	}
 
 	return matching
 
+}
+
+func GenerateTuple(users []User, size int) []Match {
+	var results []Match
+	graph := UsersToGraph(users)
+	tuples := Matcher(graph, size, []string{"deja vu"})
+	for index, matching := range tuples {
+		var matches []User
+		for _, user := range matching.matched {
+			matches = append(matches, *user)
+		}
+		results = append(results, Match{Id: strconv.Itoa(index), Users: matches})
+	}
+	return results
 }

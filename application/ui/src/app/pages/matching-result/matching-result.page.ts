@@ -18,7 +18,7 @@ export class MatchingResultPage implements OnInit {
   usersgroups = [
     {
       group: "Match 1",
-      nomber:6,
+      number: 6,
       users: [
         {
         name: "Frank tchatseu",
@@ -42,7 +42,7 @@ export class MatchingResultPage implements OnInit {
     },
     {
       group: "Match 2",
-      nomber:6,
+      number: 6,
       users: [
         {
         name: "Frank tchatseu",
@@ -66,7 +66,7 @@ export class MatchingResultPage implements OnInit {
     },
     {
       group: "Match 3",
-      nomber:6,
+      number:6,
       users: [
         {
         name: "Frank tchatseu",
@@ -90,7 +90,7 @@ export class MatchingResultPage implements OnInit {
     },
     {
       group: "Match 4",
-      nomber:6,
+      number:6,
       users: [
         {
         name: "Frank tchatseu",
