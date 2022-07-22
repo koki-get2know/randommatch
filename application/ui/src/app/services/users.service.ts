@@ -1,6 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
+export class User {
+  userId: string;
+}
+export interface MatchingReq {
+  size: number;
+  users: User[];
+  forbiddenConnections?: User[][];
+}
+export interface Matching {
+  id: number;
+  users: User[];
+}
+interface MatchingResponse {
+  data: Matching[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -9,12 +26,13 @@ export class UsersService {
 
   constructor ( private http: HttpClient ) { }
   
-  urlApi = "http://koki2.com:8011";
+  urlApi = "http://localhost:8080";
 
-  async makematch(formData) {
-    return await this.http.post( `${ this.urlApi }/matching`, formData, {} )
-      .pipe( map( data => data ) );
+  makematch(matchingReq: MatchingReq) : Observable<Matching[]> {
+    return this.http.post<MatchingResponse>( `${ this.urlApi }/matchings`, matchingReq, {} )
+      .pipe( map( res => res.data ) );
   }
+
   async uploadCsv(formData) {
     return await this.http.post( `${ this.urlApi }/matching`, formData, {} )
       .pipe( map( data => data ) );

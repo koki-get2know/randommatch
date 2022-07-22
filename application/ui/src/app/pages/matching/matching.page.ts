@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { UsersService } from '../../services/users.service';
+import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
 import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 @Component( {
@@ -21,7 +21,7 @@ export class MatchingPage implements OnInit {
   usersgroups = [
     {
       group: "group A",
-      nomber:6,
+      number:6,
       users: [
         {
         id:1,
@@ -48,7 +48,7 @@ export class MatchingPage implements OnInit {
     },
     {
       group: "group B",
-      nomber:6,
+      number:6,
       users: [
         {
         id:4,
@@ -74,7 +74,7 @@ export class MatchingPage implements OnInit {
       ]
     },
   ];
-  userSelected = [];
+  usersSelected = [];
 
   isLoading = false;
   isError = false;
@@ -90,31 +90,31 @@ export class MatchingPage implements OnInit {
   get form() {
     return this.createForm.controls;
   }
+
   selectUsers(event,user) {
   
     if (event.target.checked == false ) {
-      this.userSelected.push( user );
-      console.log( this.userSelected );
+      this.usersSelected.push( user );
+      console.log( this.usersSelected );
     }
     else {
-      this.onRemoveUserSelected( user.id );
-      console.log( this.userSelected );
+      this.onRemoveusersSelected( user.id );
+      console.log( this.usersSelected );
     }
 
   }
   // when user is unchecked, it should be remove
-  onRemoveUserSelected(id: number) {
-    let index = this.userSelected.findIndex(d => d.id === id); //find index in your array
-    this.userSelected.splice(index, 1);
+  onRemoveusersSelected(id: number) {
+    let index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
+    this.usersSelected.splice(index, 1);
     event.stopPropagation();
 }
   // select a group of user
   selectGroup(event, group){
   
-  this.userSelected = [];
+  this.usersSelected = [];
   if ( event.target.checked == false ) {
-      this.userSelected = group.users;
-      console.log( this.userSelected );
+      this.usersSelected = group.users;
     }
   }
   // 
@@ -128,28 +128,30 @@ export class MatchingPage implements OnInit {
       alert( "remplir tous les champs" );
     }
     this.isLoading = true;
-    const formData = new FormData();
-    const datamatch = {
-      matchingsize: this.form.matchingsize.value,
-      usersSelected: this.userSelected
+
+
+    let users: User[] = [];
+    for (let selected of this.usersSelected)
+    {
+      users.push({userId: selected.name})
+    }
+    const matchingRequest: MatchingReq = {
+      size: Number(this.form.matchingsize.value),
+      users
     };
-    //formData.append( 'matching_size', this.form.matchingsize.value );
-    this.matchService.makematch(datamatch)
-      .then( resp => {
-        console.log(datamatch);
+
+    this.matchService.makematch(matchingRequest)
+      .subscribe( (res: Matching[]) => {
+        console.log(res);
         console.log( "Matching effectué avec success" );
         this.initForm();
         // show the result
-        this.matchingresult(datamatch);
-      })
-      .catch( err => {
-        console.log( err );
-        
+        this.matchingresult(res);
       })
   }
 
   // matching result
-  matchingresult(datamatch) {
-    this.router.navigate(['/matching-result',{'data': datamatch} ]);
+  matchingresult(matchings: Matching[]) {
+    this.router.navigate(['/matching-result',{'data': matchings} ]);
   }
 }

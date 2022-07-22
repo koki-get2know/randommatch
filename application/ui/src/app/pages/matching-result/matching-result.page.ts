@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { Matching } from '../../services/users.service';
 
 @Component({
   selector: 'app-matching-result',
@@ -11,7 +12,7 @@ export class MatchingResultPage implements OnInit {
   constructor(private route: ActivatedRoute) { }
 
   ngOnInit () {
-    const param = this.route.snapshot.params[ 'data' ];
+    const param: Matching[] = this.route.snapshot.params[ 'data' ];
     console.log( param );
   }
 
