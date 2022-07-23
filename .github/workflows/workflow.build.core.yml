@@ -90,7 +90,7 @@ jobs:
         NAMESPACE: "randommatch"
         ACR_NAME: "randommatchakscr"
         HELM_REPO: "helm/matching"
-        IMAGE_BE_TAG: "ab0cb97ba28e35941c4dc535c40ecf531e1c5c89-2682462904" 
+        IMAGE_BE_TAG: "${{ github.sha }}-${{ github.run_id }}" 
         IMAGE_UI_TAG: "${{ github.sha }}-${{ github.run_id }}"
         VERSION: "0.1.0"
       run: |
