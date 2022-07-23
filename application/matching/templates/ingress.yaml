@@ -6,10 +6,16 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: tls-secret
   rules:
-  - http:
+  - host: {{ .Values.ingress.host }}
+    http:
       paths:
       - path: /(.*)
         pathType: Prefix

@@ -12,10 +12,6 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v3
-        - name: 'Az CLI login'
-          uses: azure/login@v1
-          with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
         - name: 'Validate format of the Iac'
           run: | 
             cd ./iac/terraform 

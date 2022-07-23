@@ -8,16 +8,14 @@
 </ion-header>
 
 <ion-content>
-  <div *ngIf="username" class="ion-padding-top ion-text-center">
+  <div *ngIf="profile" class="ion-padding-top ion-text-center">
     <img src="https://www.gravatar.com/avatar?d=mm&s=140" alt="avatar">
-    <h2>{{username}}</h2>
+    <h2>{{profile?.givenName}}</h2>
 
     <ion-list inset>
-      <ion-item (click)="updatePicture()">Update Picture</ion-item>
-      <ion-item (click)="changeUsername()">Change Username</ion-item>
-      <ion-item (click)="changePassword()">Change Password</ion-item>
-      <ion-item (click)="support()">Support</ion-item>
-      <ion-item (click)="logout()">Logout</ion-item>
+      <ion-item>Surname: {{profile?.surname}}</ion-item>
+      <ion-item>Email: {{profile?.userPrincipalName}}</ion-item>
+      <ion-item>Id: {{profile?.id}}</ion-item>
     </ion-list>
   </div>
 </ion-content>

@@ -7,7 +7,6 @@ on:
       - '.github/workflows/workflow.build.core.yml'
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -87,11 +86,12 @@ jobs:
         --file ./Dockerfile .
 
     - name: 'Package helm chart and save it to Azure container Registry'
-      env: 
+      env:
         NAMESPACE: "randommatch"
         ACR_NAME: "randommatchakscr"
         HELM_REPO: "helm/matching"
-        IMAGE_TAG: "${{ github.sha }}-${{ github.run_id }}"
+        IMAGE_BE_TAG: "ab0cb97ba28e35941c4dc535c40ecf531e1c5c89-2682462904" 
+        IMAGE_UI_TAG: "${{ github.sha }}-${{ github.run_id }}"
         VERSION: "0.1.0"
       run: |
         cd ./application/matching
@@ -101,13 +101,17 @@ jobs:
         az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
         helm push matching-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
         az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
+        kubectl label namespace ${NAMESPACE} cert-manager.io/disable-validation=true --overwrite=true
+        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
-        --set backend.image.tag=${IMAGE_TAG} \
-        --set ui.image.tag=${IMAGE_TAG} \
+        --set backend.image.tag=${IMAGE_BE_TAG} \
+        --set ui.image.tag=${IMAGE_UI_TAG} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
        
-
+# kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
+# # Label the ingress-basic namespace to disable resource validation
+# kubectl label namespace ${NAMESPACE} cert-manager.io/disable-validation=true
 # helm uninstall myhelmtest --namespace ${NAMESPACE}
 # kubectl get ingress --namespace randommatch
 # kubectl get clusterrolebinding --namespace randommatch
@@ -119,4 +123,3 @@ jobs:
 # https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 # https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos
 # https://github.com/microservices-demo/microservices-demo/tree/master/deploy/kubernetes/helm-chart
-

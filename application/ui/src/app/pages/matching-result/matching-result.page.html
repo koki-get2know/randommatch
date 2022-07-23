@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Matching result</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-list>
+          <ion-item-group *ngFor="let match of matchings; let i=index">
+            <ion-item-divider sticky>
+              <ion-label>
+                Match {{match.id}}
+              </ion-label>
+            </ion-item-divider>
+
+            <ion-item-sliding>
+              <ion-item routerLink="/app/tabs/schedule/session/">
+                <ion-grid>
+                  <ion-row>
+                    <ion-col *ngFor="let user of match.users; let j=index">
+                      <ion-avatar>
+                        <img [src]="avatars[i+j]" alt="">
+                      </ion-avatar>
+                      <ion-label>
+                        <h3>{{user.userId}}</h3>
+                        <p>
+                          Generic
+                        </p>
+                      </ion-label>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+
+                <ion-badge color="primary">{{match.users.length}}</ion-badge>
+              </ion-item>
+              <ion-item-options>
+                <ion-item-option color="favorite">
+                  Favorite
+                </ion-item-option>
+                <ion-item-option color="danger">
+                  Remove
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ion-item-group>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</ion-content>
