@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 
 export class User {
   userId: string;
+  avatar?: string;
 }
 export interface MatchingReq {
   size: number;
@@ -30,7 +31,7 @@ export class UsersService {
   urlApi = environment.serverBaseUrl;
 
   makematch(matchingReq: MatchingReq) : Observable<Matching[]> {
-    return this.http.post<MatchingResponse>( `${ this.urlApi }/matchings`, matchingReq, {} )
+    return this.http.post<MatchingResponse>( `${ this.urlApi }/matchings`, matchingReq)
       .pipe( map( res => res.data ) );
   }
 

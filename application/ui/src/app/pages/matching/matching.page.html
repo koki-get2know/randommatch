@@ -9,7 +9,7 @@
   <ion-grid>
     <ion-row>
       <ion-col>
-        <form [formGroup]="createForm" (submit)="ramdommatch()">
+        <form [formGroup]="matchingForm" (submit)="onSubmit()">
           <ion-list lines="none">
             <ion-item>
               <ion-label position="stacked" color="primary">Matching size</ion-label>
@@ -17,12 +17,12 @@
               </ion-input>
             </ion-item>
 
-            <ion-datetime locale="en-GB-u-hc-h12"></ion-datetime>
+            <!--ion-datetime locale="en-GB-u-hc-h12"></ion-datetime-->
 
           </ion-list>
 
           <div class="ion-padding">
-            <ion-button type="submit" expand="block">Match Users Randomly</ion-button>
+            <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
           </div>
         </form>
       </ion-col>

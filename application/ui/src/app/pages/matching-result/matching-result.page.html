@@ -22,7 +22,7 @@
                   <ion-row>
                     <ion-col *ngFor="let user of match.users; let j=index">
                       <ion-avatar>
-                        <img [src]="avatars[i+j]" alt="">
+                        <img [src]="user.avatar" alt="">
                       </ion-avatar>
                       <ion-label>
                         <h3>{{user.userId}}</h3>

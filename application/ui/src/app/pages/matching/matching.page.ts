@@ -3,92 +3,90 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
 import { NavController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
+import { LoremIpsum } from 'lorem-ipsum';
+
 @Component( {
   selector: 'app-matching',
   templateUrl: './matching.page.html',
   styleUrls: ['./matching.page.scss'],
 })
 export class MatchingPage implements OnInit {
-
-  constructor(private formBuilder: FormBuilder,private matchService:UsersService,public navCtrl: NavController,private router: Router) { }
-
-  ngOnInit () {
-    this.initForm();
-  }
-
-  createForm: FormGroup;
+  
+  matchingForm: FormGroup;
   checked: any;
-  usersgroups = [
-    {
-      group: "group A",
-      number:6,
-      users: [
-        {
-        id:1,
-        name: "Frank tchatseu",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-        {
-        id:2,
-        name: "Yannick Youmie",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-        {
-        id:3,
-        name: "Prestilien Pindoh",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-    {
-      group: "group B",
-      number:6,
-      users: [
-        {
-        id:4,
-        name: "Ivanov Tmib",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-        {
-        id:5,
-        name: "Alex Lexlion",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-        { 
-        id:6,
-        name: "Urbain Workday",
-        group: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-  ];
+  usersgroups = [];
+   
   usersSelected = [];
 
   isLoading = false;
   isError = false;
   isSuccess = false;
   isSubmitted = false;
+  avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
+  "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
+  "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
+  "/assets/img/speakers/mouse.jpg", "/assets/img/speakers/puppy.jpg", "/assets/img/speakers/rabbit.jpg",
+   "/assets/img/speakers/turtle.jpg",
+   "https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"];
+
+  constructor(private formBuilder: FormBuilder,private matchService:UsersService,
+    public navCtrl: NavController,private router: Router) { 
+  }
+
+  ngOnInit () {
+    this.usersgroups = this.generateUsers();
+    this.initForm();
+  }
 
   initForm() {
-    this.createForm = this.formBuilder.group({
+    this.matchingForm = this.formBuilder.group({
       matchingsize: ['', Validators.required],
     });
   }
 
+  generateUsers() {
+    const lorem = new LoremIpsum({
+      sentencesPerParagraph: {
+        max: 8,
+        min: 4
+      },
+      wordsPerSentence: {
+        max: 16,
+        min: 4
+      }
+    });
+    const min = 6;
+    const max = 30;
+    const usersNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+
+
+    let usersgroups = [];
+    for (let g=1; g < 3; g++) {
+      let users =[];
+      for (let i=1; i<usersNumber; i++) {
+        let avatarId = Math.floor(Math.random() * (this.avatars.length));
+
+        let user = {
+          id: i,
+          name: lorem.generateWords(2),
+          group: lorem.generateWords(2),
+          avatar: this.avatars[avatarId]
+        };
+        users.push(user);
+      }
+
+      let group = {
+        group: `Group ${lorem.generateWords(2)}`,
+        users: users 
+      };
+      usersgroups.push(group);
+    }
+    return usersgroups;
+}
+
   get form() {
-    return this.createForm.controls;
+    return this.matchingForm.controls;
   }
 
   selectUsers(event,user) {
@@ -115,7 +113,11 @@ export class MatchingPage implements OnInit {
       this.usersSelected = group.users;
     }
   }
-  // 
+  
+  onSubmit() {
+    this.ramdommatch();
+  }
+
   ramdommatch () {
     
     this.isSubmitted = true;
@@ -140,16 +142,18 @@ export class MatchingPage implements OnInit {
 
     this.matchService.makematch(matchingRequest)
       .subscribe( (res: Matching[]) => {
-        console.log(res);
-        console.log( "Matching effectué avec success" );
-        this.initForm();
-        // show the result
         this.matchingresult(res);
       })
   }
 
   // matching result
   matchingresult(matchings: Matching[]) {
+    for(const matching of matchings) {
+      for (const user of matching.users) {
+        let avatarId = Math.floor(Math.random() * (this.avatars.length));
+        user.avatar = this.avatars[avatarId];
+      }
+    }
     const navigationExtras: NavigationExtras = {
       state: {
         matchings
