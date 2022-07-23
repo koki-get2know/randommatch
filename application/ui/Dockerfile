@@ -1,6 +1,6 @@
 FROM node:16-slim AS ionic-build
 WORKDIR /app
-COPY package.json /app/
+COPY package*.json /app/
 RUN npm install
 COPY ./ /app/
 RUN npx ionic build --prod
