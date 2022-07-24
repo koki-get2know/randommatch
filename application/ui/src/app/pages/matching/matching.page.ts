@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
 import { NavController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
-
+import { IonicSelectableComponent } from 'ionic-selectable';
 @Component( {
   selector: 'app-matching',
   templateUrl: './matching.page.html',
   styleUrls: ['./matching.page.scss'],
-})
+} )
+
 export class MatchingPage implements OnInit {
   
   matchingForm: FormGroup;
@@ -22,6 +23,10 @@ export class MatchingPage implements OnInit {
   isError = false;
   isSuccess = false;
   isSubmitted = false;
+  selected_forbidden_connexion: [];
+  userstoforbidden =[];
+  usersconnexionforbidden: User[][]=[];
+
   avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
   "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
   "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
@@ -29,8 +34,10 @@ export class MatchingPage implements OnInit {
    "/assets/img/speakers/turtle.jpg",
    "https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"];
 
+  @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController,private router: Router) { 
+    public navCtrl: NavController, private router: Router ) { 
+    
   }
 
   ngOnInit () {
@@ -44,6 +51,31 @@ export class MatchingPage implements OnInit {
     });
   }
 
+  portChange(event: {
+    component: IonicSelectableComponent,
+    value: any
+  } ) {
+    console.log( "Selec" );
+    if ( this.selected_forbidden_connexion.length > 0 ) {
+      this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+    }
+    console.log( this.usersconnexionforbidden );
+    console.log( 'port:', event.value );
+
+
+    this.clear();
+  }
+  clear() {
+    this.selectComponent.clear();
+    this.selectComponent.close();
+    this.selected_forbidden_connexion = [];
+    
+  }
+  addforbiddenUsersItem() {
+    this.selectComponent.confirm ();
+    this.selectComponent.close(); 
+    
+  }
   generateUsers() {
     const lorem = new LoremIpsum({
       sentencesPerParagraph: {
@@ -59,28 +91,29 @@ export class MatchingPage implements OnInit {
     const max = 30;
     const usersNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
-
-
     let usersgroups = [];
     for (let g=1; g < 3; g++) {
-      let users =[];
+      let users = [];
+      let randomgroup = `Group ${ lorem.generateWords( 2 ) }`;
       for (let i=1; i<usersNumber; i++) {
         let avatarId = Math.floor(Math.random() * (this.avatars.length));
-
         let user = {
           id: i,
           name: lorem.generateWords(2),
-          group: lorem.generateWords(2),
+          group: randomgroup,
           avatar: this.avatars[avatarId]
         };
-        users.push(user);
+        users.push( user );
+        this.userstoforbidden.push(user);
       }
 
       let group = {
-        group: `Group ${lorem.generateWords(2)}`,
+        group: randomgroup,
         users: users 
       };
-      usersgroups.push(group);
+      
+      usersgroups.push( group );
+      
     }
     return usersgroups;
 }
@@ -137,11 +170,14 @@ export class MatchingPage implements OnInit {
     }
     const matchingRequest: MatchingReq = {
       size: Number(this.form.matchingsize.value),
-      users
+      users,
+      forbiddenConnections: this.usersconnexionforbidden
+
     };
 
     this.matchService.makematch(matchingRequest)
-      .subscribe( (res: Matching[]) => {
+      .subscribe( ( res: Matching[] ) => {
+        console.log( matchingRequest );
         this.matchingresult(res);
       })
   }
@@ -161,4 +197,6 @@ export class MatchingPage implements OnInit {
     };
     this.router.navigate(['/matching-result'],navigationExtras);
   }
+
+  
 }

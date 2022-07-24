@@ -12,6 +12,7 @@ import { environment } from '../environments/environment';
 import { FormsModule,ReactiveFormsModule } from '@angular/forms';
 import { MsalGuard, MsalModule, MsalInterceptor, MsalRedirectComponent } from '@azure/msal-angular';
 import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
+import { IonicSelectableModule } from 'ionic-selectable';
 const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigator.userAgent.indexOf('Trident/') > -1;
 
 @NgModule({
@@ -20,6 +21,7 @@ const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigato
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    IonicSelectableModule,
     ReactiveFormsModule,
     IonicModule.forRoot(),
     IonicStorageModule.forRoot(),

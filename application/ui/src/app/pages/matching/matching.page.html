@@ -25,14 +25,19 @@
             <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
           </div>
         </form>
+        <ion-item>
+          <ion-label>select forbidden matches</ion-label>
+          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
+          </ionic-selectable>
+        </ion-item>
         <ion-grid>
           <ion-row>
             <ion-col>
-              <ion-list>
-                <ion-item-group *ngFor="let group of usersgroups; let i=index">
+              <ion-list *ngIf="usersconnexionforbidden.length">
+                <ion-item-group *ngFor="let connexionforbidden of usersconnexionforbidden; let i=index">
                   <ion-item-divider sticky>
                     <ion-label>
-                      Match {{group.group}}
+                      Forbidden {{i}}
                     </ion-label>
                   </ion-item-divider>
 
@@ -40,21 +45,21 @@
                     <ion-item routerLink="/app/tabs/schedule/session/">
                       <ion-grid>
                         <ion-row>
-                          <ion-col *ngFor="let user of group.users; let j=index">
+                          <ion-col *ngFor="let user of connexionforbidden; let j=index">
                             <ion-avatar>
                               <img [src]="user.avatar" alt="">
                             </ion-avatar>
                             <ion-label>
-                              <h3>{{user.userId}}</h3>
+                              <h3>{{user.name}}</h3>
                               <p>
-                                Generic
+                                {{user.group}}
                               </p>
                             </ion-label>
                           </ion-col>
                         </ion-row>
                       </ion-grid>
 
-                      <ion-badge color="primary">7</ion-badge>
+                      <ion-badge color="primary">{{connexionforbidden.length}}</ion-badge>
                     </ion-item>
                     <ion-item-options>
                       <ion-item-option color="favorite">
