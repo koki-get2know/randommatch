@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
@@ -36,7 +36,8 @@ export class MatchingPage implements OnInit {
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController, private router: Router ) { 
+    public navCtrl: NavController, private router: Router,
+    public toastController: ToastController) { 
     
   }
 
@@ -50,20 +51,58 @@ export class MatchingPage implements OnInit {
       matchingsize: ['', Validators.required],
     });
   }
+  async presentToast(message) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000
+    });
+    toast.present();
+  }
 
   portChange(event: {
     component: IonicSelectableComponent,
-    value: any
-  } ) {
+    value: any} ) {
     console.log( "Selec" );
-    if ( this.selected_forbidden_connexion.length > 0 ) {
-      this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+    // just add if the list in not empty
+    if ( this.selected_forbidden_connexion.length > 1 ) {
+      if ( this.usersconnexionforbidden.length == 0 ) {
+        this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+      }
+      else {
+        if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
+          console.log( "Lien inexistant" );
+          this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+        }
+        else {
+          this.presentToast("this connection already exist!");
+        }
+      }
+    } else {
+      this.presentToast("Please select more than one user!");
     }
-    console.log( this.usersconnexionforbidden );
-    console.log( 'port:', event.value );
-
-
     this.clear();
+  }
+  forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
+    let i = 0;
+    while ( i < this.usersconnexionforbidden.length ) {
+      let element = this.usersconnexionforbidden[i];
+      if ( element.length == newconnection.length ) {
+        const diffUser = this.compareconnection( element, newconnection );
+        if ( diffUser.length == 0 ) {
+          console.log( diffUser.length);
+          return true;
+        }
+      }
+      i++;
+    }
+    return false;
+  }
+
+  compareconnection<User>(forbconnec1:any,forbconnec2:any) {
+    return forbconnec1.filter((element) => {
+        return !forbconnec2.some(elt2 => element.id === elt2.id);
+      });
+    
   }
   clear() {
     this.selectComponent.clear();
@@ -75,6 +114,10 @@ export class MatchingPage implements OnInit {
     this.selectComponent.confirm ();
     this.selectComponent.close(); 
     
+  }
+
+  removeConnection (index) {
+    this.usersconnexionforbidden.splice(index, 1);
   }
   generateUsers() {
     const lorem = new LoremIpsum({
@@ -94,11 +137,12 @@ export class MatchingPage implements OnInit {
     let usersgroups = [];
     for (let g=1; g < 3; g++) {
       let users = [];
-      let randomgroup = `Group ${ lorem.generateWords( 2 ) }`;
+      let randomgroup = `Group ${ g} ${ lorem.generateWords( g ) } `;
       for (let i=1; i<usersNumber; i++) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
+        let avatarId = Math.floor( Math.random() * ( this.avatars.length ) );
+        // generate unique id
         let user = {
-          id: i,
+          id: Math.floor(Math.random() * Date.now()),
           name: lorem.generateWords(2),
           group: randomgroup,
           avatar: this.avatars[avatarId]
