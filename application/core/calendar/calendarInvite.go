@@ -15,11 +15,11 @@ func gomailing(subject, htmlBody string) ([]byte, error) {
 	m := gomail.NewMessage()
 
 	m.SetHeader("From", "Ivanov Tmib <brobizzness@gmail.com>")
-	m.SetHeader("To", "tmibkage@yahoo.fr", "tmibkage@gmail.com", "ivan.tchomguemieguem@amadeus.com")
+	m.SetHeader("To", "tmibkage@yahoo.fr", "tmibkage@gmail.com", "ivan.tchomguemieguem@amadeus.com", "prestilienpindoh@outlook.com")
 	m.SetAddressHeader("Cc", "brobizzness@gmail.com", "Dan")
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", htmlBody)
-	m.Attach("Iterationreview.ics")
+	m.Attach("calendar/Iterationreview.ics")
 	var emailRaw bytes.Buffer
 	_, err := m.WriteTo(&emailRaw)
 	if err != nil {
