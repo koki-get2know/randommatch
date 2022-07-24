@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { MatchingPageRoutingModule } from './matching-routing.module';
 
 import { MatchingPage } from './matching.page';
+import { IonicSelectableModule } from 'ionic-selectable';
 
 @NgModule({
   imports: [
@@ -14,7 +15,9 @@ import { MatchingPage } from './matching.page';
     FormsModule,
     IonicModule,
     ReactiveFormsModule,
-    MatchingPageRoutingModule
+    MatchingPageRoutingModule,
+    IonicSelectableModule
+    
   ],
   declarations: [MatchingPage]
 })
