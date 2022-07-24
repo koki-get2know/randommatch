@@ -62,10 +62,7 @@
                       <ion-badge color="primary">{{connexionforbidden.length}}</ion-badge>
                     </ion-item>
                     <ion-item-options>
-                      <ion-item-option color="favorite">
-                        Favorite
-                      </ion-item-option>
-                      <ion-item-option color="danger">
+                      <ion-item-option color="danger" (click)="removeConnection(i)">
                         Remove
                       </ion-item-option>
                     </ion-item-options>
