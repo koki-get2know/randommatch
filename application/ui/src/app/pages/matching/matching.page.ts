@@ -77,6 +77,8 @@ export class MatchingPage implements OnInit {
           this.presentToast("this connection already exist!");
         }
       }
+    } else {
+      this.presentToast("Please select more than one user!");
     }
     this.clear();
   }
