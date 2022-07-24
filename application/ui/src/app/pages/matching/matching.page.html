@@ -77,7 +77,7 @@
 
       <ion-col>
         <!-- Searchbar with cancel button always shown -->
-        <ion-searchbar showCancelButton="always"></ion-searchbar>
+        <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
         <ion-list>
           <ion-item-group *ngFor="let group of usersgroups">
             <ion-item-divider sticky>
@@ -100,14 +100,14 @@
                 </ion-label>
                 <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
               </ion-item>
-              <ion-item-options>
+              <!--ion-item-options>
                 <ion-item-option color="favorite">
                   Favorite
                 </ion-item-option>
                 <ion-item-option color="danger">
                   Remove
                 </ion-item-option>
-              </ion-item-options>
+              </ion-item-options-->
             </ion-item-sliding>
           </ion-item-group>
         </ion-list>
