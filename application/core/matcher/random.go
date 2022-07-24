@@ -85,7 +85,6 @@ func RandomChoices(g *UserGraph, k uint, constraints []Constraint) *Matching {
 	for uint(len(matchedUsers)) < k && len(indices) > 0 {
 		rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
 		index := indices[0]
-		// check the constraints
 		if Filter(g, matchedUsers, g.users[index], constraints) {
 			matchedUsers = append(matchedUsers, g.users[index])
 		}
