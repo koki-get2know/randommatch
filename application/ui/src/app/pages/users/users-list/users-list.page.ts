@@ -6,12 +6,10 @@ import { UsersService } from '../../../services/users.service';
   templateUrl: './users-list.page.html',
   styleUrls: ['./users-list.page.scss'],
 })
-export class UsersListPage implements OnInit {
+export class UsersListPage {
 
-  constructor(private userService:UsersService,) { }
+  constructor(private userService: UsersService) { }
 
-  ngOnInit () {
-  }
 
   usersgroups = [
     {
