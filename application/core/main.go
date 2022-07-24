@@ -2,11 +2,13 @@ package main
 
 import (
 	"log"
+	"mime/multipart"
 	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/matcher"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -23,6 +25,10 @@ type matchingReq struct {
 	Size                 uint             `json:"size"`
 	Users                []matcher.User   `json:"users"`
 	ForbiddenConnections [][]matcher.User `json:"forbiddenConnections"`
+}
+
+type UsersFile struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 // albums slice to seed record album data.
@@ -42,11 +48,35 @@ func generateMatchings(c *gin.Context) {
 	var req matchingReq
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
 	tuples := matcher.GenerateTuple(req.Users, req.ForbiddenConnections, req.Size)
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+func uploadUsers(c *gin.Context) {
+	defer duration(track("uploadUsers"))
+	var usersFile UsersFile
+	err := c.ShouldBind(&usersFile)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file sent " + err.Error()})
+		return
+	}
+
+	// https://stackoverflow.com/questions/45121457/how-to-get-file-posted-from-json-in-go-gin
+	// https://github.com/gin-gonic/gin#model-binding-and-validation
+	if usersFile.File.Size > 5*1024*1024 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "File exceeded max size"})
+		return
+	}
+
+	users, err := convert.CsvToUsers(usersFile.File)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, users)
 }
 
 // getAlbums responds with the list of all albums as JSON.
@@ -154,6 +184,7 @@ func main() {
 	router.POST("/albums", postAlbums)
 	router.GET("/neo4j", helloFromNeo4j)
 	router.POST("/matchings", generateMatchings)
+	router.POST("/upload-users", uploadUsers)
 
 	router.Run()
 

@@ -11,8 +11,6 @@ export class UsersListPage implements OnInit {
   constructor(private userService:UsersService,) { }
 
   ngOnInit () {
-    console.log( "init" );
-    this.getUsers();
   }
 
   usersgroups = [
@@ -66,28 +64,15 @@ export class UsersListPage implements OnInit {
     },
   ];
 
-  uploadCsv ( fileChangeEvent ) {
-    
-  const photo = fileChangeEvent.target.files[ 0 ];
-    
-  let formData = new FormData();
-  formData.append("photo", photo, photo.name);
-  console.log( photo.name );
-  this.userService.uploadCsv( formData )
-    .subscribe( resp => {
-      console.log( resp );
-      this.getUsers();
-        
-      } );
-    
+  uploadCsv ( event ) {
+    for (const file of event.target.files) {
+      const fileData = new FormData();
+      fileData.append("file", file);
+      this.userService.uploadUsersFile( fileData )
+        .subscribe( resp => {
+          console.log( resp );            
+        });
+    }
  }
-  getUsers() {
-    this.userService.get()
-    .subscribe( resp => {
-      console.log( resp );
-      //this.usersgroups = resp;
-      } );
-
-  }
 
 }

@@ -35,8 +35,11 @@ export class UsersService {
       .pipe( map( res => res.data ) );
   }
 
-  uploadCsv(formData) {
-    return this.http.post( `${ this.urlApi }/matching`, formData, {} )
+  uploadUsersFile(fileData) {
+    return this.http.post( `${ this.urlApi }/upload-users`, fileData, {
+      reportProgress: true,
+      observe: 'events'
+    } )
       .pipe( map( data => data ) );
   }
 
