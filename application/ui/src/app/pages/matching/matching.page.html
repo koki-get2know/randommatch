@@ -27,7 +27,7 @@
         </form>
         <ion-item>
           <ion-label>select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
+          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
           </ionic-selectable>
         </ion-item>
         <ion-grid>

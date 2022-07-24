@@ -25,7 +25,7 @@ export class MatchingPage implements OnInit {
   isSubmitted = false;
   selected_forbidden_connexion: [];
   userstoforbidden =[];
-  usersconnexionforbidden: User[][]=[];
+  usersconnexionforbidden =[];
 
   avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
   "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
@@ -59,10 +59,9 @@ export class MatchingPage implements OnInit {
     toast.present();
   }
 
-  portChange(event: {
+  userChange(event: {
     component: IonicSelectableComponent,
     value: any} ) {
-    console.log( "Selec" );
     // just add if the list in not empty
     if ( this.selected_forbidden_connexion.length > 1 ) {
       if ( this.usersconnexionforbidden.length == 0 ) {
@@ -70,7 +69,7 @@ export class MatchingPage implements OnInit {
       }
       else {
         if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
-          console.log( "Lien inexistant" );
+          console.log( "Unexisting link" );
           this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
         }
         else {
@@ -98,7 +97,7 @@ export class MatchingPage implements OnInit {
     return false;
   }
 
-  compareconnection<User>(forbconnec1:any,forbconnec2:any) {
+  compareconnection(forbconnec1:any,forbconnec2:any) {
     return forbconnec1.filter((element) => {
         return !forbconnec2.some(elt2 => element.id === elt2.id);
       });
@@ -137,7 +136,7 @@ export class MatchingPage implements OnInit {
     let usersgroups = [];
     for (let g=1; g < 3; g++) {
       let users = [];
-      let randomgroup = `Group ${ g} ${ lorem.generateWords( g ) } `;
+      let randomgroup = `${ lorem.generateWords( 2 ) } `;
       for (let i=1; i<usersNumber; i++) {
         let avatarId = Math.floor( Math.random() * ( this.avatars.length ) );
         // generate unique id
@@ -152,7 +151,7 @@ export class MatchingPage implements OnInit {
       }
 
       let group = {
-        group: randomgroup,
+        group: `Group ${g} ${randomgroup}`,
         users: users 
       };
       
@@ -208,15 +207,22 @@ export class MatchingPage implements OnInit {
 
 
     let users: User[] = [];
+    let forbiddenConnections: User[][] = [];
     for (let selected of this.usersSelected)
     {
       users.push({userId: selected.name})
     }
+    for (let connection of this.usersconnexionforbidden) {
+      let newConnection = [];
+      for (let item of connection) {
+        newConnection.push({userId: item.name});
+      }
+      forbiddenConnections.push(newConnection);
+    }
     const matchingRequest: MatchingReq = {
       size: Number(this.form.matchingsize.value),
       users,
-      forbiddenConnections: this.usersconnexionforbidden
-
+      forbiddenConnections
     };
 
     this.matchService.makematch(matchingRequest)
