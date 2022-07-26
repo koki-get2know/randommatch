@@ -12,7 +12,7 @@
     <ion-row>
       <ion-col>
         <ion-list>
-          <ion-item-group *ngFor="let match of matchings; let i=index">
+          <ion-item-group *ngFor="let match of matchings">
             <ion-item-divider sticky>
               <ion-label>
                 Match {{match.id}}
@@ -23,9 +23,9 @@
               <ion-item routerLink="/app/tabs/schedule/session/">
                 <ion-grid>
                   <ion-row>
-                    <ion-col *ngFor="let user of match.users; let j=index">
+                    <ion-col *ngFor="let user of match.users">
                       <ion-avatar>
-                        <img [src]="user.avatar" alt="">
+                        <div [innerHTML]="user.avatar"></div>
                       </ion-avatar>
                       <ion-label>
                         <h3>{{user.userId}}</h3>

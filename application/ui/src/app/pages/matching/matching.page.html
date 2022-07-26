@@ -3,7 +3,8 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Matching</ion-title>
+    <ion-title>Matching
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -11,7 +12,8 @@
 
   <ion-grid>
     <ion-row>
-      <ion-col>
+      <ion-col>      
+
         <form [formGroup]="matchingForm" (submit)="onSubmit()">
           <ion-list lines="none">
             <ion-item>
@@ -50,7 +52,7 @@
                         <ion-row>
                           <ion-col *ngFor="let user of connexionforbidden; let j=index">
                             <ion-avatar>
-                              <img [src]="user.avatar" alt="">
+                              <div [innerHTML]="user.avatar"></div>
                             </ion-avatar>
                             <ion-label>
                               <h3>{{user.name}}</h3>
@@ -93,7 +95,7 @@
             <ion-item-sliding *ngFor="let user of group.users">
               <ion-item>
                 <ion-avatar slot="start">
-                  <img [src]="user.avatar" alt="">
+                  <div [innerHTML]="user.avatar"></div>
                 </ion-avatar>
                 <ion-label>
                   <h3>{{user.name}}</h3>

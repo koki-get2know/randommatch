@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Matching } from '../../services/users.service';
 
 @Component({
@@ -10,11 +11,16 @@ export class MatchingResultPage implements OnInit {
 
   matchings: Matching[] = [];
 
-  constructor() { 
+  constructor(private sanitizer: DomSanitizer) { 
   }
 
   ngOnInit () {
     this.matchings = history.state.matchings;
+    this.matchings?.forEach(match => match.users.forEach(user => {
+      if (user.avatar) {
+        user.avatar = this.sanitizer.bypassSecurityTrustHtml(user.avatar['changingThisBreaksApplicationSecurity']);
+      }
+    }));
   }
   
 
@@ -22,3 +28,5 @@ export class MatchingResultPage implements OnInit {
 
 
 }
+
+

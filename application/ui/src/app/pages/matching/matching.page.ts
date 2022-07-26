@@ -5,6 +5,7 @@ import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
+
 @Component( {
   selector: 'app-matching',
   templateUrl: './matching.page.html',
@@ -19,20 +20,9 @@ export class MatchingPage implements OnInit {
    
   usersSelected = [];
 
-  isLoading = false;
-  isError = false;
-  isSuccess = false;
-  isSubmitted = false;
   selected_forbidden_connexion: [];
   userstoforbidden =[];
   usersconnexionforbidden =[];
-
-  avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
-  "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
-  "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
-  "/assets/img/speakers/mouse.jpg", "/assets/img/speakers/puppy.jpg", "/assets/img/speakers/rabbit.jpg",
-   "/assets/img/speakers/turtle.jpg",
-   "https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"];
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
@@ -64,7 +54,7 @@ export class MatchingPage implements OnInit {
     value: any} ) {
     // just add if the list in not empty
     if ( this.selected_forbidden_connexion.length > 1 ) {
-      if ( this.usersconnexionforbidden.length == 0 ) {
+      if ( this.usersconnexionforbidden.length === 0 ) {
         this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
       }
       else {
@@ -87,8 +77,7 @@ export class MatchingPage implements OnInit {
       let element = this.usersconnexionforbidden[i];
       if ( element.length == newconnection.length ) {
         const diffUser = this.compareconnection( element, newconnection );
-        if ( diffUser.length == 0 ) {
-          console.log( diffUser.length);
+        if ( diffUser.length === 0 ) {
           return true;
         }
       }
@@ -135,16 +124,14 @@ export class MatchingPage implements OnInit {
 
     let usersgroups = [];
     for (let g=1; g < 3; g++) {
-      let users = [];
-      let randomgroup = `${ lorem.generateWords( 2 ) } `;
+      const users = [];
+      const randomgroup = `${ lorem.generateWords( 2 ) } `;
       for (let i=1; i<usersNumber; i++) {
-        let avatarId = Math.floor( Math.random() * ( this.avatars.length ) );
-        // generate unique id
-        let user = {
+        const user = {
           id: Math.floor(Math.random() * Date.now()),
           name: lorem.generateWords(2),
           group: randomgroup,
-          avatar: this.avatars[avatarId]
+          avatar: this.matchService.generateAvatarSvg()
         };
         users.push( user );
         this.userstoforbidden.push(user);
@@ -177,7 +164,7 @@ export class MatchingPage implements OnInit {
   }
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: number) {
-    let index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
+    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
     event.stopPropagation();
 }
@@ -196,24 +183,15 @@ export class MatchingPage implements OnInit {
 
   ramdommatch () {
     
-    this.isSubmitted = true;
-    this.isError = false;
-    this.isSuccess = false;
-    this.isLoading = false
-    if ( this.form.invalid ) {
-      alert( "remplir tous les champs" );
-    }
-    this.isLoading = true;
 
-
-    let users: User[] = [];
-    let forbiddenConnections: User[][] = [];
-    for (let selected of this.usersSelected)
+    const users: User[] = [];
+    const forbiddenConnections: User[][] = [];
+    for (const selected of this.usersSelected)
     {
-      users.push({userId: selected.name})
+      users.push({userId: selected.name, avatar: selected.avatar})
     }
-    for (let connection of this.usersconnexionforbidden) {
-      let newConnection = [];
+    for (const connection of this.usersconnexionforbidden) {
+      const newConnection = [];
       for (let item of connection) {
         newConnection.push({userId: item.name});
       }
@@ -226,20 +204,18 @@ export class MatchingPage implements OnInit {
     };
 
     this.matchService.makematch(matchingRequest)
-      .subscribe( ( res: Matching[] ) => {
-        console.log( matchingRequest );
-        this.matchingresult(res);
+      .subscribe( ( matchings: Matching[] ) => {
+        console.log(matchings);
+        matchings.forEach(match => match.users.forEach(user => {
+          user.avatar = matchingRequest.users.find(usr => usr.userId === user.userId)?.avatar;
+        }));
+        
+        this.matchingresult(matchings);
       })
   }
 
   // matching result
   matchingresult(matchings: Matching[]) {
-    for(const matching of matchings) {
-      for (const user of matching.users) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
-        user.avatar = this.avatars[avatarId];
-      }
-    }
     const navigationExtras: NavigationExtras = {
       state: {
         matchings
@@ -247,6 +223,5 @@ export class MatchingPage implements OnInit {
     };
     this.router.navigate(['/matching-result'],navigationExtras);
   }
-
   
 }
