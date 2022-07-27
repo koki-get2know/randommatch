@@ -21,7 +21,7 @@ export class MatchingPage implements OnInit {
   usersSelected = [];
 
   selected_forbidden_connexion: [];
-  userstoforbidden =[];
+  userstoforbid =[];
   usersconnexionforbidden =[];
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
@@ -134,7 +134,7 @@ export class MatchingPage implements OnInit {
           avatar: this.matchService.generateAvatarSvg()
         };
         users.push( user );
-        this.userstoforbidden.push(user);
+        this.userstoforbid.push(user);
       }
 
       let group = {
@@ -152,9 +152,8 @@ export class MatchingPage implements OnInit {
     return this.matchingForm.controls;
   }
 
-  selectUsers(event,user) {
-  
-    if (!!event.target.checked === false ) {
+  selectUsers(event: PointerEvent,user) {
+    if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
     }
     else {
@@ -166,8 +165,7 @@ export class MatchingPage implements OnInit {
   onRemoveusersSelected(id: number) {
     const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
-    event.stopPropagation();
-}
+  }
   // select a group of user
   selectGroup(event, group){
   

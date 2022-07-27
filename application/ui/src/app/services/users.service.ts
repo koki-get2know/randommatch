@@ -16,6 +16,7 @@ export interface MatchingReq {
   users: User[];
   forbiddenConnections?: User[][];
 }
+
 export interface Matching {
   id: number;
   users: User[];
@@ -44,6 +45,10 @@ export class UsersService {
       observe: 'events'
     } )
       .pipe( map( data => data ) );
+  }
+
+  sendEmail(matches: Matching[]) {
+    return this.http.post(`${ this.urlApi }/email-matches`, {matches,});
   }
 
   get() {

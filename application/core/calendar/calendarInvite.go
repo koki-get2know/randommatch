@@ -3,19 +3,21 @@ package calendar
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
 
-func gomailing(subject, htmlBody string) ([]byte, error) {
+func gomailing(sender, subject, htmlBody string) ([]byte, error) {
 	m := gomail.NewMessage()
 
-	m.SetHeader("From", "Ivanov Tmib <brobizzness@gmail.com>")
-	m.SetHeader("To", "tmibkage@yahoo.fr", "tmibkage@gmail.com", "ivan.tchomguemieguem@amadeus.com", "prestilienpindoh@outlook.com")
+	m.SetHeader("From", fmt.Sprintf("Koki Admin <%v>", sender))
+	m.SetHeader("To", "tmibkage@gmail.com")
 	m.SetAddressHeader("Cc", "brobizzness@gmail.com", "Dan")
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/html", htmlBody)
@@ -30,27 +32,33 @@ func gomailing(subject, htmlBody string) ([]byte, error) {
 	return emailRaw.Bytes(), nil
 }
 
-func SendInvite() {
+func SendInvite(match *matcher.Match) {
 
 	const (
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
-		Sender = "brobizzness@gmail.com"
+		sender = "brobizzness@gmail.com"
 
 		// Specify a configuration set. To use a configuration
 		// set, comment the next line and line 92.
 		//ConfigurationSet = "ConfigSet"
 
 		// The subject line for the email.
-		Subject = "Amazon SES Test (AWS SDK for Go)"
-
-		// The HTML body for the email.
-		HtmlBody = "<h1>Amazon SES Test Email (AWS SDK for Go)</h1><p>This email was sent with " +
-			"<a href='https://aws.amazon.com/ses/'>Amazon SES</a> using the " +
-			"<a href='https://aws.amazon.com/sdk-for-go/'>AWS SDK for Go</a>.</p>"
+		subject = "You are matched for a Koki!"
 	)
+	userIds := []string{}
+	for _, user := range match.Users {
+		userIds = append(userIds, user.UserId)
+	}
+	messageHtmlBody := fmt.Sprintf(`<p>Hello %v<br>
+	You have been matched to connect during this cycle.
+	</p>
+	<p>
+	Please accept (one of the) proposed invite(s). In case of conflict, contact your matching peer(s) to arrange the Koki conversation another time.
+	</p>
+	Happy Koki!`, strings.Join(userIds, ", "))
 
-	rawMessage, err := gomailing(Subject, HtmlBody)
+	rawMessage, err := gomailing(sender, subject, messageHtmlBody)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -71,7 +79,7 @@ func SendInvite() {
 	// Assemble the email.
 	input := &ses.SendRawEmailInput{
 		RawMessage: &ses.RawMessage{Data: rawMessage},
-		Source:     aws.String(Sender),
+		Source:     aws.String(sender),
 	}
 
 	// Attempt to send the email.

@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/matcher"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -25,6 +26,10 @@ type matchingReq struct {
 	Size                 uint             `json:"size"`
 	Users                []matcher.User   `json:"users"`
 	ForbiddenConnections [][]matcher.User `json:"forbiddenConnections"`
+}
+
+type EmailReq struct {
+	Matches []matcher.Match `json:"matches"`
 }
 
 type UsersFile struct {
@@ -58,8 +63,8 @@ func generateMatchings(c *gin.Context) {
 func uploadUsers(c *gin.Context) {
 	defer duration(track("uploadUsers"))
 	var usersFile UsersFile
-	err := c.ShouldBind(&usersFile)
-	if err != nil {
+
+	if err := c.ShouldBind(&usersFile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file sent " + err.Error()})
 		return
 	}
@@ -77,6 +82,24 @@ func uploadUsers(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, users)
+}
+
+func emailMatches(c *gin.Context) {
+	defer duration(track("emailMatches"))
+	var req EmailReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	go func() {
+		for _, match := range req.Matches {
+			match2 := match
+			calendar.SendInvite(&match2)
+		}
+	}()
+	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
+
 }
 
 // getAlbums responds with the list of all albums as JSON.
@@ -185,6 +208,7 @@ func main() {
 	router.GET("/neo4j", helloFromNeo4j)
 	router.POST("/matchings", generateMatchings)
 	router.POST("/upload-users", uploadUsers)
+	router.POST("/email-matches", emailMatches)
 
 	router.Run()
 
