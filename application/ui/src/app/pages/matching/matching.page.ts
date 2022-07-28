@@ -5,6 +5,9 @@ import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
+import { MsalService } from '@azure/msal-angular';
+import { AccountInfo, SilentRequest } from '@azure/msal-browser';
+import { environment } from '../../../environments/environment';
 
 @Component( {
   selector: 'app-matching',
@@ -25,11 +28,11 @@ export class MatchingPage implements OnInit {
   usersconnexionforbidden =[];
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
-  constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController, private router: Router,
-    public toastController: ToastController) { 
-    
-  }
+  constructor(private formBuilder: FormBuilder,
+    private matchService:UsersService,
+    public navCtrl: NavController,
+    private router: Router,
+    public toastController: ToastController) { }
 
   ngOnInit () {
     this.usersgroups = this.generateUsers();

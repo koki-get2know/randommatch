@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/matcher"
+	"github.com/koki/randommatch/middlewares"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -195,20 +195,21 @@ func helloNeo4j(uri, username, password string) (string, error) {
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{"*"},
-		MaxAge:       12 * time.Hour,
-	}))
-	router.StaticFile("/api", "./api/swagger.yaml")
-	router.GET("health-check", getHealthCheck)
-	router.GET("/albums", getAlbums)
-	router.GET("/albums/:id", getAlbumByID)
-	router.POST("/albums", postAlbums)
-	router.GET("/neo4j", helloFromNeo4j)
-	router.POST("/matchings", generateMatchings)
-	router.POST("/upload-users", uploadUsers)
-	router.POST("/email-matches", emailMatches)
+	router.Use(middlewares.Cors())
+
+	public := router.Group("")
+	public.StaticFile("/api", "./api/swagger.yaml")
+	public.GET("health-check", getHealthCheck)
+	public.GET("/albums", getAlbums)
+	public.GET("/albums/:id", getAlbumByID)
+	public.POST("/albums", postAlbums)
+	public.GET("/neo4j", helloFromNeo4j)
+
+	protected := router.Group("")
+	protected.Use(middlewares.JwtAuth())
+	protected.POST("/matchings", generateMatchings)
+	protected.POST("/upload-users", uploadUsers)
+	protected.POST("/email-matches", emailMatches)
 
 	router.Run()
 

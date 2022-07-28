@@ -38,15 +38,18 @@ const routes: Routes = [
   },
   {
     path: 'users-list',
-    loadChildren: () => import('./pages/users/users-list/users-list.module').then( m => m.UsersListPageModule)
+    loadChildren: () => import('./pages/users/users-list/users-list.module').then( m => m.UsersListPageModule),
+    canActivate: [MsalGuard]
   },
   {
     path: 'matching',
-    loadChildren: () => import('./pages/matching/matching.module').then( m => m.MatchingPageModule)
+    loadChildren: () => import('./pages/matching/matching.module').then( m => m.MatchingPageModule),
+    canActivate: [MsalGuard]
   },
   {
     path: 'matching-result',
-    loadChildren: () => import('./pages/matching-result/matching-result.module').then( m => m.MatchingResultPageModule)
+    loadChildren: () => import('./pages/matching-result/matching-result.module').then( m => m.MatchingResultPageModule),
+    canActivate: [MsalGuard]
   },
 
 ];
