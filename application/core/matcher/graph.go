@@ -27,7 +27,10 @@ type UserGraph struct {
 
 // AddNode adds a node to the graph
 func (g *UserGraph) AddUser(n *User) {
-	g.users = append(g.users, n)
+	if find, _ := Search(g.users, n); !find {
+		g.users = append(g.users, n)
+	}
+
 }
 
 // AddEdge adds an edge to the graph
@@ -35,9 +38,12 @@ func (g *UserGraph) AddEdge(n1, n2 *User) {
 	if g.edges == nil {
 		g.edges = make(map[User][]*User)
 	}
-	g.edges[*n1] = append(g.edges[*n1], n2)
-	g.edges[*n2] = append(g.edges[*n2], n1)
-
+	if find, _ := Search(g.edges[*n1], n2); !find {
+		g.edges[*n1] = append(g.edges[*n1], n2)
+	}
+	if find, _ := Search(g.edges[*n2], n1); !find {
+		g.edges[*n2] = append(g.edges[*n2], n1)
+	}
 }
 
 // search a user in a list of user
@@ -113,13 +119,23 @@ func (g *UserGraph) String() {
 
 }
 
-func UsersToGraph(users []User, forbiddenConnections [][]User) *UserGraph {
+// UsersToGraph create a graph of some users and connections
+
+func UsersToGraph(users []User, connections [][]User) *UserGraph {
+
+	/* input :
+	         users: table users for matching
+			 connections: Matrix for connection in the graph;
+			               for each line:
+						      - first element is connected to all the rest
+	   output: return the graph
+	*/
 	var graph UserGraph
 	for _, user := range users {
 		user2 := user
 		graph.AddUser(&user2)
 	}
-	for _, usersNotToMatch := range forbiddenConnections {
+	for _, usersNotToMatch := range connections {
 		if len(usersNotToMatch) > 0 {
 			node := usersNotToMatch[0]
 			for _, user := range usersNotToMatch[1:] {
@@ -129,4 +145,16 @@ func UsersToGraph(users []User, forbiddenConnections [][]User) *UserGraph {
 		}
 	}
 	return &graph
+}
+
+// Subgraph extract a subgraph G' from a graph G
+func (g *UserGraph) Subgrapn(users []*User) *UserGraph {
+	var subG UserGraph
+	subG.edges = make(map[User][]*User)
+	subG.users = users
+
+	for _, user := range users {
+		subG.edges[*user] = g.edges[*user]
+	}
+	return &subG
 }

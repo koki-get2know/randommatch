@@ -7,24 +7,42 @@ import (
 )
 
 // TODO the selector paramater should be a config variable
-const SELECTOR = "random"
+type Selector uint8
+
+const (
+	Basic Selector = iota
+)
 
 type Constraint uint8
 
 const (
-	dejavu Constraint = iota
+	Dejavu Constraint = iota
+	ForbiddenConnections
 )
-
-type Matching struct {
-	matched []*User
-}
 
 type Match struct {
 	Id    string `json:"id"`
 	Users []User `json:"users"`
 }
 
-func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bool {
+type ConstraintParams[T any] struct { // Type parameters for constraint
+	Params map[Constraint][]T
+}
+
+func search(users []User, n User) (bool, int) {
+	index := -1
+	find := false
+	for i, user := range users {
+		if user.UserId == n.UserId {
+			find = true
+			index = i
+			break
+		}
+	}
+
+	return find, index
+}
+func Filter(g *UserGraph, matched []User, n *User, constraints []Constraint, forbiddenConnections [][]User) bool {
 	/* Filter
 
 	   input :
@@ -39,15 +57,35 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bo
 
 	ok := true
 	for _, constraint := range constraints {
-		switch constraint {
-		case dejavu:
-			// check if an edges exist between n and any user in matched
+		if ok {
 			for _, user := range matched {
-				if find, _ := Search(g.edges[*n], user); find {
-					ok = false
-					break
+				if ok {
+					switch constraint {
+					case Dejavu:
+						// check if an edges exist between n and any user in matched
+
+						if find, _ := Search(g.edges[*n], &user); find {
+							ok = false
+
+						}
+
+					case ForbiddenConnections:
+						for _, usersNotToMatch := range forbiddenConnections {
+							if len(usersNotToMatch) > 0 {
+								find1, _ := search(usersNotToMatch, *n)
+								find2, _ := search(usersNotToMatch, user)
+								if find1 && find2 {
+									ok = false
+									break
+								}
+							}
+
+						}
+					}
 				}
 			}
+		} else {
+			break
 		}
 	}
 
@@ -63,7 +101,7 @@ func remove[T comparable](l []T, item T) []T {
 	return l
 }
 
-func RandomChoices(g *UserGraph, k uint, constraints []Constraint) *Matching {
+func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]User) *Match {
 
 	/* random choice without constraint
 
@@ -73,8 +111,8 @@ func RandomChoices(g *UserGraph, k uint, constraints []Constraint) *Matching {
 
 	*/
 
-	var matching = &Matching{}
-	var matchedUsers []*User
+	var matching = &Match{}
+	var matchedUsers []User
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
 
 	var indices []int
@@ -86,25 +124,52 @@ func RandomChoices(g *UserGraph, k uint, constraints []Constraint) *Matching {
 		rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
 		index := indices[0]
 
-		
-		ok := Filter(g, matchedUsers, g.users[index], constraints) // check the constraints
+		ok := Filter(g, matchedUsers, g.users[index], constraints, forbiddenConnections) // check the constraints
 		if ok {
 
-			matchedUsers = append(matchedUsers, g.users[index])
+			matchedUsers = append(matchedUsers, *g.users[index])
 		}
 		indices = remove(indices, index)
 	}
-	matching.matched = matchedUsers
+	matching.Users = matchedUsers
+	matching.Id = ""
 	return matching
 }
 
 //TODO
-/*func RandSubGroup(A *UserGraph, B *Usergraph, constraints []string) *Matching{
+func RandSubGroup(g *UserGraph, A []*User, B []*User, k uint, constraints []Constraint, forbiddenConnections [][]User) *Match {
 
+	/*Extract the subgraph A and B
+	    m1 = random choice k-k%2 users dans A
+	    repeat until good match
 
-}*/
+		   - m2 = random choice k/2 users dans B
+		   - check m1 + m2
+	*/
+	groupeA := g.Subgrapn(A)
+	groupeB := g.Subgrapn(B)
+	match := false
+	matchA := RandomChoices(groupeA, k/2, constraints, forbiddenConnections)
+	for !match {
+		matchB := RandomChoices(groupeB, k-k/2, constraints, forbiddenConnections)
+		ok := true
+		for _, u := range matchB.Users {
 
-func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
+			if Filter(g, matchA.Users, &u, constraints, forbiddenConnections) {
+				matchA.Users = append(matchA.Users, u)
+			} else {
+				ok = false
+				break
+			}
+		}
+		match = ok
+	}
+
+	return matchA
+
+}
+
+func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, forbidenconections [][]User) map[int]*Match {
 
 	/* Matcher without constraint
 
@@ -113,10 +178,10 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
 	   purpose: match all user in graph the g
 
 	*/
-	matching := make(map[int]*Matching)
+	matching := make(map[int]*Match)
 
 	switch SELECTOR {
-	case "random":
+	case Basic:
 		/*
 		   repeat
 		     1 - random choices k users
@@ -126,9 +191,9 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
 		*/
 		i := 0
 		for k > 0 && uint(len(g.users))/k > 0 {
-			matched := RandomChoices(g, k, constraints)
-			for _, match := range matched.matched {
-				g.RemoveUser(match)
+			matched := RandomChoices(g, k, constraints, forbidenconections)
+			for _, match := range matched.Users {
+				g.RemoveUser(&match)
 			}
 			matching[i] = matched
 			i++
@@ -139,16 +204,18 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
 
 }
 
-func GenerateTuple(users []User, forbiddenConnections [][]User, size uint) []Match {
+func GenerateTuple(users []User, connections [][]User, forbiddenConnections [][]User, size uint) []Match {
+	/*
+		         Input :
+				      users: Users for matching
+					  connections: Connections plan in the graph; first element of the tab
+	*/
 	var results []Match
-	graph := UsersToGraph(users, forbiddenConnections)
-	tuples := Matcher(graph, size, []Constraint{dejavu})
+	graph := UsersToGraph(users, connections)
+	tuples := Matcher(graph, size, []Constraint{Dejavu}, Basic, forbiddenConnections)
 	for index, matching := range tuples {
-		var matches []User
-		for _, user := range matching.matched {
-			matches = append(matches, *user)
-		}
-		results = append(results, Match{Id: strconv.Itoa(index), Users: matches})
+
+		results = append(results, Match{Id: strconv.Itoa(index), Users: matching.Users})
 	}
 	return results
 }

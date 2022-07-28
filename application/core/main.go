@@ -43,7 +43,7 @@ func generateMatchings(c *gin.Context) {
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent"})
 	}
-	tuples := matcher.GenerateTuple(req.Users, req.ForbiddenConnections, req.Size)
+	tuples := matcher.GenerateTuple(req.Users, [][]matcher.User{}, req.ForbiddenConnections, req.Size)
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
