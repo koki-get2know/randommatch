@@ -8,4 +8,7 @@ locals {
   aks_cluster_name             = "${local.resources_prefix}aksk8s"
   aks_dns_prefix               = "ps-${local.aks_cluster_name}"
   dns_zone                     = var.dns_zone
+  aks_public_ip                = "${local.resources_prefix}aksstaticpublicip"
+  aks_zones                    = ["1", "2", "3"]
+  zone_prefix_name             = "koki"
 }
