@@ -11,4 +11,5 @@ locals {
   aks_public_ip                = "${local.resources_prefix}aksstaticpublicip"
   aks_zones                    = ["1", "2", "3"]
   zone_prefix_name             = "koki"
+  tenant_owner_object_id       = "cf18f654-1a37-469b-ae37-183dbc5b1b40"
 }

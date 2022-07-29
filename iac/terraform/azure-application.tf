@@ -9,7 +9,7 @@ resource "random_uuid" "app_role_id" {}
 resource "azuread_application" "koki_app_ui" {
   display_name     = "koki-app-ui"
   sign_in_audience = "AzureADMyOrg"
-  owners           = [data.azuread_client_config.current.object_id]
+  owners           = [data.azuread_client_config.current.object_id, local.tenant_owner_object_id]
 
 
   app_role {
