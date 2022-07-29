@@ -101,6 +101,7 @@ jobs:
         az acr repository delete --name ${ACR_NAME} --image ${HELM_REPO}:${VERSION} --yes || true
         helm push matching-${VERSION}.tgz oci://${ACR_NAME}.azurecr.io/helm
         az aks get-credentials --resource-group randommatchaksrg --name randommatchaksk8s
+        kubectl apply -f ../k8s-independant-resources/namespace.yaml
         kubectl label namespace ${NAMESPACE} cert-manager.io/disable-validation=true --overwrite=true
         kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
@@ -110,8 +111,6 @@ jobs:
         kubectl get pods --namespace ${NAMESPACE}
        
 # kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml -n ${NAMESPACE}
-# # Label the ingress-basic namespace to disable resource validation
-# kubectl label namespace ${NAMESPACE} cert-manager.io/disable-validation=true
 # helm uninstall myhelmtest --namespace ${NAMESPACE}
 # kubectl get ingress --namespace randommatch
 # kubectl get clusterrolebinding --namespace randommatch
