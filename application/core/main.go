@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/koki/randommatch/matcher"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -15,6 +16,12 @@ type album struct {
 	Title  string  `json:"title"`
 	Artist string  `json:"artist"`
 	Price  float64 `json:"price"`
+}
+
+type matchingReq struct {
+	Size                 uint             `json:"size"`
+	Users                []matcher.User   `json:"users"`
+	ForbiddenConnections [][]matcher.User `json:"forbiddenConnections"`
 }
 
 // albums slice to seed record album data.
@@ -29,11 +36,22 @@ func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func generateMatchings(c *gin.Context) {
+	defer duration(track("generateMatchings"))
+	var req matchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent"})
+	}
+	tuples := matcher.GenerateTuple(req.Users, req.ForbiddenConnections, req.Size)
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
 // getAlbums responds with the list of all albums as JSON.
 func getAlbums(c *gin.Context) {
 	defer duration(track("getAlbums"))
 
-	c.IndentedJSON(http.StatusOK, albums)
+	c.JSON(http.StatusOK, albums)
 }
 
 // postAlbums adds an album from JSON received in the request body.
@@ -128,6 +146,7 @@ func main() {
 	router.GET("/albums/:id", getAlbumByID)
 	router.POST("/albums", postAlbums)
 	router.GET("/neo4j", helloFromNeo4j)
+	router.POST("/matchings", generateMatchings)
 
 	router.Run()
 

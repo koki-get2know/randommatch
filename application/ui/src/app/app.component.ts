@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 
@@ -9,7 +9,11 @@ import { SplashScreen } from '@capacitor/splash-screen';
 
 import { Storage } from '@ionic/storage';
 
-import { UserData } from './providers/user-data';
+import { MsalBroadcastService, MsalGuardConfiguration, MsalService, MSAL_GUARD_CONFIG } from '@azure/msal-angular';
+import { EventMessage, EventType, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -17,49 +21,60 @@ import { UserData } from './providers/user-data';
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   appPages = [
     {
-      title: 'Schedule',
-      url: '/app/tabs/schedule',
-      icon: 'calendar'
-    },
-    {
-      title: 'Speakers',
-      url: '/app/tabs/speakers',
+      title: 'Users',
+      url: '/users-list',
       icon: 'people'
     },
     {
-      title: 'Map',
-      url: '/app/tabs/map',
-      icon: 'map'
+      title: 'New Match',
+      url: 'matching',
+      icon: 'calendar'
     },
-    {
-      title: 'About',
-      url: '/app/tabs/about',
-      icon: 'information-circle'
-    }
+
   ];
   loggedIn = false;
   dark = false;
+  isIframe = false;
+  private readonly _destroying$ = new Subject<void>();
+
 
   constructor(
     private menu: MenuController,
     private platform: Platform,
     private router: Router,
     private storage: Storage,
-    private userData: UserData,
     private swUpdate: SwUpdate,
     private toastCtrl: ToastController,
+    @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
+    private broadcastService: MsalBroadcastService,
+    private authService: MsalService
   ) {
     this.initializeApp();
   }
 
-  async ngOnInit() {
-    this.checkLoginStatus();
-    this.listenForLoginEvents();
+  ngOnInit() {
+    this.isIframe = window !== window.parent && !window.opener;
+    this.broadcastService.msalSubject$
+    .pipe(
+      filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS),
+    )
+    .subscribe((result: EventMessage) => {
+      console.log(result);
+    });
 
-    this.swUpdate.available.subscribe(async res => {
+    this.broadcastService.inProgress$
+    .pipe(
+      filter((status: InteractionStatus) => status === InteractionStatus.None),
+      takeUntil(this._destroying$)
+    )
+    .subscribe(() => {
+      this.setLoggedIn();
+    })
+
+    this.swUpdate.versionUpdates.subscribe(async res => {
       const toast = await this.toastCtrl.create({
         message: 'Update available!',
         position: 'bottom',
@@ -89,35 +104,22 @@ export class AppComponent implements OnInit {
     });
   }
 
-  checkLoginStatus() {
-    return this.userData.isLoggedIn().then(loggedIn => {
-      return this.updateLoggedInStatus(loggedIn);
-    });
+
+  login() {
+    if (this.msalGuardConfig.authRequest){
+      this.authService.loginRedirect({...this.msalGuardConfig.authRequest} as RedirectRequest);
+    } else {
+      this.authService.loginRedirect();
+    }
   }
 
-  updateLoggedInStatus(loggedIn: boolean) {
-    setTimeout(() => {
-      this.loggedIn = loggedIn;
-    }, 300);
-  }
-
-  listenForLoginEvents() {
-    window.addEventListener('user:login', () => {
-      this.updateLoggedInStatus(true);
-    });
-
-    window.addEventListener('user:signup', () => {
-      this.updateLoggedInStatus(true);
-    });
-
-    window.addEventListener('user:logout', () => {
-      this.updateLoggedInStatus(false);
-    });
+  setLoggedIn() {
+    this.loggedIn = this.authService.instance.getAllAccounts().length > 0;
   }
 
   logout() {
-    this.userData.logout().then(() => {
-      return this.router.navigateByUrl('/app/tabs/schedule');
+    this.authService.logoutRedirect({
+      postLogoutRedirectUri: environment.redirectUri
     });
   }
 
@@ -125,5 +127,10 @@ export class AppComponent implements OnInit {
     this.menu.enable(false);
     this.storage.set('ion_did_tutorial', false);
     this.router.navigateByUrl('/tutorial');
+  }
+
+  ngOnDestroy() {
+    this._destroying$.next(undefined);
+    this._destroying$.complete();
   }
 }

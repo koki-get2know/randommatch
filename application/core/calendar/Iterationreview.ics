@@ -1,0 +1,103 @@
+BEGIN:VCALENDAR
+PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN
+VERSION:2.0
+METHOD:REQUEST
+X-MS-OLK-FORCEINSPECTOROPEN:TRUE
+BEGIN:VTIMEZONE
+TZID:Romance Standard Time
+BEGIN:STANDARD
+DTSTART:16011028T030000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:16010325T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;CN="Ivan TCHOMGUE";RSVP=TRUE:mailto:ivan.tchomguemieguem@amadeus.com
+ATTENDEE;CN="Ivan Yahoo";ROLE=OPT-PARTICIPANT;RSVP=TRUE:mailto
+	:tmibkage@gmail.com
+CLASS:PUBLIC
+CREATED:20220722T120033Z
+DESCRIPTION:_______________________________________________________________
+	_________________ \n\nJoin Microsoft Teams Meeting <https://teams.microsof
+	t.com/l/meetup-join/19%3ameeting_NzU4NTRmNDEtZGE3OS00OTlkLTllYTgtNTU3ZTQwM
+	2MwNDcz%40thread.v2/0?context=%7b%22Tid%22%3a%22b3f4f7c2-72ce-4192-aba4-d6
+	c7719b5766%22%2c%22Oid%22%3a%22c29e2ee6-8ab7-489d-82ce-faa19fc2d892%22%7d>
+	  \n\nLearn more about Teams <https://aka.ms/JoinTeamsMeeting>  | Meeting 
+	options <https://teams.microsoft.com/meetingOptions/?organizerId=c29e2ee6-
+	8ab7-489d-82ce-faa19fc2d892&tenantId=b3f4f7c2-72ce-4192-aba4-d6c7719b5766&
+	threadId=19_meeting_NzU4NTRmNDEtZGE3OS00OTlkLTllYTgtNTU3ZTQwM2MwNDcz@threa
+	d.v2&messageId=0&language=en-US>  \n\n____________________________________
+	____________________________________________ \n\n \n\n
+DTEND;TZID="Romance Standard Time":20220722T151500
+DTSTAMP:20220722T102751Z
+DTSTART;TZID="Romance Standard Time":20220722T141500
+LAST-MODIFIED:20220722T120033Z
+LOCATION:Microsoft Teams Meeting
+ORGANIZER;CN="Bro Bizz":mailto:brobizzness@gmail.com
+PRIORITY:5
+SEQUENCE:80
+SUMMARY;LANGUAGE=en-ie:My Iteration review
+TRANSP:OPAQUE
+UID:040000008200E00074C5B7101A82E00800000000C08DBB69C134D601000000000000000
+	010000000C4871594594C584CBCDA2782D939788C
+X-ALT-DESC;FMTTYPE=text/html:<html xmlns:v="urn:schemas-microsoft-com:vml" 
+	xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-mic
+	rosoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/
+	12/omml" xmlns="http://www.w3.org/TR/REC-html40"><head><meta name=Generato
+	r content="Microsoft Word 15 (filtered medium)"><style><!--\n/* Font Defin
+	itions */\n@font-face\n	{font-family:"Cambria Math"\;\n	panose-1:2 4 5 3 5
+	 4 6 3 2 4\;}\n@font-face\n	{font-family:Calibri\;\n	panose-1:2 15 5 2 2 2
+	 4 3 2 4\;}\n@font-face\n	{font-family:"Segoe UI"\;\n	panose-1:2 11 5 2 4 
+	2 4 2 2 3\;}\n@font-face\n	{font-family:"Segoe UI Semibold"\;\n	panose-1:2
+	 11 7 2 4 2 4 2 2 3\;}\n/* Style Definitions */\np.MsoNormal\, li.MsoNorma
+	l\, div.MsoNormal\n	{margin:0cm\;\n	font-size:11.0pt\;\n	font-family:"Cali
+	bri"\,sans-serif\;}\na:link\, span.MsoHyperlink\n	{mso-style-priority:99\;
+	\n	color:#0563C1\;\n	text-decoration:underline\;}\nspan.EmailStyle18\n	{ms
+	o-style-type:personal-compose\;\n	font-family:"Calibri"\,sans-serif\;\n	co
+	lor:windowtext\;}\n.MsoChpDefault\n	{mso-style-type:export-only\;\n	font-s
+	ize:10.0pt\;}\n@page WordSection1\n	{size:612.0pt 792.0pt\;\n	margin:72.0p
+	t 72.0pt 72.0pt 72.0pt\;}\ndiv.WordSection1\n	{page:WordSection1\;}\n--></
+	style><!--[if gte mso 9]><xml>\n<o:shapedefaults v:ext="edit" spidmax="102
+	6" />\n</xml><![endif]--><!--[if gte mso 9]><xml>\n<o:shapelayout v:ext="e
+	dit">\n<o:idmap v:ext="edit" data="1" />\n</o:shapelayout></xml><![endif]-
+	-></head><body lang=EN-IE link="#0563C1" vlink="#954F72" style='word-wrap:
+	break-word'><div class=WordSection1><p class=MsoNormal><span lang=EN-US st
+	yle='color:gray'>_________________________________________________________
+	_______________________</span><span lang=EN-US> <o:p></o:p></span></p><div
+	><div style='margin-top:18.0pt\;margin-bottom:7.5pt'><p class=MsoNormal><s
+	pan lang=EN-US style='font-family:"Segoe UI"\,sans-serif\;color:#252424'><
+	a href="https://teams.microsoft.com/l/meetup-join/19%3ameeting_NzU4NTRmNDE
+	tZGE3OS00OTlkLTllYTgtNTU3ZTQwM2MwNDcz%40thread.v2/0?context=%7b%22Tid%22%3
+	a%22b3f4f7c2-72ce-4192-aba4-d6c7719b5766%22%2c%22Oid%22%3a%22c29e2ee6-8ab7
+	-489d-82ce-faa19fc2d892%22%7d" target="_blank"><span style='font-size:13.5
+	pt\;font-family:"Segoe UI Semibold"\,sans-serif\;color:#6264A7'>Join Micro
+	soft Teams Meeting</span></a> <o:p></o:p></span></p></div><p class=MsoNorm
+	al><span lang=EN-US style='font-family:"Segoe UI"\,sans-serif\;color:#2524
+	24'><a href="https://aka.ms/JoinTeamsMeeting" target="_blank"><span style=
+	'font-size:9.0pt\;color:#6264A7\;text-decoration:none'>Learn more about Te
+	ams</span></a> | <a href="https://teams.microsoft.com/meetingOptions/?orga
+	nizerId=c29e2ee6-8ab7-489d-82ce-faa19fc2d892&amp\;tenantId=b3f4f7c2-72ce-4
+	192-aba4-d6c7719b5766&amp\;threadId=19_meeting_NzU4NTRmNDEtZGE3OS00OTlkLTl
+	lYTgtNTU3ZTQwM2MwNDcz@thread.v2&amp\;messageId=0&amp\;language=en-US" targ
+	et="_blank"><span style='font-size:9.0pt\;color:#6264A7\;text-decoration:n
+	one'>Meeting options</span></a> <o:p></o:p></span></p></div><div><p class=
+	MsoNormal><span lang=EN-US style='color:gray'>____________________________
+	____________________________________________________</span><span lang=EN-U
+	S> <o:p></o:p></span></p></div><p class=MsoNormal><span lang=EN-US><o:p>&n
+	bsp\;</o:p></span></p></div></body></html>
+X-MICROSOFT-CDO-BUSYSTATUS:BUSY
+X-MICROSOFT-CDO-IMPORTANCE:1
+X-MICROSOFT-DISALLOW-COUNTER:FALSE
+X-MS-OLK-APPTLASTSEQUENCE:80
+X-MS-OLK-APPTSEQTIME:20220722T102751Z
+X-MS-OLK-AUTOFILLLOCATION:FALSE
+X-MS-OLK-CONFTYPE:0
+END:VEVENT
+END:VCALENDAR

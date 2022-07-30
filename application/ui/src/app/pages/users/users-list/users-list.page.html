@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>users-list</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Searchbar with cancel button always shown -->
+  <ion-searchbar showCancelButton="always"></ion-searchbar>
+
+  <ion-button>
+    <ion-icon lazy="true" slot="start" name="person-add-outline"></ion-icon>
+    <ion-label slot="end">Upload users data</ion-label>
+    <input type="file" (change)="uploadCsv($event)" id="file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+  </ion-button>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-list>
+          <ion-item-group *ngFor="let group of usersgroups">
+            <ion-item-divider sticky>
+              <ion-label>
+                {{group.groupe}}
+              </ion-label>
+            </ion-item-divider>
+
+            <ion-item-sliding *ngFor="let user of group.users">
+              <ion-item routerLink="/app/tabs/schedule/session/">
+                <ion-avatar slot="start">
+                  <img [src]="user.avatar" alt="">
+                </ion-avatar>
+                <ion-label>
+                  <h3>{{user.name}}</h3>
+                  <p>
+                    {{user.groupe}}
+                  </p>
+                </ion-label>
+                
+                <ion-button color="danger">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </ion-item>
+              <ion-item-options>
+                <ion-item-option color="favorite">
+                  Favorite
+                </ion-item-option>
+                <ion-item-option color="danger">
+                  Remove
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ion-item-group>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</ion-content>

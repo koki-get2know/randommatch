@@ -3,7 +3,7 @@ global:
 
 ingress:
     labels: {}
-    host: ''
+    host: 'koki.sheno.ca'
     tlsSecretName: ''
 
 ui:
@@ -37,3 +37,8 @@ matchdb:
         limits:
             cpu: 1000m
             memory: 2Gi
+# https://artifacthub.io/packages/helm/cert-manager/cert-manager
+cert-manager:
+    installCRDs: false # since helm3 is not aware of dep order crds will be installed with kubectl before the chart
+    nodeSelector:
+        "kubernetes.io/os": linux
