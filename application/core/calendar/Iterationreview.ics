@@ -23,7 +23,7 @@ ATTENDEE;CN="Ivan TCHOMGUE";RSVP=TRUE:mailto:ivan.tchomguemieguem@amadeus.com
 ATTENDEE;CN="Ivan Yahoo";ROLE=OPT-PARTICIPANT;RSVP=TRUE:mailto
 	:tmibkage@gmail.com
 CLASS:PUBLIC
-CREATED:20220722T120033Z
+CREATED:20220830T120033Z
 DESCRIPTION:_______________________________________________________________
 	_________________ \n\nJoin Microsoft Teams Meeting <https://teams.microsof
 	t.com/l/meetup-join/19%3ameeting_NzU4NTRmNDEtZGE3OS00OTlkLTllYTgtNTU3ZTQwM
@@ -35,10 +35,10 @@ DESCRIPTION:_______________________________________________________________
 	threadId=19_meeting_NzU4NTRmNDEtZGE3OS00OTlkLTllYTgtNTU3ZTQwM2MwNDcz@threa
 	d.v2&messageId=0&language=en-US>  \n\n____________________________________
 	____________________________________________ \n\n \n\n
-DTEND;TZID="Romance Standard Time":20220722T151500
-DTSTAMP:20220722T102751Z
-DTSTART;TZID="Romance Standard Time":20220722T141500
-LAST-MODIFIED:20220722T120033Z
+DTEND;TZID="Romance Standard Time":20220830T151500
+DTSTAMP:20220830T102751Z
+DTSTART;TZID="Romance Standard Time":20220830T141500
+LAST-MODIFIED:20220830T120033Z
 LOCATION:Microsoft Teams Meeting
 ORGANIZER;CN="Bro Bizz":mailto:brobizzness@gmail.com
 PRIORITY:5
@@ -96,7 +96,7 @@ X-MICROSOFT-CDO-BUSYSTATUS:BUSY
 X-MICROSOFT-CDO-IMPORTANCE:1
 X-MICROSOFT-DISALLOW-COUNTER:FALSE
 X-MS-OLK-APPTLASTSEQUENCE:80
-X-MS-OLK-APPTSEQTIME:20220722T102751Z
+X-MS-OLK-APPTSEQTIME:20220830T102751Z
 X-MS-OLK-AUTOFILLLOCATION:FALSE
 X-MS-OLK-CONFTYPE:0
 END:VEVENT
