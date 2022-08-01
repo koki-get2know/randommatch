@@ -17,48 +17,48 @@ export class UsersListPage implements OnInit {
 
   usersgroups = [
     {
-      groupe: "Groupe A",
-      nomber:6,
+      group: "group A",
+      number:6,
       users: [
         {
         name: "Frank tchatseu",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
       {
         name: "Yannick Youmie",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
       {
         name: "Prestilien Pindoh",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
       ]
     },
     {
-      groupe: "Groupe B",
-      nomber:6,
+      group: "group B",
+      number:6,
       users: [
         {
         name: "Frank tchatseu",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
       {
         name: "Yannick Youmie",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
       {
         name: "Prestilien Pindoh",
-        groupe: "Service client2",
+        group: "Service client2",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
@@ -74,25 +74,20 @@ export class UsersListPage implements OnInit {
   formData.append("photo", photo, photo.name);
   console.log( photo.name );
   this.userService.uploadCsv( formData )
-    .then( resp => {
+    .subscribe( resp => {
       console.log( resp );
       this.getUsers();
         
-      } )
-    .catch( err => {
-      console.log( err );
-    });
+      } );
     
  }
   getUsers() {
     this.userService.get()
-    .then( resp => {
+    .subscribe( resp => {
       console.log( resp );
       //this.usersgroups = resp;
-      } )
-    .catch( err => {
-      console.log( err );
-    });
+      } );
+
   }
 
 }

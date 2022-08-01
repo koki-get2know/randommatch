@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	//"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/koki/randommatch/matcher"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -41,7 +42,8 @@ func generateMatchings(c *gin.Context) {
 	var req matchingReq
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent" + err.Error()})
+		return
 	}
 	tuples := matcher.GenerateTuple(req.Users, [][]matcher.User{}, matcher.Basic, req.ForbiddenConnections, req.Size, []matcher.User{}, []matcher.User{}, 0, 0)
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
@@ -140,6 +142,11 @@ func helloNeo4j(uri, username, password string) (string, error) {
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{"*"},
+		MaxAge:       12 * time.Hour,
+	}))
 	router.StaticFile("/api", "./api/swagger.yaml")
 	router.GET("health-check", getHealthCheck)
 	router.GET("/albums", getAlbums)

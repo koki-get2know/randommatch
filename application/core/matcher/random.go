@@ -239,7 +239,6 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 		i := 0
 		if matchSizeB > 0 && matchSizeA > 0 {
 			for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
-
 				matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB, interGroupConstraints, innerGroupConstraints, forbidenconections)
 				if matched != nil {
 					for _, match := range matched.Users {
