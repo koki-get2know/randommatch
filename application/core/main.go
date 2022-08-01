@@ -31,6 +31,8 @@ var albums = []album{
 	{ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
 }
 
+var numberOfMatching = 0
+
 // getAlbums responds with the list of all albums as JSON.
 func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
@@ -44,7 +46,8 @@ func generateMatchings(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent"})
 	}
 	tuples := matcher.GenerateTuple(req.Users, req.ForbiddenConnections, req.Size)
-	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+	numberOfMatching++
+	c.JSON(http.StatusCreated, gin.H{"data": tuples, "numberOfMatching": numberOfMatching})
 }
 
 // getAlbums responds with the list of all albums as JSON.

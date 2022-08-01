@@ -3,7 +3,7 @@ module github.com/koki/randommatch
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go v1.44.59
+	github.com/aws/aws-sdk-go v1.44.66
 	github.com/cheekybits/genny v1.0.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.3
