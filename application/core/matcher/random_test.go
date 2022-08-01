@@ -23,11 +23,11 @@ func TestRanSubGroup(t *testing.T) {
 	g.String()
 	var forbiddenConnections [][]User
 	interConstraint := []Constraint{Dejavu}
-	A := []*User{&User{"5"}}
+	A := []*User{{"5"}}
 	subA := g.Subgraph(A)
 	fmt.Println("Sous groupe A")
 	subA.String()
-	B := []*User{&User{"3"}}
+	B := []*User{{"3"}}
 	fmt.Println("Sous groupe B")
 	subB := g.Subgraph(B)
 	subB.String()
@@ -43,7 +43,7 @@ func TestMatcher1(t *testing.T) {
 
 	g.String()
 	var forbiddenConnections [][]User
-	A := []User{User{"2"}, User{"1"}}
+	A := []User{{"2"}, {"1"}}
 	forbiddenConnections = append(forbiddenConnections, A)
 	constraint := []Constraint{Dejavu}
 	SELECTOR := Basic
@@ -85,11 +85,11 @@ func TestMatcher2(t *testing.T) {
 
 	G.String()
 	var forbiddenConnections [][]User
-	A := []*User{&User{"4"}, &User{"5"}, &User{"6"}}
-	B := []*User{&User{"1"}, &User{"2"}, &User{"3"}}
+	A := []*User{{"5"}}
+	B := []*User{{"1"}, {"2"}}
 	interConstraint := []Constraint{Dejavu}
 	SELECTOR := Group
-	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{})
+	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{Dejavu})
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
@@ -107,10 +107,10 @@ func TestMatcher2(t *testing.T) {
 
 func TestGenTuple(t *testing.T) {
 
-	users := []User{User{"1"}, User{"2"}, User{"3"}, User{"4"}, User{"5"}, User{"6"}}
+	users := []User{{"1"}, {"2"}, {"3"}, {"4"}, {"5"}, {"6"}}
 	var connections, forbiddenConnections [][]User
-	A := []User{User{"4"}, User{"5"}, User{"6"}}
-	B := []User{User{"1"}, User{"2"}, User{"3"}}
+	A := []User{{"4"}, {"5"}, {"6"}}
+	B := []User{{"1"}, {"2"}, {"3"}}
 
 	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 0, A, B, 1, 1)
 

@@ -132,8 +132,8 @@ func UsersToGraph(users []User, connections [][]User) *UserGraph {
 	*/
 	var graph UserGraph
 	for _, user := range users {
-		user2 := user
-		graph.AddUser(&user2)
+		user := user
+		graph.AddUser(&user)
 	}
 	for _, usersAlreadyMatch := range connections {
 		if len(usersAlreadyMatch) > 0 {
