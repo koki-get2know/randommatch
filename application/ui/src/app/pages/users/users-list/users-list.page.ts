@@ -6,59 +6,55 @@ import { UsersService } from '../../../services/users.service';
   templateUrl: './users-list.page.html',
   styleUrls: ['./users-list.page.scss'],
 })
-export class UsersListPage implements OnInit {
+export class UsersListPage {
 
-  constructor(private userService:UsersService,) { }
+  constructor(private userService: UsersService) { }
 
-  ngOnInit () {
-    console.log( "init" );
-    this.getUsers();
-  }
 
   usersgroups = [
     {
-      groupe: "Groupe A",
-      nomber:6,
+      group: "group A",
+      number:6,
       users: [
         {
         name: "Frank tchatseu",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
       {
         name: "Yannick Youmie",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
       {
         name: "Prestilien Pindoh",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
       ]
     },
     {
-      groupe: "Groupe B",
-      nomber:6,
+      group: "group B",
+      number:6,
       users: [
         {
         name: "Frank tchatseu",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
       },
       {
         name: "Yannick Youmie",
-        groupe: "Service client",
+        group: "Service client",
         phone: "696812610",
         avatar:"/assets/img/speakers/rabbit.jpg"
       },
       {
         name: "Prestilien Pindoh",
-        groupe: "Service client2",
+        group: "Service client2",
         phone: "696812610",
         avatar:"/assets/img/speakers/puppy.jpg"
       },
@@ -66,33 +62,15 @@ export class UsersListPage implements OnInit {
     },
   ];
 
-  uploadCsv ( fileChangeEvent ) {
-    
-  const photo = fileChangeEvent.target.files[ 0 ];
-    
-  let formData = new FormData();
-  formData.append("photo", photo, photo.name);
-  console.log( photo.name );
-  this.userService.uploadCsv( formData )
-    .then( resp => {
-      console.log( resp );
-      this.getUsers();
-        
-      } )
-    .catch( err => {
-      console.log( err );
-    });
-    
+  uploadCsv ( event ) {
+    for (const file of event.target.files) {
+      const fileData = new FormData();
+      fileData.append("file", file);
+      this.userService.uploadUsersFile( fileData )
+        .subscribe( resp => {
+          console.log( resp );            
+        });
+    }
  }
-  getUsers() {
-    this.userService.get()
-    .then( resp => {
-      console.log( resp );
-      //this.usersgroups = resp;
-      } )
-    .catch( err => {
-      console.log( err );
-    });
-  }
 
 }

@@ -61,18 +61,7 @@ const routes: Routes = [
         path: '',
         redirectTo: '/app/tabs/schedule',
         pathMatch: 'full'
-      },
-
-      {
-        path: 'users-list',
-        children: [
-          {
-            path: '',
-            loadChildren: () => import('../users/users-list/users-list.module').then(m => m.UsersListPageModule)
-          }
-        ]
-      },
-      
+      },      
     ]
   }
 ];

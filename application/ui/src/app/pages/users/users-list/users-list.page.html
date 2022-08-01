@@ -1,17 +1,19 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>users-list</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Users</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <!-- Searchbar with cancel button always shown -->
-  <ion-searchbar showCancelButton="always"></ion-searchbar>
-
-  <ion-button>
-    <ion-icon lazy="true" slot="start" name="person-add-outline"></ion-icon>
-    <ion-label slot="end">Upload users data</ion-label>
-    <input type="file" (change)="uploadCsv($event)" id="file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+  <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
+  <input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="ion-hide" (change)="uploadCsv($event)" #csvFileUpload>
+  <ion-button shape="round" fill="clear" (click)="csvFileUpload.click()" >
+    <ion-icon slot="start" name="document-outline"></ion-icon>
+    upload users
   </ion-button>
   <ion-grid>
     <ion-row>
@@ -20,7 +22,7 @@
           <ion-item-group *ngFor="let group of usersgroups">
             <ion-item-divider sticky>
               <ion-label>
-                {{group.groupe}}
+                {{group.group}}
               </ion-label>
             </ion-item-divider>
 
@@ -32,13 +34,9 @@
                 <ion-label>
                   <h3>{{user.name}}</h3>
                   <p>
-                    {{user.groupe}}
+                    {{user.group}}
                   </p>
                 </ion-label>
-                
-                <ion-button color="danger">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
               </ion-item>
               <ion-item-options>
                 <ion-item-option color="favorite">

@@ -1,37 +1,37 @@
 package convert
 
 import (
-	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"os"
 	"strconv"
 	"strings"
 )
 
 type User struct {
-	UserId                 string
-	Name                   string
-	Email                  string
-	Groups                 []string
-	Genre                  string
-	Birthday               string
-	Hobbies                []string
-	MatchPreference        []string
-	MatchPreferenceTime    []string
-	PositionHeld           string
-	MultiMatch             bool
-	PhoneNumber            string
-	Departement            string
-	Location               string
-	Seniority              string
-	Role                   string
-	NumberOfMatching       int
-	NumberMatchingAccepted int
-	NumberMatchingDeclined int
-	AverageMatchingRate    int
+	UserId                 string   `json:"userId"`
+	Name                   string   `json:"name"`
+	Email                  string   `json:"email"`
+	Groups                 []string `json:"groups"`
+	Gender                 string   `json:"gender"`
+	Birthday               string   `json:"birthday"`
+	Hobbies                []string `json:"hobbies"`
+	MatchPreference        []string `json:"matchPreference"`
+	MatchPreferenceTime    []string `json:"matchPreferenceTime"`
+	PositionHeld           string   `json:"positionHeld"`
+	MultiMatch             bool     `json:"multiMatch"`
+	PhoneNumber            string   `json:"phoneNumber"`
+	Department             string   `json:"department"`
+	Location               string   `json:"location"`
+	Seniority              string   `json:"seniority"`
+	Role                   string   `json:"role"`
+	NumberOfMatching       int      `json:"numberOfMatching"`
+	NumberMatchingAccepted int      `json:"numberMatchingAccepted"`
+	NumberMatchingDeclined int      `json:"numberMatchingDeclined"`
+	AverageMatchingRate    int      `json:"averageMatchingRate"`
 	//SubjectOfInterest    []string
 }
 
@@ -51,70 +51,84 @@ func randStringRunes(n int) string {
 	return string(b)
 }*/
 
-func ConvertRawDataToJson(filename string) []byte {
-
-	csvFile, err := os.Open(filename)
+func csvReaderToUsers(r io.Reader) ([]User, error) {
+	csvReader := csv.NewReader(r)
+	records, err := csvReader.ReadAll()
 	if err != nil {
 		fmt.Println(err)
-	}
-	defer csvFile.Close()
-
-	// Skip first row data
-	row1, err := bufio.NewReader(csvFile).ReadSlice('\n')
-	if err != nil {
-		fmt.Println(err)
-	}
-	_, err = csvFile.Seek(int64(len(row1)), io.SeekStart)
-	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
-	// Read data
-	reader := csv.NewReader(csvFile)
-	reader.FieldsPerRecord = -1
+	var header []string
 
-	csvData, err := reader.ReadAll()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if len(records) > 0 {
+		// skip the header
+		header = records[0]
+		records = records[1:]
 	}
-
-	var user User
+	if len(header) < 15 {
+		return nil, fmt.Errorf("header and content not matching")
+	}
 	var users []User
+	for _, record := range records {
+		user := User{
+			UserId:              "", //randStringRunes(32)
+			Name:                record[0],
+			Email:               record[1],
+			Groups:              strings.Split(record[2], "-"),
+			Gender:              record[3],
+			Birthday:            record[4],
+			Hobbies:             strings.Split(record[5], "-"),
+			MatchPreference:     strings.Split(record[6], "-"),
+			MatchPreferenceTime: strings.Split(record[7], "-"),
+			PositionHeld:        record[8],
+			PhoneNumber:         record[10],
+			Department:          record[11],
+			Location:            record[12],
+			Seniority:           record[13],
+			Role:                record[14],
+		}
 
-	// Create a json data
-	for _, each := range csvData {
-		user.UserId = "" //randStringRunes(32)
-		user.Name = each[0]
-		user.Email = each[1]
-		user.Groups = strings.Split(each[2], "-") //[]string{each[4]}
-		user.Genre = each[3]
-		user.Birthday = each[4]
-		user.Hobbies = strings.Split(each[5], "-")             //[]string{each[7]}
-		user.MatchPreference = strings.Split(each[6], "-")     //[]string{each[8]}
-		user.MatchPreferenceTime = strings.Split(each[7], "-") //[]string{each[9]}
-		user.PositionHeld = each[8]
-		user.MultiMatch, _ = strconv.ParseBool(each[9])
-		user.PhoneNumber = each[10]
-		user.Departement = each[11]
-		user.Location = each[12]
-		user.Seniority = each[13]
-		user.Role = each[14]
-
-		user.NumberOfMatching = 0
-		user.NumberMatchingAccepted = 0
-		user.NumberMatchingDeclined = 0
-		user.AverageMatchingRate = 0
+		user.MultiMatch, err = strconv.ParseBool(record[9])
+		if err != nil {
+			fmt.Printf("Warning wrong boolean string value passed for user %v, value passed: %v\n", user.Name, user.MultiMatch)
+			user.MultiMatch = false
+		}
 
 		users = append(users, user)
 	}
+	return users, nil
+}
 
+func CsvToUsers(csvFile *multipart.FileHeader) ([]User, error) {
+	openedFile, err := csvFile.Open()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return csvReaderToUsers(openedFile)
+}
+
+func ConvertRawDataToJson(filepath string) []byte {
+
+	csvFile, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println(err)
+		return []byte{}
+	}
+	defer csvFile.Close()
+	// Read data
+	users, err := csvReaderToUsers(csvFile)
+	if err != nil {
+		fmt.Println(err)
+		return []byte{}
+	}
 	// Convert to JSON
 	jsonData, err := json.Marshal(users)
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return []byte{}
 	}
 
 	return jsonData
