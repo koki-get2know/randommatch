@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/matcher"
@@ -92,10 +93,15 @@ func emailMatches(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
+
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	adminEmail := claims["preferred_username"].(string)
+
 	go func() {
 		for _, match := range req.Matches {
-			match2 := match
-			calendar.SendInvite(&match2)
+			match := match
+			calendar.SendInvite(&match, adminEmail)
+			break // send only once for now
 		}
 	}()
 	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})

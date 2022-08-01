@@ -4,40 +4,79 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"time"
 
+	ics "github.com/arran4/golang-ical"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/google/uuid"
 	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
 
-func gomailing(sender, subject, htmlBody string) ([]byte, error) {
+func generateIcsInvitation(sender, subject, description string, attendees []string) ([]byte, error) {
+	startAt := time.Now()
+	language := "en-us"
+	location := "It's up to you"
+
+	cal := ics.NewCalendar()
+	cal.SetMethod(ics.MethodRequest)
+	event := cal.AddEvent(uuid.New().String())
+	event.SetCreatedTime(time.Now())
+	event.SetDtStampTime(time.Now())
+	event.SetModifiedAt(time.Now())
+	event.SetStartAt(startAt)
+	event.SetEndAt(startAt.Add(30 * time.Minute))
+	event.SetSummary(subject, &ics.KeyValues{Key: string(ics.ParameterLanguage), Value: []string{language}})
+	event.SetLocation(location)
+	event.SetDescription(description)
+	event.SetOrganizer("mailto:"+sender, ics.WithCN("Koki Admin"))
+	event.SetTimeTransparency(ics.TransparencyOpaque)
+
+	for _, attendee := range attendees {
+		event.AddAttendee(attendee, ics.CalendarUserTypeIndividual, ics.ParticipationStatusNeedsAction, ics.ParticipationRoleReqParticipant, ics.WithRSVP(true))
+	}
+	event.SetSequence(1)
+	reminder := event.AddAlarm()
+	reminder.SetAction(ics.ActionDisplay)
+	reminder.SetTrigger("-P15M")
+	fmt.Println(cal.Serialize())
+	filename := "invite.ics"
 	m := gomail.NewMessage()
 
+	m.SetHeader("subject", subject)
 	m.SetHeader("From", fmt.Sprintf("Koki Admin <%v>", sender))
-	m.SetHeader("To", "tmibkage@gmail.com")
-	m.SetAddressHeader("Cc", "brobizzness@gmail.com", "Dan")
-	m.SetHeader("Subject", subject)
-	m.SetBody("text/html", htmlBody)
-	m.Attach("calendar/Iterationreview.ics")
+	m.SetHeader("To", strings.Join(attendees, ", "))
+	m.SetHeader("Content-Description", filename)
+	m.SetHeader("Content-class", "urn:content-classes:calendarmessage")
+	m.SetHeader("Filename", filename)
+	m.SetHeader("Path", filename)
+
+	//m.SetBody("text/plain", description)
+	m.SetBody("text/plain", description)
+	m.AddAlternative(`text/calendar; method="REQUEST"; name="invite.ics"`,
+		cal.Serialize(),
+		gomail.SetPartEncoding(gomail.Base64))
+
+	//m.Attach()
 	var emailRaw bytes.Buffer
 	_, err := m.WriteTo(&emailRaw)
 	if err != nil {
 		fmt.Println(err)
-		return nil, err
 	}
 	fmt.Printf("m: %v\n", emailRaw.String())
 	return emailRaw.Bytes(), nil
 }
 
-func SendInvite(match *matcher.Match) {
+func SendInvite(match *matcher.Match, adminEmail string) {
 
 	const (
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
-		sender = "brobizzness@gmail.com"
+		sender = "koki.get2know@gmail.com"
 
 		// Specify a configuration set. To use a configuration
 		// set, comment the next line and line 92.
@@ -50,15 +89,18 @@ func SendInvite(match *matcher.Match) {
 	for _, user := range match.Users {
 		userIds = append(userIds, user.UserId)
 	}
-	messageHtmlBody := fmt.Sprintf(`<p>Hello %v<br>
+
+	description := fmt.Sprintf(`Hello %v,
 	You have been matched to connect during this cycle.
-	</p>
-	<p>
-	Please accept (one of the) proposed invite(s). In case of conflict, contact your matching peer(s) to arrange the Koki conversation another time.
-	</p>
+	
+	Please accept (one of the) proposed invite(s).
+	In case of conflict, contact your matching peer(s) to arrange the Koki conversation another time.
+	
 	Happy Koki!`, strings.Join(userIds, ", "))
 
-	rawMessage, err := gomailing(sender, subject, messageHtmlBody)
+	attendees := []string{adminEmail}
+
+	rawMessage, err := generateIcsInvitation(sender, subject, description, attendees)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -66,8 +108,9 @@ func SendInvite(match *matcher.Match) {
 	// Create a new session in the us-east-1 region.
 	// Replace us-east-1 with the AWS Region you're using for Amazon SES.
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
-	)
+		Region:      aws.String("us-east-1"),
+		Credentials: credentials.NewStaticCredentials("AKIAUQ5SMTNQKJH7CSR5", "7+W1cAOcLNVVDQpCDI3Ips7QDiNSXoC1Ej6Q/LZB", ""),
+	})
 
 	if err != nil {
 		fmt.Println(err)
@@ -82,11 +125,8 @@ func SendInvite(match *matcher.Match) {
 		Source:     aws.String(sender),
 	}
 
-	// Attempt to send the email.
-	//result, err := svc.SendEmail(input)
 	result, err := svc.SendRawEmail(input)
 
-	// Display error messages if they occur.
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -108,10 +148,5 @@ func SendInvite(match *matcher.Match) {
 		return
 	}
 
-	fmt.Println("Email Sent")
-	fmt.Println(result)
-	// Authentication.
-	//auth := smtp.PlainAuth("ses-smtp-user.20220720-191343", "AKIAUQ5SMTNQKJH7CSR5", "BMiZx6u/2IC33GIt9fYQiz66c5+MC60fl/OixMatMCC/", smtpHost)
-	//auth := smtp.PlainAuth("ses-smtp-user.20220720-191343", "AKIAUQ5SMTNQEKMPO3C5", "BMBwPqGwY88P/unnpJdtilHsFImWaQ7y+J2cuCT2vwGP", smtpHost)
-
+	fmt.Println("Email Sent", result)
 }
