@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/jinzhu/copier"
 )
 
 // TODO the selector paramater should be a config variable
@@ -11,6 +13,7 @@ type Selector uint8
 
 const (
 	Basic Selector = iota
+	Group
 )
 
 type Constraint uint8
@@ -25,7 +28,13 @@ type Match struct {
 	Users []User `json:"users"`
 }
 
+//TODO integrate  the constraint structure in code
 type ConstraintParams[T any] struct { // Type parameters for constraint
+	Params map[Constraint][]T
+}
+
+//TODO integrate the selector structure in code
+type SelectorParams[T any] struct { // Type parameters for constraint
 	Params map[Constraint][]T
 }
 
@@ -136,40 +145,56 @@ func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConn
 	return matching
 }
 
-//TODO
-func RandSubGroup(g *UserGraph, A []*User, B []*User, k uint, constraints []Constraint, forbiddenConnections [][]User) *Match {
+func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, matchSizeB uint, interGroupConstraints []Constraint, innerGroupConstraints []Constraint, forbiddenConnections [][]User) *Match {
 
-	/*Extract the subgraph A and B
-	    m1 = random choice k-k%2 users dans A
-	    repeat until good match
+	/*
+		   input :
+		       g : users graph
+			   groupeA : subgraph of g A
+			   groupeB : subgraph of g B
+			   matchSizeA : number of person to take in A
+			   matchSizeB : number of person to take in B
+			   interGroupConstraint : constraints for matching between groupe A and B
+			   innerGroupConstraint : constraints for matching into a group
+		       forbedenConnections : parameter of constraint forbidenconnection; it contains the user who cannot match together
 
-		   - m2 = random choice k/2 users dans B
-		   - check m1 + m2
+		   purpose : match users' groupeA with users' groupeB according to the innerGroupConstraint and interGroupConstraint
+		   output : match of size matchSizeA + matchSizeB
 	*/
-	groupeA := g.Subgrapn(A)
-	groupeB := g.Subgrapn(B)
+	matchA := &Match{}
 	match := false
-	matchA := RandomChoices(groupeA, k/2, constraints, forbiddenConnections)
-	for !match {
-		matchB := RandomChoices(groupeB, k-k/2, constraints, forbiddenConnections)
-		ok := true
-		for _, u := range matchB.Users {
 
-			if Filter(g, matchA.Users, &u, constraints, forbiddenConnections) {
-				matchA.Users = append(matchA.Users, u)
-			} else {
-				ok = false
-				break
+	if uint(len(groupeA.users)) >= matchSizeA && uint(len(groupeB.users)) >= matchSizeB {
+
+		matchA = RandomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
+		users := []User{}
+		gb := &UserGraph{}
+		copier.Copy(&users, &matchA.Users)
+		copier.Copy(gb, groupeB)
+		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
+			matchB := RandomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
+			ok := true
+
+			for _, u := range matchB.Users {
+
+				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) {
+					matchA.Users = append(matchA.Users, u)
+
+				} else {
+					ok = false
+
+					break
+				}
+				gb.RemoveUser(&u)
 			}
+			match = ok
 		}
-		match = ok
 	}
-
 	return matchA
 
 }
 
-func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, forbidenconections [][]User) map[int]*Match {
+func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, forbidenconections [][]User, A []*User, B []*User, matchSizeA uint, matchSizeB uint, interGroupConstraints []Constraint, innerGroupConstraints []Constraint) map[int]*Match {
 
 	/* Matcher without constraint
 
@@ -189,30 +214,90 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 		   until is possible to take k users in graph
 
 		*/
+
 		i := 0
 		for k > 0 && uint(len(g.users))/k > 0 {
 			matched := RandomChoices(g, k, constraints, forbidenconections)
 			for _, match := range matched.Users {
 				g.RemoveUser(&match)
+
 			}
 			matching[i] = matched
 			i++
 		}
+	case Group:
+		/*Extract the subgraph A and B
+		    m1 = random choice  users dans A
+		    repeat until good match
+
+			   - m2 = random choice  users dans B
+			   - check if m1 + m2 can be match
+		*/
+		groupA := g.Subgraph(A)
+		groupB := g.Subgraph(B)
+
+		i := 0
+		if matchSizeB > 0 && matchSizeA > 0 {
+			for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
+
+				matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB, interGroupConstraints, innerGroupConstraints, forbidenconections)
+				if matched != nil {
+					for _, match := range matched.Users {
+						groupA.RemoveUser(&match)
+						groupB.RemoveUser(&match)
+
+					}
+				}
+
+				matching[i] = matched
+				i++
+
+			}
+		}
+
 	}
 
 	return matching
 
 }
 
-func GenerateTuple(users []User, connections [][]User, forbiddenConnections [][]User, size uint) []Match {
+func GenerateTuple(users []User, connections [][]User, s Selector, forbiddenConnections [][]User, size uint, A []User, B []User, sizeA uint, sizeB uint) []Match {
 	/*
-		         Input :
-				      users: Users for matching
-					  connections: Connections plan in the graph; first element of the tab
+				         Input :
+						    - general
+						      users: Users for matching
+							  connections: Connections plan in the graph;
+							  s   : type of selector : basic, group .....
+							- specific
+							  *constraint
+							   forbiddenConnecitons: variable for forbideenconnections constraints
+							  *selector
+							    size : size of matching; variable for basic selector\
+							    A,B : groupe A and B of  user; variable for group selector
+		                        sizeA, sizeB: size of matching for A and B respectivily; variable for group selector
 	*/
 	var results []Match
+	var tuples map[int]*Match
 	graph := UsersToGraph(users, connections)
-	tuples := Matcher(graph, size, []Constraint{Dejavu}, Basic, forbiddenConnections)
+
+	switch s {
+	case Basic:
+		tuples = Matcher(graph, size, []Constraint{Dejavu}, Basic, forbiddenConnections, []*User{}, []*User{}, 0, 0, []Constraint{}, []Constraint{})
+	case Group:
+		gA := []*User{}
+		gB := []*User{}
+		for _, u := range A {
+			u2 := u
+			gA = append(gA, &u2)
+
+		}
+		for _, u := range B {
+			u2 := u
+			gB = append(gB, &u2)
+		}
+
+		tuples = Matcher(graph, size, []Constraint{}, Group, forbiddenConnections, gA, gB, sizeA, sizeB, []Constraint{Dejavu}, []Constraint{})
+	}
 	for index, matching := range tuples {
 
 		results = append(results, Match{Id: strconv.Itoa(index), Users: matching.Users})

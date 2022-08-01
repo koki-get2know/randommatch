@@ -135,10 +135,10 @@ func UsersToGraph(users []User, connections [][]User) *UserGraph {
 		user2 := user
 		graph.AddUser(&user2)
 	}
-	for _, usersNotToMatch := range connections {
-		if len(usersNotToMatch) > 0 {
-			node := usersNotToMatch[0]
-			for _, user := range usersNotToMatch[1:] {
+	for _, usersAlreadyMatch := range connections {
+		if len(usersAlreadyMatch) > 0 {
+			node := usersAlreadyMatch[0]
+			for _, user := range usersAlreadyMatch[1:] {
 				user2 := user
 				graph.AddEdge(&node, &user2)
 			}
@@ -148,7 +148,7 @@ func UsersToGraph(users []User, connections [][]User) *UserGraph {
 }
 
 // Subgraph extract a subgraph G' from a graph G
-func (g *UserGraph) Subgrapn(users []*User) *UserGraph {
+func (g *UserGraph) Subgraph(users []*User) *UserGraph {
 	var subG UserGraph
 	subG.edges = make(map[User][]*User)
 	subG.users = users

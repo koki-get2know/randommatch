@@ -23,6 +23,9 @@ func fillGraph() {
 	g.AddEdge(&nA, &nB)
 	g.AddEdge(&nA, &nC)
 	g.AddEdge(&nB, &nE)
+	g.AddEdge(&nF, &nE)
+	g.AddEdge(&nA, &nE)
+
 }
 
 func TestAdd(t *testing.T) {
@@ -31,7 +34,7 @@ func TestAdd(t *testing.T) {
 	n1 := User{"4"}
 	n2 := User{"5"}
 	A := []*User{&n1, &n2}
-	sub := g.Subgrapn(A)
+	sub := g.Subgraph(A)
 	sub.String()
 
 }
