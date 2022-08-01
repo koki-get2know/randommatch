@@ -1,10 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
+import { MsalService } from '@azure/msal-angular';
+import { AccountInfo, SilentRequest } from '@azure/msal-browser';
+import { environment } from '../../../environments/environment';
+
 @Component( {
   selector: 'app-matching',
   templateUrl: './matching.page.html',
@@ -19,26 +23,16 @@ export class MatchingPage implements OnInit {
    
   usersSelected = [];
 
-  isLoading = false;
-  isError = false;
-  isSuccess = false;
-  isSubmitted = false;
   selected_forbidden_connexion: [];
-  userstoforbidden =[];
-  usersconnexionforbidden: User[][]=[];
-
-  avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
-  "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
-  "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
-  "/assets/img/speakers/mouse.jpg", "/assets/img/speakers/puppy.jpg", "/assets/img/speakers/rabbit.jpg",
-   "/assets/img/speakers/turtle.jpg",
-   "https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"];
+  userstoforbid =[];
+  usersconnexionforbidden =[];
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
-  constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController, private router: Router ) { 
-    
-  }
+  constructor(private formBuilder: FormBuilder,
+    private matchService:UsersService,
+    public navCtrl: NavController,
+    private router: Router,
+    public toastController: ToastController) { }
 
   ngOnInit () {
     this.usersgroups = this.generateUsers();
@@ -50,20 +44,56 @@ export class MatchingPage implements OnInit {
       matchingsize: ['', Validators.required],
     });
   }
+  async presentToast(message) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000
+    });
+    toast.present();
+  }
 
-  portChange(event: {
+  userChange(event: {
     component: IonicSelectableComponent,
-    value: any
-  } ) {
-    console.log( "Selec" );
-    if ( this.selected_forbidden_connexion.length > 0 ) {
-      this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+    value: any} ) {
+    // just add if the list in not empty
+    if ( this.selected_forbidden_connexion.length > 1 ) {
+      if ( this.usersconnexionforbidden.length === 0 ) {
+        this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+      }
+      else {
+        if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
+          console.log( "Unexisting link" );
+          this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+        }
+        else {
+          this.presentToast("this connection already exist!");
+        }
+      }
+    } else {
+      this.presentToast("Please select more than one user!");
     }
-    console.log( this.usersconnexionforbidden );
-    console.log( 'port:', event.value );
-
-
     this.clear();
+  }
+  forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
+    let i = 0;
+    while ( i < this.usersconnexionforbidden.length ) {
+      let element = this.usersconnexionforbidden[i];
+      if ( element.length == newconnection.length ) {
+        const diffUser = this.compareconnection( element, newconnection );
+        if ( diffUser.length === 0 ) {
+          return true;
+        }
+      }
+      i++;
+    }
+    return false;
+  }
+
+  compareconnection(forbconnec1:any,forbconnec2:any) {
+    return forbconnec1.filter((element) => {
+        return !forbconnec2.some(elt2 => element.id === elt2.id);
+      });
+    
   }
   clear() {
     this.selectComponent.clear();
@@ -75,6 +105,10 @@ export class MatchingPage implements OnInit {
     this.selectComponent.confirm ();
     this.selectComponent.close(); 
     
+  }
+
+  removeConnection (index) {
+    this.usersconnexionforbidden.splice(index, 1);
   }
   generateUsers() {
     const lorem = new LoremIpsum({
@@ -93,22 +127,21 @@ export class MatchingPage implements OnInit {
 
     let usersgroups = [];
     for (let g=1; g < 3; g++) {
-      let users = [];
-      let randomgroup = `Group ${ lorem.generateWords( 2 ) }`;
+      const users = [];
+      const randomgroup = `${ lorem.generateWords( 2 ) } `;
       for (let i=1; i<usersNumber; i++) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
-        let user = {
-          id: i,
+        const user = {
+          id: Math.floor(Math.random() * Date.now()),
           name: lorem.generateWords(2),
           group: randomgroup,
-          avatar: this.avatars[avatarId]
+          avatar: this.matchService.generateAvatarSvg()
         };
         users.push( user );
-        this.userstoforbidden.push(user);
+        this.userstoforbid.push(user);
       }
 
       let group = {
-        group: randomgroup,
+        group: `Group ${g} ${randomgroup}`,
         users: users 
       };
       
@@ -122,9 +155,8 @@ export class MatchingPage implements OnInit {
     return this.matchingForm.controls;
   }
 
-  selectUsers(event,user) {
-  
-    if (!!event.target.checked === false ) {
+  selectUsers(event: PointerEvent,user) {
+    if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
     }
     else {
@@ -134,10 +166,9 @@ export class MatchingPage implements OnInit {
   }
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: number) {
-    let index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
+    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
-    event.stopPropagation();
-}
+  }
   // select a group of user
   selectGroup(event, group){
   
@@ -153,43 +184,39 @@ export class MatchingPage implements OnInit {
 
   ramdommatch () {
     
-    this.isSubmitted = true;
-    this.isError = false;
-    this.isSuccess = false;
-    this.isLoading = false
-    if ( this.form.invalid ) {
-      alert( "remplir tous les champs" );
-    }
-    this.isLoading = true;
 
-
-    let users: User[] = [];
-    for (let selected of this.usersSelected)
+    const users: User[] = [];
+    const forbiddenConnections: User[][] = [];
+    for (const selected of this.usersSelected)
     {
-      users.push({userId: selected.name})
+      users.push({userId: selected.name, avatar: selected.avatar})
+    }
+    for (const connection of this.usersconnexionforbidden) {
+      const newConnection = [];
+      for (let item of connection) {
+        newConnection.push({userId: item.name});
+      }
+      forbiddenConnections.push(newConnection);
     }
     const matchingRequest: MatchingReq = {
       size: Number(this.form.matchingsize.value),
       users,
-      forbiddenConnections: this.usersconnexionforbidden
-
+      forbiddenConnections
     };
 
     this.matchService.makematch(matchingRequest)
-      .subscribe( ( res: Matching[] ) => {
-        console.log( matchingRequest );
-        this.matchingresult(res);
+      .subscribe( ( matchings: Matching[] ) => {
+        console.log(matchings);
+        matchings.forEach(match => match.users.forEach(user => {
+          user.avatar = matchingRequest.users.find(usr => usr.userId === user.userId)?.avatar;
+        }));
+        
+        this.matchingresult(matchings);
       })
   }
 
   // matching result
   matchingresult(matchings: Matching[]) {
-    for(const matching of matchings) {
-      for (const user of matching.users) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
-        user.avatar = this.avatars[avatarId];
-      }
-    }
     const navigationExtras: NavigationExtras = {
       state: {
         matchings
@@ -197,6 +224,5 @@ export class MatchingPage implements OnInit {
     };
     this.router.navigate(['/matching-result'],navigationExtras);
   }
-
   
 }

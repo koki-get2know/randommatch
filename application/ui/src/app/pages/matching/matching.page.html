@@ -1,6 +1,10 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>matching</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Matching
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -8,7 +12,8 @@
 
   <ion-grid>
     <ion-row>
-      <ion-col>
+      <ion-col>      
+
         <form [formGroup]="matchingForm" (submit)="onSubmit()">
           <ion-list lines="none">
             <ion-item>
@@ -27,7 +32,7 @@
         </form>
         <ion-item>
           <ion-label>select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
+          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbid" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
           </ionic-selectable>
         </ion-item>
         <ion-grid>
@@ -47,7 +52,7 @@
                         <ion-row>
                           <ion-col *ngFor="let user of connexionforbidden; let j=index">
                             <ion-avatar>
-                              <img [src]="user.avatar" alt="">
+                              <div [innerHTML]="user.avatar"></div>
                             </ion-avatar>
                             <ion-label>
                               <h3>{{user.name}}</h3>
@@ -62,10 +67,7 @@
                       <ion-badge color="primary">{{connexionforbidden.length}}</ion-badge>
                     </ion-item>
                     <ion-item-options>
-                      <ion-item-option color="favorite">
-                        Favorite
-                      </ion-item-option>
-                      <ion-item-option color="danger">
+                      <ion-item-option color="danger" (click)="removeConnection(i)">
                         Remove
                       </ion-item-option>
                     </ion-item-options>
@@ -80,7 +82,7 @@
 
       <ion-col>
         <!-- Searchbar with cancel button always shown -->
-        <ion-searchbar showCancelButton="always"></ion-searchbar>
+        <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
         <ion-list>
           <ion-item-group *ngFor="let group of usersgroups">
             <ion-item-divider sticky>
@@ -93,7 +95,7 @@
             <ion-item-sliding *ngFor="let user of group.users">
               <ion-item>
                 <ion-avatar slot="start">
-                  <img [src]="user.avatar" alt="">
+                  <div [innerHTML]="user.avatar"></div>
                 </ion-avatar>
                 <ion-label>
                   <h3>{{user.name}}</h3>
@@ -103,14 +105,14 @@
                 </ion-label>
                 <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
               </ion-item>
-              <ion-item-options>
+              <!--ion-item-options>
                 <ion-item-option color="favorite">
                   Favorite
                 </ion-item-option>
                 <ion-item-option color="danger">
                   Remove
                 </ion-item-option>
-              </ion-item-options>
+              </ion-item-options-->
             </ion-item-sliding>
           </ion-item-group>
         </ion-list>

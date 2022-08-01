@@ -2,12 +2,15 @@ package main
 
 import (
 	"log"
+	"mime/multipart"
 	"net/http"
 	"time"
 
-	//"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/koki/randommatch/calendar"
+	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/matcher"
+	"github.com/koki/randommatch/middlewares"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -23,6 +26,14 @@ type matchingReq struct {
 	Size                 uint             `json:"size"`
 	Users                []matcher.User   `json:"users"`
 	ForbiddenConnections [][]matcher.User `json:"forbiddenConnections"`
+}
+
+type EmailReq struct {
+	Matches []matcher.Match `json:"matches"`
+}
+
+type UsersFile struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 // albums slice to seed record album data.
@@ -42,11 +53,53 @@ func generateMatchings(c *gin.Context) {
 	var req matchingReq
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
 	tuples := matcher.GenerateTuple(req.Users, [][]matcher.User{}, matcher.Basic, req.ForbiddenConnections, req.Size, []matcher.User{}, []matcher.User{}, 0, 0)
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+func uploadUsers(c *gin.Context) {
+	defer duration(track("uploadUsers"))
+	var usersFile UsersFile
+
+	if err := c.ShouldBind(&usersFile); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file sent " + err.Error()})
+		return
+	}
+
+	// https://stackoverflow.com/questions/45121457/how-to-get-file-posted-from-json-in-go-gin
+	// https://github.com/gin-gonic/gin#model-binding-and-validation
+	if usersFile.File.Size > 5*1024*1024 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "File exceeded max size"})
+		return
+	}
+
+	users, err := convert.CsvToUsers(usersFile.File)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, users)
+}
+
+func emailMatches(c *gin.Context) {
+	defer duration(track("emailMatches"))
+	var req EmailReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	go func() {
+		for _, match := range req.Matches {
+			match2 := match
+			calendar.SendInvite(&match2)
+		}
+	}()
+	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
+
 }
 
 // getAlbums responds with the list of all albums as JSON.
@@ -142,18 +195,21 @@ func helloNeo4j(uri, username, password string) (string, error) {
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{"*"},
-		MaxAge:       12 * time.Hour,
-	}))
-	router.StaticFile("/api", "./api/swagger.yaml")
-	router.GET("health-check", getHealthCheck)
-	router.GET("/albums", getAlbums)
-	router.GET("/albums/:id", getAlbumByID)
-	router.POST("/albums", postAlbums)
-	router.GET("/neo4j", helloFromNeo4j)
-	router.POST("/matchings", generateMatchings)
+	router.Use(middlewares.Cors())
+
+	public := router.Group("")
+	public.StaticFile("/api", "./api/swagger.yaml")
+	public.GET("health-check", getHealthCheck)
+	public.GET("/albums", getAlbums)
+	public.GET("/albums/:id", getAlbumByID)
+	public.POST("/albums", postAlbums)
+	public.GET("/neo4j", helloFromNeo4j)
+
+	protected := router.Group("")
+	protected.Use(middlewares.JwtAuth())
+	protected.POST("/matchings", generateMatchings)
+	protected.POST("/upload-users", uploadUsers)
+	protected.POST("/email-matches", emailMatches)
 
 	router.Run()
 
