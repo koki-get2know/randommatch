@@ -71,7 +71,7 @@ def send_appointment(date, attendee_email, organiser_email, subj, description, l
   # Send the email out
   server = smtplib.SMTP('email-smtp.us-east-1.amazonaws.com', 587)
   server.starttls()
-  server.login("AKIAUQ5SMTNQKJH7CSR5", "BMiZx6u/2IC33GIt9fYQiz66c5+MC60fl/OixMatMCC/")
+  server.login("keyid", "secretsalt")
   server.sendmail(msg["From"], [msg["To"]], msg.as_string())
   server.quit()
 

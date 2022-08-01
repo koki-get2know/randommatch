@@ -23,6 +23,10 @@ spec:
         env:
         - name: GIN_MODE
           value: "release"
+        - name: SES_KEY_ID
+          value: {{ .Values.aws_ses.keyid }}
+        - name: SES_KEY_SECRET
+          value: {{ .Values.aws_ses.keysecret }}
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001

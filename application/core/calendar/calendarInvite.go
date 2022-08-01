@@ -3,6 +3,7 @@ package calendar
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -109,9 +110,8 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 	// Replace us-east-1 with the AWS Region you're using for Amazon SES.
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-east-1"),
-		Credentials: credentials.NewStaticCredentials("AKIAUQ5SMTNQKJH7CSR5", "7+W1cAOcLNVVDQpCDI3Ips7QDiNSXoC1Ej6Q/LZB", ""),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("SES_KEY_ID"), os.Getenv("SES_KEY_SECRET"), ""),
 	})
-
 	if err != nil {
 		fmt.Println(err)
 		return
