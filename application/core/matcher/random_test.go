@@ -9,7 +9,7 @@ func TestRandomChoices(t *testing.T) {
 	//id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
 	g.String()
 	var forbiddenConnections [][]User
-	constraint := []Constraint{Dejavu}
+	constraint := []Constraint{Unique}
 	matching := RandomChoices(&g, 2, constraint, forbiddenConnections)
 	fmt.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
@@ -22,7 +22,7 @@ func TestRandomChoices(t *testing.T) {
 func TestRanSubGroup(t *testing.T) {
 	g.String()
 	var forbiddenConnections [][]User
-	interConstraint := []Constraint{Dejavu}
+	interConstraint := []Constraint{Unique}
 	A := []*User{{"5"}}
 	subA := g.Subgraph(A)
 	fmt.Println("Sous groupe A")
@@ -31,7 +31,7 @@ func TestRanSubGroup(t *testing.T) {
 	fmt.Println("Sous groupe B")
 	subB := g.Subgraph(B)
 	subB.String()
-	matching := RandSubGroup(subA, subB, 1, 1, interConstraint, []Constraint{Dejavu}, forbiddenConnections)
+	matching := RandSubGroup(subA, subB, 1, 1, interConstraint, []Constraint{Unique}, forbiddenConnections)
 	fmt.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
 		fmt.Printf("%s,", user.String())
@@ -45,7 +45,7 @@ func TestMatcher1(t *testing.T) {
 	var forbiddenConnections [][]User
 	A := []User{{"2"}, {"1"}}
 	forbiddenConnections = append(forbiddenConnections, A)
-	constraint := []Constraint{Dejavu}
+	constraint := []Constraint{Unique}
 	SELECTOR := Basic
 	matching := Matcher(&g, 2, constraint, SELECTOR, forbiddenConnections, []*User{}, []*User{}, 0, 0, []Constraint{}, []Constraint{})
 
@@ -87,9 +87,9 @@ func TestMatcher2(t *testing.T) {
 	var forbiddenConnections [][]User
 	A := []*User{{"5"}}
 	B := []*User{{"1"}, {"2"}}
-	interConstraint := []Constraint{Dejavu}
+	interConstraint := []Constraint{Unique}
 	SELECTOR := Group
-	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{Dejavu})
+	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{Unique})
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")

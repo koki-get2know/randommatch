@@ -139,8 +139,8 @@ func UsersToGraph(users []User, connections [][]User) *UserGraph {
 		if len(usersAlreadyMatch) > 0 {
 			node := usersAlreadyMatch[0]
 			for _, user := range usersAlreadyMatch[1:] {
-				user2 := user
-				graph.AddEdge(&node, &user2)
+				user := user
+				graph.AddEdge(&node, &user)
 			}
 		}
 	}
