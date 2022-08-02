@@ -1,12 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/matcher"
@@ -92,10 +96,15 @@ func emailMatches(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
+
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	adminEmail := claims["preferred_username"].(string)
+
 	go func() {
 		for _, match := range req.Matches {
-			match2 := match
-			calendar.SendInvite(&match2)
+			match := match
+			calendar.SendInvite(&match, adminEmail)
+			break // send only once for now
 		}
 	}()
 	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
@@ -145,9 +154,16 @@ func getAlbumByID(c *gin.Context) {
 
 func helloFromNeo4j(c *gin.Context) {
 	defer duration(track("helloFromNeo4j"))
-	hello, err := helloNeo4j("bolt://match-db:7687", "neo4j", "test")
+	creds := strings.Split(os.Getenv("NEO4J_AUTH"), "/")
+	if len(creds) < 2 {
+		fmt.Println("NEO4J_AUTH env variable missing or not set correctly")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Missing setup"})
+		return
+	}
+	hello, err := helloNeo4j("bolt://match-db:7687", creds[0], creds[1])
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Exiting because of error" + err.Error()})
+		return
 	}
 	c.IndentedJSON(http.StatusCreated, gin.H{"message": hello})
 }

@@ -11,8 +11,8 @@ import (
 	"github.com/koki/randommatch/utils/token"
 )
 
-func extract(c *gin.Context) string {
-	authValues := strings.Split(c.Request.Header.Get("Authorization"), " ")
+func extract(r *http.Request) string {
+	authValues := strings.Split(r.Header.Get("Authorization"), " ")
 	if len(authValues) == 2 && authValues[0] == "Bearer" {
 		return authValues[1]
 	}
@@ -21,14 +21,17 @@ func extract(c *gin.Context) string {
 
 func JwtAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		bearerToken := extract(c)
-
-		if _, err := token.Validate(bearerToken); err != nil {
+		bearerToken := extract(c.Request)
+		claims, err := token.Validate(bearerToken)
+		if err != nil {
 			fmt.Println("bearer token error", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Operation denied"})
-			c.Abort()
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+
+		c.Set("tokenClaims", claims)
+
 		c.Next()
 	}
 }

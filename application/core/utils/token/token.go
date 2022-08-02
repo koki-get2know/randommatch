@@ -34,8 +34,9 @@ const callsBeforeExpiringCache uint = 10000
 
 var getPEMPublicKey = getPEMPublicKeyCacheAware()
 
-func Validate(jwtToken string) (*jwt.Token, error) {
-	tkn, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+func Validate(jwtToken string) (jwt.MapClaims, error) {
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(jwtToken, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -55,7 +56,7 @@ func Validate(jwtToken string) (*jwt.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tkn, nil
+	return claims, nil
 }
 
 func getPEMPublicKeyCacheAware() func(kid string) (string, error) {
