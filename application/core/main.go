@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
+	"github.com/koki/randommatch/database"
 	"github.com/koki/randommatch/matcher"
 	"github.com/koki/randommatch/middlewares"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -160,7 +161,7 @@ func helloFromNeo4j(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Missing setup"})
 		return
 	}
-	hello, err := helloNeo4j("bolt://match-db:7687", creds[0], creds[1])
+	hello, err := helloNeo4j()
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Exiting because of error" + err.Error()})
 		return
@@ -176,15 +177,12 @@ func duration(msg string, start time.Time) {
 	log.Printf("%v: %v\n", msg, time.Since(start))
 }
 
-func helloNeo4j(uri, username, password string) (string, error) {
-	driver, err := neo4j.NewDriver(uri, neo4j.BasicAuth(username, password, ""))
+func helloNeo4j() (string, error) {
+	driver, err := database.Driver()
 	if err != nil {
 		return "", err
 	}
-	defer driver.Close()
-
-	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	greeting, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
@@ -209,7 +207,18 @@ func helloNeo4j(uri, username, password string) (string, error) {
 }
 
 func main() {
+	_, exists := os.LookupEnv("NEO4J_AUTH")
+	if exists {
+		driver, err := database.Driver()
+		if err != nil {
+			fmt.Print(err)
+			return
+		}
+		defer (*driver).Close()
+	}
+
 	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 	router.Use(middlewares.Cors())
 
