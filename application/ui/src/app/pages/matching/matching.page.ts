@@ -5,9 +5,6 @@ import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
-import { MsalService } from '@azure/msal-angular';
-import { AccountInfo, SilentRequest } from '@azure/msal-browser';
-import { environment } from '../../../environments/environment';
 
 @Component( {
   selector: 'app-matching',
@@ -131,7 +128,7 @@ export class MatchingPage implements OnInit {
       const randomgroup = `${ lorem.generateWords( 2 ) } `;
       for (let i=1; i<usersNumber; i++) {
         const user = {
-          id: Math.floor(Math.random() * Date.now()),
+          id: Math.floor(Math.random() * Date.now()).toString(),
           name: lorem.generateWords(2),
           group: randomgroup,
           avatar: this.matchService.generateAvatarSvg()
@@ -189,12 +186,12 @@ export class MatchingPage implements OnInit {
     const forbiddenConnections: User[][] = [];
     for (const selected of this.usersSelected)
     {
-      users.push({userId: selected.name, avatar: selected.avatar})
+      users.push({id: selected.id, name: selected.name, avatar: selected.avatar})
     }
     for (const connection of this.usersconnexionforbidden) {
       const newConnection = [];
       for (let item of connection) {
-        newConnection.push({userId: item.name});
+        newConnection.push({id: item.id, name: item.name});
       }
       forbiddenConnections.push(newConnection);
     }
@@ -208,7 +205,7 @@ export class MatchingPage implements OnInit {
       .subscribe( ( matchings: Matching[] ) => {
         console.log(matchings);
         matchings.forEach(match => match.users.forEach(user => {
-          user.avatar = matchingRequest.users.find(usr => usr.userId === user.userId)?.avatar;
+          user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
         }));
         
         this.matchingresult(matchings);

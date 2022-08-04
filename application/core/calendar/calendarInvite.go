@@ -56,13 +56,11 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	m.SetHeader("Filename", filename)
 	m.SetHeader("Path", filename)
 
-	//m.SetBody("text/plain", description)
 	m.SetBody("text/plain", description)
 	m.AddAlternative(`text/calendar; method="REQUEST"; name="invite.ics"`,
 		cal.Serialize(),
 		gomail.SetPartEncoding(gomail.Base64))
 
-	//m.Attach()
 	var emailRaw bytes.Buffer
 	_, err := m.WriteTo(&emailRaw)
 	if err != nil {
@@ -88,7 +86,7 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 	)
 	userIds := []string{}
 	for _, user := range match.Users {
-		userIds = append(userIds, user.UserId)
+		userIds = append(userIds, user.Id)
 	}
 
 	description := fmt.Sprintf(`Hello %v,

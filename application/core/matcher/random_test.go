@@ -3,12 +3,14 @@ package matcher
 import (
 	"fmt"
 	"testing"
+
+	"github.com/koki/randommatch/entity"
 )
 
 func TestRandomChoices(t *testing.T) {
 	//id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
 	g.String()
-	var forbiddenConnections [][]User
+	var forbiddenConnections [][]entity.User
 	constraint := []Constraint{Unique}
 	matching := RandomChoices(&g, 2, constraint, forbiddenConnections)
 	fmt.Printf("Match of %d: [", len(matching.Users))
@@ -21,13 +23,13 @@ func TestRandomChoices(t *testing.T) {
 
 func TestRanSubGroup(t *testing.T) {
 	g.String()
-	var forbiddenConnections [][]User
+	var forbiddenConnections [][]entity.User
 	interConstraint := []Constraint{Unique}
-	A := []*User{{"5"}}
+	A := []*entity.User{{Id: "5"}}
 	subA := g.Subgraph(A)
 	fmt.Println("Sous groupe A")
 	subA.String()
-	B := []*User{{"3"}}
+	B := []*entity.User{{Id: "3"}}
 	fmt.Println("Sous groupe B")
 	subB := g.Subgraph(B)
 	subB.String()
@@ -42,12 +44,13 @@ func TestRanSubGroup(t *testing.T) {
 func TestMatcher1(t *testing.T) {
 
 	g.String()
-	var forbiddenConnections [][]User
-	A := []User{{"2"}, {"1"}}
+	var forbiddenConnections [][]entity.User
+	A := []entity.User{{Id: "2"}, {Id: "1"}}
 	forbiddenConnections = append(forbiddenConnections, A)
 	constraint := []Constraint{Unique}
 	SELECTOR := Basic
-	matching := Matcher(&g, 2, constraint, SELECTOR, forbiddenConnections, []*User{}, []*User{}, 0, 0, []Constraint{}, []Constraint{})
+	matching := Matcher(&g, 2, constraint, SELECTOR, forbiddenConnections,
+		[]*entity.User{}, []*entity.User{}, 0, 0, []Constraint{}, []Constraint{})
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
@@ -64,12 +67,12 @@ func TestMatcher1(t *testing.T) {
 }
 func TestMatcher2(t *testing.T) {
 	var G UserGraph
-	nA := User{"1"}
-	nB := User{"2"}
-	nC := User{"3"}
-	nD := User{"4"}
-	nE := User{"5"}
-	nF := User{"6"}
+	nA := entity.User{Id: "1"}
+	nB := entity.User{Id: "2"}
+	nC := entity.User{Id: "3"}
+	nD := entity.User{Id: "4"}
+	nE := entity.User{Id: "5"}
+	nF := entity.User{Id: "6"}
 	G.AddUser(&nA)
 	G.AddUser(&nB)
 	G.AddUser(&nC)
@@ -84,9 +87,9 @@ func TestMatcher2(t *testing.T) {
 	G.AddEdge(&nA, &nE)
 
 	G.String()
-	var forbiddenConnections [][]User
-	A := []*User{{"5"}}
-	B := []*User{{"1"}, {"2"}}
+	var forbiddenConnections [][]entity.User
+	A := []*entity.User{{Id: "5"}}
+	B := []*entity.User{{Id: "1"}, {Id: "2"}}
 	interConstraint := []Constraint{Unique}
 	SELECTOR := Group
 	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{Unique})
@@ -107,10 +110,10 @@ func TestMatcher2(t *testing.T) {
 
 func TestGenTuple(t *testing.T) {
 
-	users := []User{{"1"}, {"2"}, {"3"}, {"4"}, {"5"}, {"6"}}
-	var connections, forbiddenConnections [][]User
-	A := []User{{"4"}, {"5"}, {"6"}}
-	B := []User{{"1"}, {"2"}, {"3"}}
+	users := []entity.User{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}, {Id: "6"}}
+	var connections, forbiddenConnections [][]entity.User
+	A := []entity.User{{Id: "4"}, {Id: "5"}, {Id: "6"}}
+	B := []entity.User{{Id: "1"}, {Id: "2"}, {Id: "3"}}
 
 	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 0, A, B, 1, 1)
 

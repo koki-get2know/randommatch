@@ -11,7 +11,7 @@ func TestConvertRawDataToJson(t *testing.T) {
 	actual := string(jsonData)
 	expected := `[
 		{
-			"userId": "",
+			"id": "",
 			"name": "Pins Prestilien",
 			"email": "pinsdev24@gmail.com",
 			"groups": [
@@ -43,7 +43,7 @@ func TestConvertRawDataToJson(t *testing.T) {
 			"averageMatchingRate": 0
 		},
 		{
-			"userId": "",
+			"id": "",
 			"name": "Pins Prestilien",
 			"email": "pinsdev24@gmail.com",
 			"groups": [

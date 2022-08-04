@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
+	"github.com/koki/randommatch/entity"
 )
 
 // TODO the selector paramater should be a config variable
@@ -24,8 +25,8 @@ const (
 )
 
 type Match struct {
-	Id    string `json:"id"`
-	Users []User `json:"users"`
+	Id    string        `json:"id"`
+	Users []entity.User `json:"users"`
 }
 
 //TODO integrate  the constraint structure in code
@@ -38,11 +39,11 @@ type SelectorParams[T any] struct { // Type parameters for constraint
 	Params map[Constraint][]T
 }
 
-func search(users []User, n User) (bool, int) {
+func search(users []entity.User, n entity.User) (bool, int) {
 	index := -1
 	find := false
 	for i, user := range users {
-		if user.UserId == n.UserId {
+		if user.Id == n.Id {
 			find = true
 			index = i
 			break
@@ -52,7 +53,8 @@ func search(users []User, n User) (bool, int) {
 	return find, index
 }
 
-func Filter(g *UserGraph, matched []User, n *User, constraints []Constraint, forbiddenConnections [][]User) bool {
+func Filter(g *UserGraph, matched []entity.User, n *entity.User,
+	constraints []Constraint, forbiddenConnections [][]entity.User) bool {
 	/* Filter
 
 	   input :
@@ -74,7 +76,7 @@ constraintloop:
 			case Unique:
 				// check if an edges exist between n and any user in matched
 
-				if find, _ := Search(g.edges[*n], &user); find {
+				if find, _ := Search(g.edges[(*n).Id], &user); find {
 					ok = false
 					break constraintloop
 				}
@@ -109,7 +111,7 @@ func remove[T comparable](l []T, item T) []T {
 	return l
 }
 
-func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]User) *Match {
+func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 
 	/* random choice without constraint
 
@@ -120,7 +122,7 @@ func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConn
 	*/
 
 	var matching = &Match{}
-	var matchedUsers []User
+	var matchedUsers []entity.User
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
 
 	var indices []int
@@ -145,7 +147,7 @@ func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConn
 }
 
 func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, matchSizeB uint,
-	interGroupConstraints []Constraint, innerGroupConstraints []Constraint, forbiddenConnections [][]User) *Match {
+	interGroupConstraints []Constraint, innerGroupConstraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 
 	/*
 		   input :
@@ -168,7 +170,7 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 		matchA = RandomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
 
-		users := []User{}
+		users := []entity.User{}
 		gb := &UserGraph{}
 		copier.Copy(&users, &matchA.Users)
 		copier.Copy(gb, groupeB)
@@ -197,8 +199,8 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 }
 
 func Matcher(g *UserGraph, k uint,
-	constraints []Constraint, SELECTOR Selector, forbidenconections [][]User,
-	A []*User, B []*User, matchSizeA uint, matchSizeB uint,
+	constraints []Constraint, SELECTOR Selector, forbidenconections [][]entity.User,
+	A []*entity.User, B []*entity.User, matchSizeA uint, matchSizeB uint,
 	interGroupConstraints []Constraint, innerGroupConstraints []Constraint) map[int]*Match {
 
 	/* Matcher without constraint
@@ -270,9 +272,9 @@ func Matcher(g *UserGraph, k uint,
 
 }
 
-func GenerateTuple(users []User, connections [][]User, s Selector,
-	forbiddenConnections [][]User, size uint,
-	A []User, B []User, sizeA uint, sizeB uint) []Match {
+func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
+	forbiddenConnections [][]entity.User, size uint,
+	A []entity.User, B []entity.User, sizeA uint, sizeB uint) []Match {
 	/*
 				         Input :
 						    - general
@@ -294,11 +296,11 @@ func GenerateTuple(users []User, connections [][]User, s Selector,
 	switch s {
 	case Basic:
 		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
-			forbiddenConnections, []*User{}, []*User{},
+			forbiddenConnections, []*entity.User{}, []*entity.User{},
 			0, 0, []Constraint{}, []Constraint{})
 	case Group:
-		gA := []*User{}
-		gB := []*User{}
+		gA := []*entity.User{}
+		gB := []*entity.User{}
 		for _, u := range A {
 			u := u
 			gA = append(gA, &u)

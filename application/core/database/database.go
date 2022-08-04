@@ -21,7 +21,9 @@ func Driver() (*neo4j.Driver, error) {
 			return
 		}
 		var dr neo4j.Driver
-		dr, err = neo4j.NewDriver("bolt://match-db:7687", neo4j.BasicAuth(creds[0], creds[1], ""))
+		// dr, err = neo4j.NewDriver("bolt://match-db:7687", neo4j.BasicAuth(creds[0], creds[1], ""))
+		dr, err = neo4j.NewDriver("bolt://localhost:7687", neo4j.BasicAuth(creds[0], creds[1], ""))
+
 		if err != nil {
 			return
 		}
