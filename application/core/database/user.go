@@ -21,11 +21,6 @@ const (
 	Cancelled jobStatus = "Cancelled"
 )
 
-type Job struct {
-	uid    string
-	status jobStatus
-}
-
 func CreateUser(user entity.User) (string, error) {
 	driver, err := Driver()
 	if err != nil {
