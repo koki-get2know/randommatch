@@ -24,9 +24,11 @@ spec:
         - name: GIN_MODE
           value: "release"
         - name: SES_KEY_ID
-          value: {{ .Values.aws_ses.keyid }}
+          value: {{ .Values.backend.aws_ses.keyid }}
         - name: SES_KEY_SECRET
-          value: {{ .Values.aws_ses.keysecret }}
+          value: {{ .Values.backend.aws_ses.keysecret }}
+        - name: DB_HOST
+          value: {{ .Values.backend.dbhost }}
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
