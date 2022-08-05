@@ -39,6 +39,13 @@ export class UsersService {
     return this.http.post( `${ this.urlApi }/matching`, formData, {} )
       .pipe( map( data => data ) );
   }
+  uploadUsersFile(fileData) {
+    return this.http.post( `${ this.urlApi }/upload-users`, fileData, {
+      reportProgress: true,
+      observe: 'events'
+    } )
+      .pipe( map( data => data ) );
+  }
 
   get() {
     return this.http.get<any>(`${this.urlApi}/matching/`)

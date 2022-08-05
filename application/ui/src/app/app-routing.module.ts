@@ -48,6 +48,14 @@ const routes: Routes = [
     path: 'matching-result',
     loadChildren: () => import('./pages/matching-result/matching-result.module').then( m => m.MatchingResultPageModule)
   },
+  {
+    path: 'user-filter',
+    loadChildren: () => import('./pages/users/user-filter/user-filter.module').then( m => m.UserFilterPageModule)
+  },
+  {
+    path: 'matching-group',
+    loadChildren: () => import('./pages/matching-group/matching-group.module').then( m => m.MatchingGroupPageModule)
+  },
 
 ];
 

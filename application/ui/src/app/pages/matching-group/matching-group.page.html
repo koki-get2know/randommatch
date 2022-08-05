@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>matching</ion-title>
+    <ion-title>matching Group</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -26,9 +26,61 @@
       </form>
     </ion-row>
     <ion-row>
+
+
       <ion-col>
         <ion-item>
-          <ion-label>select forbidden matches</ion-label>
+          <ion-label>Users Group 1</ion-label>
+          <ionic-selectable #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChangeGroup1($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
+          </ionic-selectable>
+        </ion-item>
+        <ion-list>
+          <ion-item-group *ngFor="let usergroup1 of result_selected_group1 ; let i=index">
+            <ion-item-divider sticky>
+              <ion-label>
+                <h3>{{usergroup1.name}}</h3>
+                <p>
+                  {{usergroup1.group}}
+                </p>
+              </ion-label>
+              <div class="ion-padding speaker-detail">
+
+                <ion-chip [color]="getRandomColor (i)" button (click)="tagclick()">
+                  <ion-label>Depart</ion-label>
+                </ion-chip>
+              </div>
+            </ion-item-divider>
+          </ion-item-group>
+        </ion-list>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label>Users Group 2</ion-label>
+          <ionic-selectable #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChangeGroup2($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
+          </ionic-selectable>
+        </ion-item>
+        <ion-list>
+          <ion-item-group *ngFor="let usergroup1 of result_selected_group2 ; let i=index">
+            <ion-item-divider sticky>
+              <ion-label>
+                <h3>{{usergroup1.name}}</h3>
+                <p>
+                  {{usergroup1.group}}
+                </p>
+              </ion-label>
+              <div class="ion-padding speaker-detail">
+
+                <ion-chip [color]="getRandomColor (i)" button (click)="tagclick()">
+                  <ion-label>Depart</ion-label>
+                </ion-chip>
+              </div>
+            </ion-item-divider>
+          </ion-item-group>
+        </ion-list>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label>Select forbidden matches</ion-label>
           <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
           </ionic-selectable>
         </ion-item>
@@ -48,9 +100,7 @@
                       <ion-grid>
                         <ion-row>
                           <ion-col *ngFor="let user of connexionforbidden; let j=index">
-                            <ion-avatar>
-                              <img [src]="user.avatar" alt="">
-                            </ion-avatar>
+                            
                             <ion-label>
                               <h3>{{user.name}}</h3>
                               <p>
@@ -79,45 +129,6 @@
 
         </ion-grid>
       </ion-col>
-
-      <ion-col>
-        <!-- Searchbar with cancel button always shown -->
-        <ion-searchbar showCancelButton="always"></ion-searchbar>
-        <ion-list>
-          <ion-item-group *ngFor="let group of usersgroups">
-            <ion-item-divider sticky>
-              <ion-label>
-                {{group.group}}
-              </ion-label>
-              <ion-checkbox slot="start" (click)="selectGroup($event,group)" color="primary"></ion-checkbox>
-            </ion-item-divider>
-
-            <ion-item-sliding *ngFor="let user of group.users">
-              <ion-item>
-                <ion-avatar slot="start">
-                  <img [src]="user.avatar" alt="">
-                </ion-avatar>
-                <ion-label>
-                  <h3>{{user.name}}</h3>
-                  <p>
-                    {{user.group}}
-                  </p>
-                </ion-label>
-                <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
-              </ion-item>
-              <ion-item-options>
-                <ion-item-option color="favorite">
-                  Favorite
-                </ion-item-option>
-                <ion-item-option color="danger">
-                  Remove
-                </ion-item-option>
-              </ion-item-options>
-            </ion-item-sliding>
-          </ion-item-group>
-        </ion-list>
-      </ion-col>
-
     </ion-row>
 
 
