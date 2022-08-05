@@ -33,6 +33,11 @@ export class AppComponent implements OnInit, OnDestroy {
       url: 'matching',
       icon: 'calendar'
     },
+    {
+      title: 'New Group Match',
+      url: 'matching-group',
+      icon: 'calendar'
+    },
 
   ];
   loggedIn = false;

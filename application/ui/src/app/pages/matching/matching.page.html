@@ -8,26 +8,28 @@
 
   <ion-grid>
     <ion-row>
+      <form [formGroup]="matchingForm" (submit)="onSubmit()">
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label position="stacked" color="primary">Matching size</ion-label>
+            <ion-input name="username" formControlName="matchingsize" type="text">
+            </ion-input>
+          </ion-item>
+
+          <!--ion-datetime locale="en-GB-u-hc-h12"></ion-datetime-->
+
+        </ion-list>
+
+        <div class="ion-padding">
+          <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
+        </div>
+      </form>
+    </ion-row>
+    <ion-row>
       <ion-col>
-        <form [formGroup]="matchingForm" (submit)="onSubmit()">
-          <ion-list lines="none">
-            <ion-item>
-              <ion-label position="stacked" color="primary">Matching size</ion-label>
-              <ion-input name="username" formControlName="matchingsize" type="text">
-              </ion-input>
-            </ion-item>
-
-            <!--ion-datetime locale="en-GB-u-hc-h12"></ion-datetime-->
-
-          </ion-list>
-
-          <div class="ion-padding">
-            <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
-          </div>
-        </form>
         <ion-item>
           <ion-label>select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="group">
+          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="usersSelected" itemValueField="id" itemTextField="Name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="Departement">
           </ionic-selectable>
         </ion-item>
         <ion-grid>
@@ -42,17 +44,14 @@
                   </ion-item-divider>
 
                   <ion-item-sliding>
-                    <ion-item routerLink="/app/tabs/schedule/session/">
+                    <ion-item button>
                       <ion-grid>
                         <ion-row>
                           <ion-col *ngFor="let user of connexionforbidden; let j=index">
-                            <ion-avatar>
-                              <img [src]="user.avatar" alt="">
-                            </ion-avatar>
                             <ion-label>
-                              <h3>{{user.name}}</h3>
+                              <h3>{{user.Name}}</h3>
                               <p>
-                                {{user.group}}
+                                {{user.Departement}}
                               </p>
                             </ion-label>
                           </ion-col>
@@ -78,36 +77,31 @@
       <ion-col>
         <!-- Searchbar with cancel button always shown -->
         <ion-searchbar showCancelButton="always"></ion-searchbar>
-        <ion-list>
-          <ion-item-group *ngFor="let group of usersgroups">
+        <ion-list #scheduleList>
+          <ion-item-group>
             <ion-item-divider sticky>
               <ion-label>
-                {{group.group}}
+                USERS LIST
               </ion-label>
-              <ion-checkbox slot="start" (click)="selectGroup($event,group)" color="primary"></ion-checkbox>
             </ion-item-divider>
 
-            <ion-item-sliding *ngFor="let user of group.users">
-              <ion-item>
-                <ion-avatar slot="start">
-                  <img [src]="user.avatar" alt="">
-                </ion-avatar>
+            <ion-item-sliding *ngFor="let user of usersgroups" #slidingItem>
+              <ion-item button>
                 <ion-label>
-                  <h3>{{user.name}}</h3>
+                  <h3>{{user.Name}}</h3>
                   <p>
-                    {{user.group}}
+                    {{user.Departement}}
                   </p>
                 </ion-label>
+                <div class="ion-padding speaker-detail">
+
+                  <ion-chip *ngFor="let group of user.Groups; let i=index" [color]="getRandomColor (i)" button (click)="tagclick()">
+                    <ion-label>{{group}}</ion-label>
+                  </ion-chip>
+                </div>
                 <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
+
               </ion-item>
-              <ion-item-options>
-                <ion-item-option color="favorite">
-                  Favorite
-                </ion-item-option>
-                <ion-item-option color="danger">
-                  Remove
-                </ion-item-option>
-              </ion-item-options>
             </ion-item-sliding>
           </ion-item-group>
         </ion-list>

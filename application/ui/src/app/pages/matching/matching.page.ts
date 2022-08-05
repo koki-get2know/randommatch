@@ -25,7 +25,13 @@ export class MatchingPage implements OnInit {
   isSubmitted = false;
   selected_forbidden_connexion: [];
   userstoforbidden =[];
-  usersconnexionforbidden: User[][]=[];
+  usersconnexionforbidden: User[][] = [];
+  
+  ColorsTags = [
+    "twitter",
+    "instagram",
+    "dark"
+  ]
 
   avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
   "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
@@ -42,10 +48,23 @@ export class MatchingPage implements OnInit {
   }
 
   ngOnInit () {
-    this.usersgroups = this.generateUsers();
+    //this.usersgroups = this.generateUsers();
+    const storagevalue= localStorage.getItem( "userlist" );
+    this.usersgroups = storagevalue ? JSON.parse( storagevalue ) : [];
+
+    console.log( "NEW LIST" );
+    console.log( this.usersgroups );
+
     this.initForm();
   }
 
+  
+  getRandomColor () {
+    const min = 0;
+    const max = 2;
+    const index = Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+    return this.ColorsTags[3%(index+1)];
+  }
   initForm() {
     this.matchingForm = this.formBuilder.group({
       matchingsize: ['', Validators.required],
@@ -218,6 +237,8 @@ export class MatchingPage implements OnInit {
       forbiddenConnections: this.usersconnexionforbidden
 
     };
+    console.log( "MACHT DATA" );
+    console.log( matchingRequest );
 
     this.matchService.makematch(matchingRequest)
       .subscribe( ( res: Matching[] ) => {
@@ -241,6 +262,5 @@ export class MatchingPage implements OnInit {
     };
     this.router.navigate(['/matching-result'],navigationExtras);
   }
-
   
 }

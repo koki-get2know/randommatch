@@ -13,6 +13,13 @@ export interface MatchingReq {
   users: User[];
   forbiddenConnections?: User[][];
 }
+
+export interface MatchingGroupReq {
+  size: number;
+  group1: User[];
+  group2: User[];
+  forbiddenConnections?: User[][];
+}
 export interface Matching {
   id: number;
   users: User[];
@@ -35,8 +42,20 @@ export class UsersService {
       .pipe( map( res => res.data ) );
   }
 
+  makematchgroup(matchingReq: MatchingGroupReq) : Observable<Matching[]> {
+    return this.http.post<MatchingResponse>( `${ this.urlApi }/matchings`, matchingReq)
+      .pipe( map( res => res.data ) );
+  }
+
   uploadCsv(formData) {
     return this.http.post( `${ this.urlApi }/matching`, formData, {} )
+      .pipe( map( data => data ) );
+  }
+  uploadUsersFile(fileData) {
+    return this.http.post( `${ this.urlApi }/upload-users`, fileData, {
+      reportProgress: true,
+      observe: 'events'
+    } )
       .pipe( map( data => data ) );
   }
 
