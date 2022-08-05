@@ -9,6 +9,8 @@ import (
 	"github.com/koki/randommatch/entity"
 )
 
+var randomChoices = randomChoicesSeed()
+
 // TODO the selector paramater should be a config variable
 type Selector uint8
 
@@ -111,7 +113,7 @@ func remove[T comparable](l []T, item T) []T {
 	return l
 }
 
-func RandomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
+func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
 
 	return func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
@@ -168,16 +170,15 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 	matchA := &Match{}
 	match := false
 	if uint(len(groupeA.users)) >= matchSizeA && uint(len(groupeB.users)) >= matchSizeB {
-		RandomChoices := RandomChoicesSeed()
 
-		matchA = RandomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
+		matchA = randomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
 
 		users := []entity.User{}
 		gb := &UserGraph{}
 		copier.Copy(&users, &matchA.Users)
 		copier.Copy(gb, groupeB)
 		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
-			matchB := RandomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
+			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
 
 			ok := true
 
@@ -225,9 +226,8 @@ func Matcher(g *UserGraph, k uint,
 		*/
 
 		i := 0
-		RandomChoices := RandomChoicesSeed()
 		for k > 0 && uint(len(g.users))/k > 0 {
-			matched := RandomChoices(g, k, constraints, forbidenconections)
+			matched := randomChoices(g, k, constraints, forbidenconections)
 			for _, match := range matched.Users {
 				match := match
 				g.RemoveUser(&match)
