@@ -85,9 +85,11 @@ func TestMatcher2(t *testing.T) {
 
 	G.String()
 	var forbiddenConnections [][]User
-	A := []*User{{"5"}}
+	C := []User{{"5"}, {"1"}}
+	forbiddenConnections = append(forbiddenConnections, C)
+	A := []*User{{"5"}, {"6"}}
 	B := []*User{{"1"}, {"2"}}
-	interConstraint := []Constraint{Dejavu}
+	interConstraint := []Constraint{Dejavu, ForbiddenConnections}
 	SELECTOR := Group
 	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{Dejavu})
 

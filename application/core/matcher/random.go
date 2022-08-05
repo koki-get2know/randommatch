@@ -238,8 +238,6 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 		*/
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
-		groupA.String()
-		groupB.String()
 		i := 0
 		if matchSizeB > 0 && matchSizeA > 0 {
 			for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
