@@ -291,6 +291,11 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 	*/
 	var results []Match
 	var tuples map[int]*Match
+
+	if len(users) == 0 && s == Group {
+		users = append(A, B...)
+	}
+
 	graph := UsersToGraph(users, connections)
 
 	switch s {

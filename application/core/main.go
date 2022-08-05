@@ -33,6 +33,12 @@ type matchingReq struct {
 	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
 }
 
+type groupMatchingReq struct {
+	Size                 uint            `json:"size"`
+	Groups               [][]entity.User `json:"groups"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
+}
+
 type EmailReq struct {
 	Matches []matcher.Match `json:"matches"`
 }
@@ -63,6 +69,23 @@ func generateMatchings(c *gin.Context) {
 	}
 	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
 		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{}, 0, 0)
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+func generateGroupMatchings(c *gin.Context) {
+	defer duration(track("generateGroupMatchings"))
+	var req groupMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	if len(req.Groups) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
+		return
+	}
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1], req.Size/2, req.Size-(req.Size/2))
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
@@ -221,6 +244,7 @@ func main() {
 	protected := router.Group("")
 	protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
+	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
 	protected.GET("/users-creation-job/:id", getJobStatus)
 	protected.GET("/users", getUsers)

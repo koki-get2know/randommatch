@@ -23,10 +23,10 @@ type User struct {
 	Location               string   `json:"location"`
 	Seniority              string   `json:"seniority"`
 	Role                   string   `json:"role"`
-	NumberOfMatching       int      `json:"numberOfMatching"`
-	NumberMatchingAccepted int      `json:"numberMatchingAccepted"`
-	NumberMatchingDeclined int      `json:"numberMatchingDeclined"`
-	AverageMatchingRate    int      `json:"averageMatchingRate"`
+	NumberOfMatching       int      `json:"-"`
+	NumberMatchingAccepted int      `json:"-"`
+	NumberMatchingDeclined int      `json:"-"`
+	AverageMatchingRate    int      `json:"-"`
 	//SubjectOfInterest    []string
 }
 
