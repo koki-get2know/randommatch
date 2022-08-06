@@ -13,8 +13,12 @@ func TestRandomChoices(t *testing.T) {
 
 	var forbiddenConnections [][]entity.User
 	constraint := []Constraint{Unique}
+<<<<<<< HEAD
 	RandomChoices := RandomChoicesSeed()
 	matching := RandomChoices(&g, 2, constraint, forbiddenConnections)
+=======
+	matching := randomChoices(&g, 2, constraint, forbiddenConnections)
+>>>>>>> 513bf1e1ee2af44c8662feaa566e801c16833b4b
 	fmt.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
 		fmt.Printf("%s,", user.String())
@@ -55,7 +59,7 @@ func TestMatcher1(t *testing.T) {
 	constraint := []Constraint{Unique}
 	SELECTOR := Basic
 	matching := Matcher(&g, 2, constraint, SELECTOR, forbiddenConnections,
-		[]*entity.User{}, []*entity.User{}, 0, 0, []Constraint{}, []Constraint{})
+		[]*entity.User{}, []*entity.User{}, []Constraint{}, []Constraint{})
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
@@ -102,7 +106,7 @@ func TestMatcher2(t *testing.T) {
 	B := []*entity.User{{Id: "1"}, {Id: "2"}, {Id: "4"}}
 	interConstraint := []Constraint{Unique}
 	SELECTOR := Group
-	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, 1, 1, interConstraint, []Constraint{Unique})
+	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, interConstraint, []Constraint{Unique})
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
@@ -129,6 +133,7 @@ func TestGenTuple(t *testing.T) {
 	forbiddenConnections = append(forbiddenConnections, C)
 	forbiddenConnections = append(forbiddenConnections, D)
 	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 0, A, B, 1, 1)
+
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")

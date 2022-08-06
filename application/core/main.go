@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/database"
@@ -69,7 +68,7 @@ func generateMatchings(c *gin.Context) {
 	}
 
 	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
-		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{}, 0, 0)
+		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
@@ -86,7 +85,8 @@ func generateGroupMatchings(c *gin.Context) {
 		return
 	}
 	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
-		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1], req.Size/2, req.Size-(req.Size/2))
+
+		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
 
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
@@ -113,15 +113,12 @@ func uploadUsers(c *gin.Context) {
 		return
 	}
 
-	jobId := uuid.New().String()
-	err = database.CreateJobStatus(jobId)
+	jobId, err := database.CreateUsers(users)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "job creation failed " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "users creation failed " + err.Error()})
 		return
 	}
-
-	go database.CreateUsers(users, jobId)
-
 	c.Header("Location", fmt.Sprintf("/users-creation-job/%v", jobId))
 	c.JSON(http.StatusAccepted, gin.H{"message": "Job enqueued"})
 }
@@ -159,6 +156,7 @@ func emailMatches(c *gin.Context) {
 	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
 	adminEmail := claims["preferred_username"].(string)
 
+	// http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
 	go func() {
 		for _, match := range req.Matches {
 			match := match
@@ -220,7 +218,7 @@ func duration(msg string, start time.Time) {
 }
 
 func main() {
-	//os.Setenv("NEO4J_AUTH", "***/***")
+	os.Setenv("NEO4J_AUTH", "***/***")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
