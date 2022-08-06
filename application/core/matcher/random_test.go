@@ -13,12 +13,9 @@ func TestRandomChoices(t *testing.T) {
 
 	var forbiddenConnections [][]entity.User
 	constraint := []Constraint{Unique}
-<<<<<<< HEAD
-	RandomChoices := RandomChoicesSeed()
+	RandomChoices := randomChoicesSeed()
 	matching := RandomChoices(&g, 2, constraint, forbiddenConnections)
-=======
-	matching := randomChoices(&g, 2, constraint, forbiddenConnections)
->>>>>>> 513bf1e1ee2af44c8662feaa566e801c16833b4b
+
 	fmt.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
 		fmt.Printf("%s,", user.String())
@@ -132,8 +129,7 @@ func TestGenTuple(t *testing.T) {
 	D := []entity.User{{Id: "tata"}, {Id: "titi"}}
 	forbiddenConnections = append(forbiddenConnections, C)
 	forbiddenConnections = append(forbiddenConnections, D)
-	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 0, A, B, 1, 1)
-
+	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, B)
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
