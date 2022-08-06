@@ -175,7 +175,6 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 		   output : match of size matchSizeA + matchSizeB
 	*/
 	matchA := &Match{}
-	match := false
 	if uint(len(groupeA.users)) >= matchSizeA && uint(len(groupeB.users)) >= matchSizeB {
 
 		matchA = randomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
@@ -184,10 +183,11 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 		gb := &UserGraph{}
 		copier.Copy(&users, &matchA.Users)
 		copier.Copy(gb, groupeB)
+		match := false
 		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
 			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
 
-			ok := true
+			match = true
 
 			for _, u := range matchB.Users {
 				u := u
@@ -195,13 +195,12 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 					matchA.Users = append(matchA.Users, u)
 
 				} else {
-					ok = false
+					match = false
 					gb.RemoveUser(&u)
 					break
 				}
 				gb.RemoveUser(&u)
 			}
-			match = ok
 		}
 	}
 	return matchA
