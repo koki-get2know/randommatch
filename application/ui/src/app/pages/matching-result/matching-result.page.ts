@@ -38,9 +38,9 @@ export class MatchingResultPage implements OnInit {
         this.matchings.splice(this.matchings.findIndex(m => m.id === match.id), 1);
         const forbiddenConnection: User[] = [];
         for (const user of match.users) {
-          users.push({userId: user.userId});
+          users.push({id: user.id, name: user.name});
           userswithavatar.push(user);
-          forbiddenConnection.push({userId: user.userId});
+          forbiddenConnection.push({id: user.id, name: user.name});
         }
         forbiddenConnections.push(forbiddenConnection);
       }
@@ -52,7 +52,7 @@ export class MatchingResultPage implements OnInit {
       };
       this.matchingService.makematch(req).subscribe(( matchings: Matching[] ) => {
         matchings.forEach(match => match.users.forEach(user => {
-          user.avatar = userswithavatar.find(usr => usr.userId === user.userId)?.avatar;
+          user.avatar = userswithavatar.find(usr => usr.id === user.id)?.avatar;
         }));
         
         this.matchings = this.matchings.concat(matchings);

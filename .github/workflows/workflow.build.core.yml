@@ -108,8 +108,8 @@ jobs:
         --set backend.image.tag=${IMAGE_BE_TAG} \
         --set ui.image.tag=${IMAGE_UI_TAG} \
         --set matchdb.creds=${{ secrets.NEO4J_AUTH }} \
-        --set aws_ses.keyid=${{ secrets.SES_KEY_ID }} \
-        --set aws_ses.keysecret=${{ secrets.SES_KEY_SECRET }} \
+        --set backend.aws_ses.keyid=${{ secrets.SES_KEY_ID }} \
+        --set backend.aws_ses.keysecret=${{ secrets.SES_KEY_SECRET }} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
        

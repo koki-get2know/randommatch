@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
+
+	"github.com/koki/randommatch/entity"
 )
 
 // TODO the selector paramater should be a config variable
@@ -19,13 +21,13 @@ const (
 type Constraint uint8
 
 const (
-	Dejavu Constraint = iota
+	Unique Constraint = iota
 	ForbiddenConnections
 )
 
 type Match struct {
-	Id    string `json:"id"`
-	Users []User `json:"users"`
+	Id    string        `json:"id"`
+	Users []entity.User `json:"users"`
 }
 
 //TODO integrate  the constraint structure in code
@@ -38,11 +40,11 @@ type SelectorParams[T any] struct { // Type parameters for constraint
 	Params map[Constraint][]T
 }
 
-func search(users []User, n User) (bool, int) {
+func search(users []entity.User, n entity.User) (bool, int) {
 	index := -1
 	find := false
 	for i, user := range users {
-		if user.UserId == n.UserId {
+		if user.Id == n.Id {
 			find = true
 			index = i
 			break
@@ -51,7 +53,10 @@ func search(users []User, n User) (bool, int) {
 
 	return find, index
 }
-func Filter(g *UserGraph, matched []User, n *User, constraints []Constraint, forbiddenConnections [][]User) bool {
+
+func Filter(g *UserGraph, matched []entity.User, n *entity.User,
+	constraints []Constraint, forbiddenConnections [][]entity.User) bool {
+
 	/* Filter
 
 	   input :
@@ -65,37 +70,36 @@ func Filter(g *UserGraph, matched []User, n *User, constraints []Constraint, for
 	*/
 
 	ok := true
+
+constraintloop:
 	for _, constraint := range constraints {
-		if ok {
-			for _, user := range matched {
-				if ok {
-					switch constraint {
-					case Dejavu:
-						// check if an edges exist between n and any user in matched
 
-						if find, _ := Search(g.edges[*n], &user); find {
-							ok = false
+		for _, user := range matched {
+			switch constraint {
+			case Unique:
+				// check if an edges exist between n and any user in matched
 
-						}
+				if find, _ := Search(g.edges[(*n).Id], &user); find {
+					ok = false
+					break constraintloop
+				}
 
-					case ForbiddenConnections:
-						for _, usersNotToMatch := range forbiddenConnections {
-							if len(usersNotToMatch) > 0 {
-								find1, _ := search(usersNotToMatch, *n)
-								find2, _ := search(usersNotToMatch, user)
-								if find1 && find2 {
-									ok = false
-									break
-								}
+			case ForbiddenConnections:
+				for _, usersNotToMatch := range forbiddenConnections {
+					if len(usersNotToMatch) > 0 {
+						if find1, _ := search(usersNotToMatch, *n); find1 {
+							if find2, _ := search(usersNotToMatch, user); find2 {
+								ok = false
+								break constraintloop
 							}
-
 						}
 					}
+
 				}
 			}
-		} else {
-			break
+
 		}
+
 	}
 
 	return ok
@@ -110,42 +114,48 @@ func remove[T comparable](l []T, item T) []T {
 	return l
 }
 
-func RandomChoices(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]User) *Match {
-
-	/* random choice without constraint
-
-	   input : a graph of users, k length of tuple match
-	   output : k random id
-	   purpose : match k user from the graph
-
-	*/
-
-	var matching = &Match{}
-	var matchedUsers []User
+func RandomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
 
-	var indices []int
-	for i := range g.users {
-		indices = append(indices, i)
-	}
+	return func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 
-	for uint(len(matchedUsers)) < k && len(indices) > 0 {
-		rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
-		index := indices[0]
+		/* random choice without constraint
 
-		ok := Filter(g, matchedUsers, g.users[index], constraints, forbiddenConnections) // check the constraints
-		if ok {
+		   input : a graph of users, k length of tuple match
+		   output : k random id
+		   purpose : match k user from the graph
 
-			matchedUsers = append(matchedUsers, *g.users[index])
+
+		*/
+
+		var matching = &Match{}
+		var matchedUsers []entity.User
+		var indices []int
+		for i := range g.users {
+			indices = append(indices, i)
 		}
-		indices = remove(indices, index)
+
+		for uint(len(matchedUsers)) < k && len(indices) > 0 {
+			rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
+			index := indices[0]
+
+			ok := Filter(g, matchedUsers, g.users[index], constraints, forbiddenConnections) // check the constraints
+			if ok {
+
+				matchedUsers = append(matchedUsers, *g.users[index])
+			}
+			indices = remove(indices, index)
+
+		}
+		matching.Users = matchedUsers
+		matching.Id = ""
+		return matching
 	}
-	matching.Users = matchedUsers
-	matching.Id = ""
-	return matching
+
 }
 
-func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, matchSizeB uint, interGroupConstraints []Constraint, innerGroupConstraints []Constraint, forbiddenConnections [][]User) *Match {
+func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, matchSizeB uint,
+	interGroupConstraints []Constraint, innerGroupConstraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 
 	/*
 		   input :
@@ -165,10 +175,11 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 	match := false
 
 	if uint(len(groupeA.users)) >= matchSizeA && uint(len(groupeB.users)) >= matchSizeB {
+		RandomChoices := RandomChoicesSeed()
 
 		matchA = RandomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
 
-		users := []User{}
+		users := []entity.User{}
 		gb := &UserGraph{}
 		copier.Copy(&users, &matchA.Users)
 		copier.Copy(gb, groupeB)
@@ -179,7 +190,7 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 			for _, u := range matchB.Users {
 				u := u
-				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) {
+				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
 					matchA.Users = append(matchA.Users, u)
 
 				} else {
@@ -196,7 +207,10 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 }
 
-func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, forbidenconections [][]User, A []*User, B []*User, matchSizeA uint, matchSizeB uint, interGroupConstraints []Constraint, innerGroupConstraints []Constraint) map[int]*Match {
+func Matcher(g *UserGraph, k uint,
+	constraints []Constraint, SELECTOR Selector, forbidenconections [][]entity.User,
+	A []*entity.User, B []*entity.User, matchSizeA uint, matchSizeB uint,
+	interGroupConstraints []Constraint, innerGroupConstraints []Constraint) map[int]*Match {
 
 	/* Matcher without constraint
 
@@ -218,6 +232,7 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 		*/
 
 		i := 0
+		RandomChoices := RandomChoicesSeed()
 		for k > 0 && uint(len(g.users))/k > 0 {
 			matched := RandomChoices(g, k, constraints, forbidenconections)
 			for _, match := range matched.Users {
@@ -238,10 +253,14 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 		*/
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
+		groupA.String()
+		groupB.String()
 		i := 0
 		if matchSizeB > 0 && matchSizeA > 0 {
 			for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
-				matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB, interGroupConstraints, innerGroupConstraints, forbidenconections)
+				matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
+					interGroupConstraints, innerGroupConstraints,
+					forbidenconections)
 				if matched != nil {
 					for _, match := range matched.Users {
 						match := match
@@ -249,6 +268,8 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 						groupB.RemoveUser(&match)
 
 					}
+					groupA.String()
+					groupB.String()
 				}
 
 				matching[i] = matched
@@ -263,7 +284,9 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint, SELECTOR Selector, 
 
 }
 
-func GenerateTuple(users []User, connections [][]User, s Selector, forbiddenConnections [][]User, size uint, A []User, B []User, sizeA uint, sizeB uint) []Match {
+func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
+	forbiddenConnections [][]entity.User, size uint,
+	A []entity.User, B []entity.User, sizeA uint, sizeB uint) []Match {
 	/*
 				         Input :
 						    - general
@@ -280,25 +303,36 @@ func GenerateTuple(users []User, connections [][]User, s Selector, forbiddenConn
 	*/
 	var results []Match
 	var tuples map[int]*Match
-	graph := UsersToGraph(users, connections)
 
+	if len(users) == 0 && s == Group {
+		users = append(A, B...)
+	}
+
+	graph := UsersToGraph(users, connections)
+	graph.String()
 	switch s {
 	case Basic:
-		tuples = Matcher(graph, size, []Constraint{Dejavu}, Basic, forbiddenConnections, []*User{}, []*User{}, 0, 0, []Constraint{}, []Constraint{})
+
+		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
+			forbiddenConnections, []*entity.User{}, []*entity.User{},
+			0, 0, []Constraint{}, []Constraint{})
 	case Group:
-		gA := []*User{}
-		gB := []*User{}
+		gA := []*entity.User{}
+		gB := []*entity.User{}
 		for _, u := range A {
-			u2 := u
-			gA = append(gA, &u2)
+			u := u
+			gA = append(gA, &u)
 
 		}
 		for _, u := range B {
-			u2 := u
-			gB = append(gB, &u2)
+			u := u
+			gB = append(gB, &u)
 		}
 
-		tuples = Matcher(graph, size, []Constraint{}, Group, forbiddenConnections, gA, gB, sizeA, sizeB, []Constraint{Dejavu}, []Constraint{})
+		tuples = Matcher(graph, size, []Constraint{}, Group,
+			forbiddenConnections, gA, gB,
+			sizeA, sizeB, []Constraint{Unique, ForbiddenConnections}, []Constraint{ForbiddenConnections})
+
 	}
 	for index, matching := range tuples {
 

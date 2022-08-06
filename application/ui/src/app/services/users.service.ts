@@ -8,7 +8,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import avatar from 'animal-avatar-generator';
 
 export class User {
-  userId: string;
+  id: string;
+  name?: string;
   avatar?: SafeHtml;
 }
 export interface MatchingReq {

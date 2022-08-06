@@ -6,16 +6,17 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
+	"github.com/koki/randommatch/database"
+	"github.com/koki/randommatch/entity"
 	"github.com/koki/randommatch/matcher"
 	"github.com/koki/randommatch/middlewares"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // album represents data about a record album.
@@ -27,9 +28,15 @@ type album struct {
 }
 
 type matchingReq struct {
-	Size                 uint             `json:"size"`
-	Users                []matcher.User   `json:"users"`
-	ForbiddenConnections [][]matcher.User `json:"forbiddenConnections"`
+	Size                 uint            `json:"size"`
+	Users                []entity.User   `json:"users"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
+}
+
+type groupMatchingReq struct {
+	Size                 uint            `json:"size"`
+	Groups               [][]entity.User `json:"groups"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
 }
 
 type EmailReq struct {
@@ -60,7 +67,27 @@ func generateMatchings(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
-	tuples := matcher.GenerateTuple(req.Users, [][]matcher.User{}, matcher.Basic, req.ForbiddenConnections, req.Size, []matcher.User{}, []matcher.User{}, 0, 0)
+
+	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
+		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{}, 0, 0)
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+func generateGroupMatchings(c *gin.Context) {
+	defer duration(track("generateGroupMatchings"))
+	var req groupMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	if len(req.Groups) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
+		return
+	}
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1], req.Size/2, req.Size-(req.Size/2))
+
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
@@ -85,7 +112,39 @@ func uploadUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, users)
+
+	jobId := uuid.New().String()
+	err = database.CreateJobStatus(jobId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "job creation failed " + err.Error()})
+		return
+	}
+
+	go database.CreateUsers(users, jobId)
+
+	c.Header("Location", fmt.Sprintf("/users-creation-job/%v", jobId))
+	c.JSON(http.StatusAccepted, gin.H{"message": "Job enqueued"})
+}
+
+func getUsers(c *gin.Context) {
+	defer duration(track("getUsers"))
+	users, err := database.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": users})
+}
+
+func getJobStatus(c *gin.Context) {
+	defer duration(track("getJobStatus"))
+	id := c.Param("id")
+	status, err := database.GetJobStatus(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": status})
 }
 
 func emailMatches(c *gin.Context) {
@@ -152,22 +211,6 @@ func getAlbumByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
-func helloFromNeo4j(c *gin.Context) {
-	defer duration(track("helloFromNeo4j"))
-	creds := strings.Split(os.Getenv("NEO4J_AUTH"), "/")
-	if len(creds) < 2 {
-		fmt.Println("NEO4J_AUTH env variable missing or not set correctly")
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Missing setup"})
-		return
-	}
-	hello, err := helloNeo4j("bolt://match-db:7687", creds[0], creds[1])
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Exiting because of error" + err.Error()})
-		return
-	}
-	c.IndentedJSON(http.StatusCreated, gin.H{"message": hello})
-}
-
 func track(msg string) (string, time.Time) {
 	return msg, time.Now()
 }
@@ -176,40 +219,20 @@ func duration(msg string, start time.Time) {
 	log.Printf("%v: %v\n", msg, time.Since(start))
 }
 
-func helloNeo4j(uri, username, password string) (string, error) {
-	driver, err := neo4j.NewDriver(uri, neo4j.BasicAuth(username, password, ""))
-	if err != nil {
-		return "", err
-	}
-	defer driver.Close()
-
-	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-
-	defer session.Close()
-
-	greeting, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
-		result, err := transaction.Run(
-			"CREATE (a:Greeting) SET a.message = $message RETURN a.message + ', from node ' + id(a)",
-			map[string]interface{}{"message": "hello, world from neo4j"})
-		if err != nil {
-			return nil, err
-		}
-
-		if result.Next() {
-			return result.Record().Values[0], nil
-		}
-
-		return nil, result.Err()
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return greeting.(string), nil
-}
-
 func main() {
+	//os.Setenv("NEO4J_AUTH", "***/***")
+	_, exists := os.LookupEnv("NEO4J_AUTH")
+	if exists {
+		driver, err := database.Driver()
+		if err != nil {
+			fmt.Print(err)
+			return
+		}
+		defer (*driver).Close()
+	}
+
 	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 	router.Use(middlewares.Cors())
 
@@ -219,12 +242,14 @@ func main() {
 	public.GET("/albums", getAlbums)
 	public.GET("/albums/:id", getAlbumByID)
 	public.POST("/albums", postAlbums)
-	public.GET("/neo4j", helloFromNeo4j)
 
 	protected := router.Group("")
 	protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
+	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
+	protected.GET("/users-creation-job/:id", getJobStatus)
+	protected.GET("/users", getUsers)
 	protected.POST("/email-matches", emailMatches)
 
 	router.Run()
