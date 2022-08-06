@@ -68,7 +68,7 @@ func generateMatchings(c *gin.Context) {
 		return
 	}
 	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
-		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{}, 0, 0)
+		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
@@ -85,7 +85,7 @@ func generateGroupMatchings(c *gin.Context) {
 		return
 	}
 	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
-		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1], req.Size/2, req.Size-(req.Size/2))
+		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
