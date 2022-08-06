@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/fatih/structs"
@@ -85,23 +86,51 @@ func mapUsers(users []entity.User) []map[string]interface{} {
 	return result
 }
 
-func CreateUsers(users []entity.User, jobId string) error {
+func CreateUsers(users []entity.User) (string, error) {
+	jobId := uuid.New().String()
+	if err := CreateJobStatus(jobId); err != nil {
+		return "", err
+	}
+	status := make(chan jobStatus)
+	go func() {
+		if err := createUsers(users, status); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	go func() {
+		driver, err := Driver()
+		if err != nil {
+			fmt.Print("Driver error", err)
+			return
+		}
+		session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+		defer session.Close()
+		for st := range status {
+			fmt.Println("status", st)
+			if err := updateJobStatus(session, jobId, st); err != nil {
+				fmt.Println("Error while updating job", jobId, err)
+			}
+		}
+	}()
+	return jobId, nil
+}
 
+func createUsers(users []entity.User, out chan jobStatus) error {
+	defer close(out)
 	driver, err := Driver()
 	if err != nil {
+		out <- Failed
 		return err
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	if len(users) == 0 {
-		updateJobStatus(session, jobId, Done)
+		out <- Done
 		return nil
 	}
 
-	if err = updateJobStatus(session, jobId, Running); err != nil {
-		return err
-	}
+	out <- Running
 	const chunkSize = 1000
 	userschunks := chunkSlice(users, chunkSize)
 
@@ -130,11 +159,12 @@ func CreateUsers(users []entity.User, jobId string) error {
 
 		})
 		if err != nil {
-			updateJobStatus(session, jobId, Failed)
+			out <- Failed
 			return err
 		}
 	}
-	return updateJobStatus(session, jobId, Done)
+	out <- Done
+	return nil
 }
 
 func GetUsers() ([]entity.User, error) {
