@@ -110,7 +110,19 @@ func uploadUsers(c *gin.Context) {
 		return
 	}
 
-	jobId, err := database.CreateUsers(users)
+	// in a next phase organization creation should be done via a super admin that has the appropriate roles
+	orga := entity.Organization{
+		Name:        "dummy",
+		Description: "All users belongs to this organization on the MVP phase",
+	}
+	orgaUid, err := database.CreateOrganization(orga)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		return
+	}
+
+	jobId, err := database.CreateUsers(users, orgaUid)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "users creation failed " + err.Error()})
@@ -215,7 +227,7 @@ func duration(msg string, start time.Time) {
 }
 
 func main() {
-	os.Setenv("NEO4J_AUTH", "***/***")
+	//os.Setenv("NEO4J_AUTH", "****/****")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
@@ -248,5 +260,4 @@ func main() {
 	protected.POST("/email-matches", emailMatches)
 
 	router.Run()
-
 }

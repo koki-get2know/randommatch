@@ -86,14 +86,14 @@ func mapUsers(users []entity.User) []map[string]interface{} {
 	return result
 }
 
-func CreateUsers(users []entity.User) (string, error) {
+func CreateUsers(users []entity.User, orgaUid string) (string, error) {
 	jobId := uuid.New().String()
 	if err := CreateJobStatus(jobId); err != nil {
 		return "", err
 	}
 	status := make(chan jobStatus)
 	go func() {
-		if err := createUsers(users, status); err != nil {
+		if err := createUsers(users, orgaUid, status); err != nil {
 			fmt.Println(err)
 		}
 	}()
@@ -106,7 +106,6 @@ func CreateUsers(users []entity.User) (string, error) {
 		session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 		defer session.Close()
 		for st := range status {
-			fmt.Println("status", st)
 			if err := updateJobStatus(session, jobId, st); err != nil {
 				fmt.Println("Error while updating job", jobId, err)
 			}
@@ -115,7 +114,7 @@ func CreateUsers(users []entity.User) (string, error) {
 	return jobId, nil
 }
 
-func createUsers(users []entity.User, out chan jobStatus) error {
+func createUsers(users []entity.User, orgaUid string, out chan jobStatus) error {
 	defer close(out)
 	driver, err := Driver()
 	if err != nil {
@@ -136,12 +135,19 @@ func createUsers(users []entity.User, out chan jobStatus) error {
 
 	for _, chunk := range userschunks {
 		_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run("UNWIND $users AS user "+
-				"MERGE (n: User{name: user.Name, email: user.Email}) "+
-				"ON CREATE SET n += {uid: $uid, "+
+			result, err := tx.Run("MATCH (o: Organization{uid: $orguid }) "+
+				"UNWIND $users AS user "+
+				"MERGE (u: User{name: user.Name, email: user.Email}) "+
+				"ON CREATE SET u += {uid: $uid, "+
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
-				"RETURN n.uid",
-				map[string]interface{}{"users": mapUsers(chunk), "uid": uuid.New().String()})
+				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
+				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
+				"WITH user.Groups AS tags, u AS u "+
+				"UNWIND tags AS tag "+
+				"MERGE (t: Tag {name: tag}) "+
+				"MERGE (u)-[rut:HAS_TAG]->(t) "+
+				"RETURN u.uid",
+				map[string]interface{}{"users": mapUsers(chunk), "uid": uuid.New().String(), "orguid": orgaUid})
 
 			if err != nil {
 				return "", err
@@ -176,18 +182,25 @@ func GetUsers() ([]entity.User, error) {
 	defer session.Close()
 
 	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n: User) RETURN n", map[string]interface{}{})
+		result, err := tx.Run("MATCH (n: User) OPTIONAL MATCH (n)-[r:HAS_TAG]->(t: Tag) RETURN  n, COLLECT(t.name)",
+			map[string]interface{}{})
 		var users []entity.User
 
 		if err != nil {
 			return users, err
 		}
 		for result.Next() {
+			var tags []string
+			for _, tag := range result.Record().Values[1].([]interface{}) {
+				tags = append(tags, tag.(string))
+			}
 			user := result.Record().Values[0].(dbtype.Node).Props
+
 			users = append(users,
 				entity.User{
-					Id:   user["uid"].(string),
-					Name: user["name"].(string),
+					Id:     user["uid"].(string),
+					Name:   user["name"].(string),
+					Groups: tags,
 				})
 		}
 

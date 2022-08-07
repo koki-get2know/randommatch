@@ -22,35 +22,75 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 	}
 
 	var header []string
-
+	var headerCellIndex = make(map[string]int)
 	if len(records) > 0 {
 		// skip the header
 		header = records[0]
 		records = records[1:]
+		for i, cell := range header {
+			headerCellIndex[cell] = i
+		}
 	}
-	if len(header) < 15 {
-		return nil, fmt.Errorf("header and content not matching")
-	}
+
 	var users []entity.User
 	for _, record := range records {
-		user := entity.User{
-			Name:                record[0],
-			Email:               record[1],
-			Groups:              strings.Split(record[2], "-"),
-			Gender:              record[3],
-			Birthday:            record[4],
-			Hobbies:             strings.Split(record[5], "-"),
-			MatchPreference:     strings.Split(record[6], "-"),
-			MatchPreferenceTime: strings.Split(record[7], "-"),
-			PositionHeld:        record[8],
-			PhoneNumber:         record[10],
-			Department:          record[11],
-			Location:            record[12],
-			Seniority:           record[13],
-			Role:                record[14],
+		user := entity.User{}
+
+		if val, exists := headerCellIndex["Name"]; exists {
+			user.Name = record[val]
+		}
+		if val, exists := headerCellIndex["Email"]; exists {
+			user.Email = record[val]
+		}
+		if val, exists := headerCellIndex["Gender"]; exists {
+			user.Gender = record[val]
+		}
+		if val, exists := headerCellIndex["Birthday"]; exists {
+			user.Birthday = record[val]
+		}
+		if val, exists := headerCellIndex["PositionHeld"]; exists {
+			user.PositionHeld = record[val]
+		}
+		if val, exists := headerCellIndex["PhoneNumber"]; exists {
+			user.PhoneNumber = record[val]
+		}
+		if val, exists := headerCellIndex["Department"]; exists {
+			user.Department = record[val]
+		}
+		if val, exists := headerCellIndex["Location"]; exists {
+			user.Location = record[val]
+		}
+		if val, exists := headerCellIndex["Seniority"]; exists {
+			user.Seniority = record[val]
+		}
+		if val, exists := headerCellIndex["Role"]; exists {
+			user.Role = record[val]
+		}
+		if val, exists := headerCellIndex["Groups"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.Groups = strings.Split(record[val], "-")
+			}
 		}
 
-		user.MultiMatch, err = strconv.ParseBool(record[9])
+		if val, exists := headerCellIndex["Hobbies"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.Hobbies = strings.Split(record[val], "-")
+			}
+		}
+		if val, exists := headerCellIndex["MatchPreference"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.MatchPreference = strings.Split(record[val], "-")
+			}
+		}
+
+		if val, exists := headerCellIndex["MatchPreferenceTime"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.MatchPreferenceTime = strings.Split(record[val], "-")
+			}
+		}
+		if val, exists := headerCellIndex["MultiMatch"]; exists {
+			user.MultiMatch, err = strconv.ParseBool(record[val])
+		}
 		if err != nil {
 			fmt.Printf("Warning wrong boolean string value passed for user %v, value passed: %v\n", user.Name, user.MultiMatch)
 			user.MultiMatch = false
