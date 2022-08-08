@@ -13,8 +13,7 @@ func TestRandomChoices(t *testing.T) {
 
 	var forbiddenConnections [][]entity.User
 	constraint := []Constraint{Unique}
-	RandomChoices := randomChoicesSeed()
-	matching := RandomChoices(&g, 2, constraint, forbiddenConnections)
+	matching := randomChoices(&g, 2, constraint, forbiddenConnections)
 
 	fmt.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
