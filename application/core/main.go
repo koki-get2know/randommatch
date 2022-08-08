@@ -44,7 +44,8 @@ var albums = []album{
 	{ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
 }
 
-var numberOfMatching = 0
+var numberOfConversation = 0
+var numberOfMatchingSection = 0
 
 // getAlbums responds with the list of all albums as JSON.
 func getHealthCheck(c *gin.Context) {
@@ -60,8 +61,7 @@ func generateMatchings(c *gin.Context) {
 		return
 	}
 	tuples := matcher.GenerateTuple(req.Users, req.ForbiddenConnections, req.Size)
-	numberOfMatching++
-	c.JSON(http.StatusCreated, gin.H{"data": tuples, "numberOfMatching": numberOfMatching})
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }
 
 func uploadUsers(c *gin.Context) {
@@ -89,6 +89,29 @@ func uploadUsers(c *gin.Context) {
 }
 
 func emailMatches(c *gin.Context) {
+	defer duration(track("emailMatches"))
+	var req EmailReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	adminEmail := claims["preferred_username"].(string)
+
+	go func() {
+		for _, match := range req.Matches {
+			match := match
+			calendar.SendInvite(&match, adminEmail)
+			break // send only once for now
+		}
+	}()
+	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
+
+}
+
+func countNumberConversation(c *gin.Context) {
 	defer duration(track("emailMatches"))
 	var req EmailReq
 

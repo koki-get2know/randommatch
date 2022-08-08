@@ -19,7 +19,7 @@
   "private": true,
   "dependencies": {
     "@angular/common": "^13.3.0",
-    "@angular/core": "^13.3.0",
+    "@angular/core": "^13.3.11",
     "@angular/forms": "^13.3.0",
     "@angular/platform-browser": "^13.3.0",
     "@angular/platform-browser-dynamic": "^13.3.0",
@@ -43,7 +43,7 @@
     "animal-avatar-generator": "^1.0.5",
     "cordova-plugin-inappbrowser": "5.0.0",
     "core-js": "^3.6.4",
-    "ionic-selectable": "^4.8.0",
+    "ionic-selectable": "^4.9.0",
     "lorem-ipsum": "^2.0.8",
     "rxjs": "^6.5.4",
     "sw-toolbox": "3.6.0",
