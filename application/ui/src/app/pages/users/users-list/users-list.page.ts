@@ -328,6 +328,8 @@ export class UsersListPage implements OnInit {
   }
 
   uploadCsv ( event ) {
+    this.storeUsersList();
+
     for (const file of event.target.files) {
       const fileData = new FormData();
       fileData.append("file", file);
