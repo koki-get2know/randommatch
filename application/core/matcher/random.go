@@ -181,7 +181,6 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 		   output : match of size matchSizeA + matchSizeB
 	*/
 	matchA := &Match{}
-	randomChoices := randomChoicesSeed()
 	if uint(len(groupeA.users)) >= matchSizeA && uint(len(groupeB.users)) >= matchSizeB {
 
 		matchA = randomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
