@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
+
 	"github.com/koki/randommatch/entity"
 )
 
@@ -57,6 +58,7 @@ func search(users []entity.User, n entity.User) (bool, int) {
 
 func Filter(g *UserGraph, matched []entity.User, n *entity.User,
 	constraints []Constraint, forbiddenConnections [][]entity.User) bool {
+
 	/* Filter
 
 	   input :
@@ -73,6 +75,7 @@ func Filter(g *UserGraph, matched []entity.User, n *entity.User,
 
 constraintloop:
 	for _, constraint := range constraints {
+
 		for _, user := range matched {
 			switch constraint {
 			case Unique:
@@ -131,6 +134,7 @@ func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, fo
 		   output : k random id
 		   purpose : match k user from the graph
 
+
 		*/
 
 		var matching = &Match{}
@@ -150,11 +154,13 @@ func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, fo
 				matchedUsers = append(matchedUsers, *g.users[index])
 			}
 			indices = remove(indices, index)
+
 		}
 		matching.Users = matchedUsers
 		matching.Id = ""
 		return matching
 	}
+
 }
 
 func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, matchSizeB uint,
@@ -191,7 +197,7 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 			for _, u := range matchB.Users {
 				u := u
-				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) {
+				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
 					matchA.Users = append(matchA.Users, u)
 
 				} else {
@@ -252,6 +258,7 @@ func Matcher(g *UserGraph, k uint,
 			   - m2 = random choice  users dans B
 			   - check if m1 + m2 can be match
 		*/
+
 		if k < 2 {
 			break
 		}
@@ -270,7 +277,6 @@ func Matcher(g *UserGraph, k uint,
 		if matchSizeB == 0 || matchSizeA == 0 || matchSizeB+matchSizeA != k {
 			break
 		}
-
 		i := 0
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
@@ -338,7 +344,9 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 		graph := UsersToGraph(append(A, B...), connections)
 		tuples = Matcher(graph, size, []Constraint{}, Group,
 			forbiddenConnections, gA, gB,
+
 			[]Constraint{Unique, ForbiddenConnections}, []Constraint{})
+
 	}
 	for index, matching := range tuples {
 
