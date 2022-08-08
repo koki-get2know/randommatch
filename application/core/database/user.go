@@ -80,6 +80,7 @@ func mapUsers(users []entity.User) []map[string]interface{} {
 	var result = make([]map[string]interface{}, len(users))
 
 	for index, item := range users {
+		item.Id = uuid.New().String()
 		result[index] = structs.Map(item)
 	}
 
@@ -138,7 +139,7 @@ func createUsers(users []entity.User, orgaUid string, out chan jobStatus) error 
 			result, err := tx.Run("MATCH (o: Organization{uid: $orguid }) "+
 				"UNWIND $users AS user "+
 				"MERGE (u: User{name: user.Name, email: user.Email}) "+
-				"ON CREATE SET u += {uid: $uid, "+
+				"ON CREATE SET u += {uid: user.Id, "+
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
 				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
 				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
@@ -147,7 +148,7 @@ func createUsers(users []entity.User, orgaUid string, out chan jobStatus) error 
 				"MERGE (t: Tag {name: tag}) "+
 				"MERGE (u)-[rut:HAS_TAG]->(t) "+
 				"RETURN u.uid",
-				map[string]interface{}{"users": mapUsers(chunk), "uid": uuid.New().String(), "orguid": orgaUid})
+				map[string]interface{}{"users": mapUsers(chunk), "orguid": orgaUid})
 
 			if err != nil {
 				return "", err
