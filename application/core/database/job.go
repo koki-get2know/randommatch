@@ -5,6 +5,17 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
+type JobStatus string
+
+const (
+	Pending   JobStatus = "Pending"
+	Running   JobStatus = "Running"
+	Done      JobStatus = "Done"
+	Failed    JobStatus = "Failed"
+	Suspended JobStatus = "Suspended"
+	Cancelled JobStatus = "Cancelled"
+)
+
 func CreateJobStatus(uid string) error {
 	driver, err := Driver()
 	if err != nil {
@@ -35,7 +46,47 @@ func CreateJobStatus(uid string) error {
 	return nil
 }
 
-func updateJobStatus(session neo4j.Session, uid string, status jobStatus) error {
+func UpdateJobErrors(uid string, errors []string) error {
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: Job{uid: $uid}) "+
+			"SET n += {errors: $errors, "+
+			"last_update: datetime({timezone: 'Z'})}",
+			map[string]interface{}{"uid": uid, "errors": errors})
+
+		if err != nil {
+			return nil, err
+		}
+		_, err = result.Consume()
+
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateJobStatus(uid string, status JobStatus) error {
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	return updateJobStatus(session, uid, status)
+}
+
+func updateJobStatus(session neo4j.Session, uid string, status JobStatus) error {
 	_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run("MATCH (n: Job{uid: $uid}) "+
 			"SET n += {status: $status, "+

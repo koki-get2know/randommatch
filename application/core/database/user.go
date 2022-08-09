@@ -11,17 +11,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
-type jobStatus string
-
-const (
-	Pending   jobStatus = "Pending"
-	Running   jobStatus = "Running"
-	Done      jobStatus = "Done"
-	Failed    jobStatus = "Failed"
-	Suspended jobStatus = "Suspended"
-	Cancelled jobStatus = "Cancelled"
-)
-
 func CreateUser(user entity.User) (string, error) {
 	driver, err := Driver()
 	if err != nil {
@@ -92,7 +81,7 @@ func CreateUsers(users []entity.User, orgaUid string) (string, error) {
 	if err := CreateJobStatus(jobId); err != nil {
 		return "", err
 	}
-	status := make(chan jobStatus)
+	status := make(chan JobStatus)
 	go func() {
 		if err := createUsers(users, orgaUid, status); err != nil {
 			fmt.Println(err)
@@ -115,7 +104,7 @@ func CreateUsers(users []entity.User, orgaUid string) (string, error) {
 	return jobId, nil
 }
 
-func createUsers(users []entity.User, orgaUid string, out chan jobStatus) error {
+func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error {
 	defer close(out)
 	driver, err := Driver()
 	if err != nil {
@@ -216,4 +205,37 @@ func GetUsers() ([]entity.User, error) {
 		return []entity.User{}, err
 	}
 	return users.([]entity.User), nil
+}
+
+func GetEmailsFromUIds(uids []string) (map[string]string, error) {
+	driver, err := Driver()
+	if err != nil {
+		return map[string]string{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	mapUidEmail, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: User) WHERE n.uid IN $uids RETURN  n.uid, n.email",
+			map[string]interface{}{"uids": uids})
+
+		if err != nil {
+			return map[string]string{}, err
+		}
+		var uidEmails = make(map[string]string)
+		for result.Next() {
+			uidEmails[result.Record().Values[0].(string)] = result.Record().Values[1].(string)
+		}
+
+		if result.Err() != nil {
+			return map[string]string{}, result.Err()
+		}
+
+		return uidEmails, nil
+
+	})
+
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return mapUidEmail.(map[string]string), nil
 }
