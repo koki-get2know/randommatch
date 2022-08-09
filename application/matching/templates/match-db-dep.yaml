@@ -20,7 +20,7 @@ spec:
         image: {{ .Values.matchdb.image.repo }}:{{ .Values.matchdb.image.tag }}
         env:
             - name: NEO4J_AUTH
-              value: neo4j/test
+              value: {{ .Values.matchdb.creds }}
         ports:
         - name: neo4j
           containerPort: 7687

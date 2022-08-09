@@ -4,27 +4,61 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/jinzhu/copier"
+
+	"github.com/koki/randommatch/entity"
 )
 
+var randomChoices = randomChoicesSeed()
+
 // TODO the selector paramater should be a config variable
-const SELECTOR = "random"
+type Selector uint8
+
+const (
+	Basic Selector = iota
+	Group
+)
 
 type Constraint uint8
 
 const (
-	dejavu Constraint = iota
+	Unique Constraint = iota
+	ForbiddenConnections
 )
 
-type Matching struct {
-	matched []*User
-}
-
 type Match struct {
-	Id    string `json:"id"`
-	Users []User `json:"users"`
+	Id    string        `json:"id"`
+	Users []entity.User `json:"users"`
 }
 
-func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bool {
+//TODO integrate  the constraint structure in code
+type ConstraintParams[T any] struct { // Type parameters for constraint
+	Params map[Constraint][]T
+}
+
+//TODO integrate the selector structure in code
+type SelectorParams[T any] struct { // Type parameters for constraint
+	Params map[Constraint][]T
+}
+
+func search(users []entity.User, n entity.User) (bool, int) {
+	index := -1
+	find := false
+	for i, user := range users {
+		if user.Id == n.Id {
+			find = true
+			index = i
+			break
+		}
+	}
+
+	return find, index
+}
+
+func Filter(g *UserGraph, matched []entity.User, n *entity.User,
+	constraints []Constraint, forbiddenConnections [][]entity.User) bool {
+
 	/* Filter
 
 	   input :
@@ -38,20 +72,46 @@ func Filter(g *UserGraph, matched []*User, n *User, constraints []Constraint) bo
 	*/
 
 	ok := true
+
+constraintloop:
 	for _, constraint := range constraints {
-		switch constraint {
-		case dejavu:
-			// check if an edges exist between n and any user in matched
-			for _, user := range matched {
-				if find, _ := Search(g.edges[*n], user); find {
+
+		for _, user := range matched {
+			switch constraint {
+			case Unique:
+				// check if an edges exist between n and any user in matched
+
+				if find, _ := Search(g.edges[(*n).Id], &user); find {
 					ok = false
-					break
+					break constraintloop
+				}
+
+			case ForbiddenConnections:
+				for _, usersNotToMatch := range forbiddenConnections {
+					if len(usersNotToMatch) > 0 {
+						if find1, _ := search(usersNotToMatch, *n); find1 {
+							if find2, _ := search(usersNotToMatch, user); find2 {
+								ok = false
+								break constraintloop
+							}
+						}
+					}
+
 				}
 			}
+
 		}
+
 	}
 
 	return ok
+}
+
+func minimum(a uint, b uint) uint {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func remove[T comparable](l []T, item T) []T {
@@ -63,56 +123,114 @@ func remove[T comparable](l []T, item T) []T {
 	return l
 }
 
-func RandomChoices(g *UserGraph, k uint, constraints []Constraint) *Matching {
-
-	/* random choice without constraint
-
-	   input : a graph of users, k length of tuple match
-	   output : k random id
-	   purpose : match k user from the graph
-
-	*/
-
-	var matching = &Matching{}
-	var matchedUsers []*User
+func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
 
-	var indices []int
-	for i := range g.users {
-		indices = append(indices, i)
+	return func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
+
+		/* random choice without constraint
+
+		   input : a graph of users, k length of tuple match
+		   output : k random id
+		   purpose : match k user from the graph
+
+
+		*/
+
+		var matching = &Match{}
+		var matchedUsers []entity.User
+		var indices []int
+		for i := range g.users {
+			indices = append(indices, i)
+		}
+
+		for uint(len(matchedUsers)) < k && len(indices) > 0 {
+			rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
+			index := indices[0]
+
+			ok := Filter(g, matchedUsers, g.users[index], constraints, forbiddenConnections) // check the constraints
+			if ok {
+
+				matchedUsers = append(matchedUsers, *g.users[index])
+			}
+			indices = remove(indices, index)
+
+		}
+		matching.Users = matchedUsers
+		matching.Id = ""
+		return matching
 	}
 
-	for uint(len(matchedUsers)) < k && len(indices) > 0 {
-		rand.Shuffle(len(indices), func(i, j int) { indices[i], indices[j] = indices[j], indices[i] })
-		index := indices[0]
-		if Filter(g, matchedUsers, g.users[index], constraints) {
-			matchedUsers = append(matchedUsers, g.users[index])
-		}
-		indices = remove(indices, index)
-	}
-	matching.matched = matchedUsers
-	return matching
 }
 
-//TODO
-/*func RandSubGroup(A *UserGraph, B *Usergraph, constraints []string) *Matching{
+func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, matchSizeB uint,
+	interGroupConstraints []Constraint, innerGroupConstraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 
+	/*
+		   input :
+		       g : users graph
+			   groupeA : subgraph of g A
+			   groupeB : subgraph of g B
+			   matchSizeA : number of person to take in A
+			   matchSizeB : number of person to take in B
+			   interGroupConstraint : constraints for matching between groupe A and B
+			   innerGroupConstraint : constraints for matching into a group
+		       forbedenConnections : parameter of constraint forbidenconnection; it contains the user who cannot match together
 
-}*/
+		   purpose : match users' groupeA with users' groupeB according to the innerGroupConstraint and interGroupConstraint
+		   output : match of size matchSizeA + matchSizeB
+	*/
+	matchA := &Match{}
+	if uint(len(groupeA.users)) >= matchSizeA && uint(len(groupeB.users)) >= matchSizeB {
 
-func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
+		matchA = randomChoices(groupeA, matchSizeA, innerGroupConstraints, forbiddenConnections)
+
+		users := []entity.User{}
+		gb := &UserGraph{}
+		copier.Copy(&users, &matchA.Users)
+		copier.Copy(gb, groupeB)
+		match := false
+		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
+			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
+
+			match = true
+
+			for _, u := range matchB.Users {
+				u := u
+				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
+					matchA.Users = append(matchA.Users, u)
+
+				} else {
+					match = false
+					gb.RemoveUser(&u)
+					break
+				}
+				gb.RemoveUser(&u)
+			}
+		}
+	}
+	return matchA
+
+}
+
+func Matcher(g *UserGraph, k uint,
+	constraints []Constraint, SELECTOR Selector, forbidenconections [][]entity.User,
+	A []*entity.User, B []*entity.User,
+	interGroupConstraints []Constraint, innerGroupConstraints []Constraint) map[int]*Match {
 
 	/* Matcher without constraint
 
 	   input : g User's graph, k length of tuple match
+	   matchSizeA, matchSizeB: size of matching for A and B respectivily; variable for group selector
+
 	   output : list of tuple match
 	   purpose: match all user in graph the g
 
 	*/
-	matching := make(map[int]*Matching)
+	matching := make(map[int]*Match)
 
 	switch SELECTOR {
-	case "random":
+	case Basic:
 		/*
 		   repeat
 		     1 - random choices k users
@@ -120,31 +238,119 @@ func Matcher(g *UserGraph, k uint, constraints []Constraint) map[int]*Matching {
 		   until is possible to take k users in graph
 
 		*/
+
 		i := 0
 		for k > 0 && uint(len(g.users))/k > 0 {
-			matched := RandomChoices(g, k, constraints)
-			for _, match := range matched.matched {
-				g.RemoveUser(match)
+			matched := randomChoices(g, k, constraints, forbidenconections)
+			for _, match := range matched.Users {
+				match := match
+				g.RemoveUser(&match)
+
 			}
 			matching[i] = matched
 			i++
 		}
+	case Group:
+		/*Extract the subgraph A and B
+		    m1 = random choice  users dans A
+		    repeat until good match
+
+			   - m2 = random choice  users dans B
+			   - check if m1 + m2 can be match
+		*/
+
+		if k < 2 {
+			break
+		}
+		var matchSizeA uint
+		var matchSizeB uint
+		maxMatchSizeA := minimum(uint(len(A)), k-1)
+		maxMatchSizeB := minimum(uint(len(B)), k-1)
+		if maxMatchSizeA < maxMatchSizeB {
+			matchSizeA = minimum(maxMatchSizeA, k/2)
+			matchSizeB = minimum(k-matchSizeA, maxMatchSizeB)
+		} else {
+			matchSizeB = minimum(maxMatchSizeB, k/2)
+			matchSizeA = minimum(k-matchSizeB, maxMatchSizeA)
+		}
+
+		if matchSizeB == 0 || matchSizeA == 0 || matchSizeB+matchSizeA != k {
+			break
+		}
+		i := 0
+		groupA := g.Subgraph(A)
+		groupB := g.Subgraph(B)
+		for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
+			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
+				interGroupConstraints, innerGroupConstraints,
+				forbidenconections)
+			if matched != nil {
+				for _, match := range matched.Users {
+					match := match
+					groupA.RemoveUser(&match)
+					groupB.RemoveUser(&match)
+
+				}
+			}
+
+			matching[i] = matched
+			i++
+
+		}
+
 	}
 
 	return matching
 
 }
 
-func GenerateTuple(users []User, forbiddenConnections [][]User, size uint) []Match {
+func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
+	forbiddenConnections [][]entity.User, size uint,
+	A []entity.User, B []entity.User) []Match {
+	/*
+		         Input :
+				    - general
+					  connections: Connections plan in the graph;
+					  s   : type of selector : basic, group .....
+					- specific
+					   users: Users for matching for group selector basic
+					  *constraint
+					   forbiddenConnecitons: variable for forbideenconnections constraints
+					  *selector
+					    size : size of matching; variable for basic selector
+					    A,B : groupe A and B of  user; variable for group selector
+	*/
 	var results []Match
-	graph := UsersToGraph(users, forbiddenConnections)
-	tuples := Matcher(graph, size, []Constraint{dejavu})
-	for index, matching := range tuples {
-		var matches []User
-		for _, user := range matching.matched {
-			matches = append(matches, *user)
+	var tuples map[int]*Match
+
+	switch s {
+	case Basic:
+		graph := UsersToGraph(users, connections)
+		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
+			forbiddenConnections, []*entity.User{}, []*entity.User{},
+			[]Constraint{}, []Constraint{})
+	case Group:
+		gA := []*entity.User{}
+		gB := []*entity.User{}
+		for _, u := range A {
+			u := u
+			gA = append(gA, &u)
+
 		}
-		results = append(results, Match{Id: strconv.Itoa(index), Users: matches})
+		for _, u := range B {
+			u := u
+			gB = append(gB, &u)
+		}
+		graph := UsersToGraph(append(A, B...), connections)
+		tuples = Matcher(graph, size, []Constraint{}, Group,
+			forbiddenConnections, gA, gB,
+
+			[]Constraint{Unique, ForbiddenConnections}, []Constraint{})
+
+	}
+	for index, matching := range tuples {
+
+		results = append(results, Match{Id: strconv.Itoa(index), Users: matching.Users})
 	}
 	return results
 }

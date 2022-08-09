@@ -3,6 +3,7 @@ package calendar
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -55,13 +56,11 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	m.SetHeader("Filename", filename)
 	m.SetHeader("Path", filename)
 
-	//m.SetBody("text/plain", description)
 	m.SetBody("text/plain", description)
 	m.AddAlternative(`text/calendar; method="REQUEST"; name="invite.ics"`,
 		cal.Serialize(),
 		gomail.SetPartEncoding(gomail.Base64))
 
-	//m.Attach()
 	var emailRaw bytes.Buffer
 	_, err := m.WriteTo(&emailRaw)
 	if err != nil {
@@ -71,7 +70,7 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	return emailRaw.Bytes(), nil
 }
 
-func SendInvite(match *matcher.Match, adminEmail string) {
+func SendInvite(match *matcher.Match, adminEmail string) error {
 
 	const (
 		// Replace sender@example.com with your "From" address.
@@ -87,7 +86,7 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 	)
 	userIds := []string{}
 	for _, user := range match.Users {
-		userIds = append(userIds, user.UserId)
+		userIds = append(userIds, user.Id)
 	}
 
 	description := fmt.Sprintf(`Hello %v,
@@ -103,18 +102,17 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 	rawMessage, err := generateIcsInvitation(sender, subject, description, attendees)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	// Create a new session in the us-east-1 region.
 	// Replace us-east-1 with the AWS Region you're using for Amazon SES.
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-east-1"),
-		Credentials: credentials.NewStaticCredentials("AKIAUQ5SMTNQKJH7CSR5", "7+W1cAOcLNVVDQpCDI3Ips7QDiNSXoC1Ej6Q/LZB", ""),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("SES_KEY_ID"), os.Getenv("SES_KEY_SECRET"), ""),
 	})
-
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	// Create an SES session.
 	svc := ses.New(sess)
@@ -145,8 +143,9 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 			fmt.Println(err.Error())
 		}
 
-		return
+		return err
 	}
 
 	fmt.Println("Email Sent", result)
+	return nil
 }

@@ -11,8 +11,8 @@
   <!-- Searchbar with cancel button always shown -->
   <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
   <input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="ion-hide" (change)="uploadCsv($event)" #csvFileUpload>
-  <ion-button shape="round" fill="clear" (click)="csvFileUpload.click()" >
-    <ion-icon slot="start" name="document-outline"></ion-icon>
+  <ion-button shape="round" fill="clear" mode="ios" (click)="csvFileUpload.click()" >
+    <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
     upload users
   </ion-button>
   <ion-grid>

@@ -11,12 +11,10 @@ func TestConvertRawDataToJson(t *testing.T) {
 	actual := string(jsonData)
 	expected := `[
 		{
-			"userId": "",
+			"id": "",
 			"name": "Pins Prestilien",
 			"email": "pinsdev24@gmail.com",
-			"groups": [
-				""
-			],
+			"groups": null,
 			"gender": "Male",
 			"birthday": "10/01",
 			"hobbies": [
@@ -36,14 +34,10 @@ func TestConvertRawDataToJson(t *testing.T) {
 			"department": "Informatique",
 			"location": "Kao",
 			"seniority": "",
-			"role": "super-user",
-			"numberOfMatching": 0,
-			"numberMatchingAccepted": 0,
-			"numberMatchingDeclined": 0,
-			"averageMatchingRate": 0
+			"role": "super-user"
 		},
 		{
-			"userId": "",
+			"id": "",
 			"name": "Pins Prestilien",
 			"email": "pinsdev24@gmail.com",
 			"groups": [
@@ -69,11 +63,7 @@ func TestConvertRawDataToJson(t *testing.T) {
 			"department": "Math",
 			"location": "Fpol",
 			"seniority": "",
-			"role": "user",
-			"numberOfMatching": 0,
-			"numberMatchingAccepted": 0,
-			"numberMatchingDeclined": 0,
-			"averageMatchingRate": 0
+			"role": "user"
 		}
 	]`
 	require.JSONEq(t, expected, actual)

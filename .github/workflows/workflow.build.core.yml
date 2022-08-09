@@ -59,7 +59,7 @@ jobs:
         cd ./application/ui
         docker build -t ionic-tag .
         docker run --name some-nginx -d ionic-tag
-        until [ "`docker inspect -f {{.State.Running}} CONTAINERNAME`"=="true" ]; do
+        until [ "`docker inspect -f {{.State.Running}} some-nginx`"=="true" ]; do
           sleep 0.1;
         done;
         docker exec some-nginx curl localhost
@@ -107,6 +107,9 @@ jobs:
         helm upgrade -i myhelmtest  oci://${ACR_NAME}.azurecr.io/${HELM_REPO} --version ${VERSION} \
         --set backend.image.tag=${IMAGE_BE_TAG} \
         --set ui.image.tag=${IMAGE_UI_TAG} \
+        --set matchdb.creds=${{ secrets.NEO4J_AUTH }} \
+        --set backend.aws_ses.keyid=${{ secrets.SES_KEY_ID }} \
+        --set backend.aws_ses.keysecret=${{ secrets.SES_KEY_SECRET }} \
         --namespace ${NAMESPACE} --create-namespace
         kubectl get pods --namespace ${NAMESPACE}
        
