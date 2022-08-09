@@ -17,12 +17,7 @@
       upload users
     </ion-button>
   </div>
-  <span>
-    <ion-button shape="round" color="secondary" fill="clear" (click)="storeUsersList()">
-      <ion-icon slot="start" name="document-outline"></ion-icon>
-      Match individual users
-    </ion-button>
-  </span>
+  
   <ion-list #scheduleList [hidden]="shownSessions === 0">
     <ion-item-group>
       <ion-item-divider sticky>
@@ -30,18 +25,18 @@
           USERS LIST
         </ion-label>
       </ion-item-divider>
-
+    
       <ion-item-sliding *ngFor="let user of userslist" #slidingItem >
         <ion-item button>
           <ion-label>
-            <h3>{{user.Name}}</h3>
+            <h3>{{user.name}}</h3>
             <p>
-              {{user.Departement}}
+              {{user.departement}}
             </p>
           </ion-label>
           <div class="ion-padding speaker-detail">
 
-            <ion-chip *ngFor="let group of user.Groups; let i=index" [color]="getRandomColor (i)" button (click)="tagclick()">
+            <ion-chip *ngFor="let group of user.groups; let i=index"  button (click)="tagclick()">
               <ion-label>{{group}}</ion-label>
             </ion-chip>
           </div>

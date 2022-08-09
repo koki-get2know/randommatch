@@ -11,8 +11,10 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { FormsModule,ReactiveFormsModule } from '@angular/forms';
 import { MsalGuard, MsalModule, MsalInterceptor, MsalRedirectComponent } from '@azure/msal-angular';
-import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
+import { BrowserCacheLocation, InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { IonicSelectableModule } from 'ionic-selectable';
+import { BearerInterceptor } from './http-interceptors/bearer-interceptor.service';
+import { appConstants } from './constants';
 const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigator.userAgent.indexOf('Trident/') > -1;
 
 @NgModule({
@@ -36,23 +38,28 @@ const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigato
         postLogoutRedirectUri: environment.redirectUri
       },
       cache: {
-        cacheLocation: 'localStorage',
+        cacheLocation: BrowserCacheLocation.LocalStorage,
         storeAuthStateInCookie: isIE, // Set to true for Internet Explorer 11
       }
     }), {
       interactionType: InteractionType.Redirect, // MSAL Guard Configuration
       authRequest: {
-        scopes: ['user.read']
+        scopes: appConstants.scopes
       }
     }, {
       interactionType: InteractionType.Redirect, // MSAL Interceptor Configuration
       protectedResourceMap: new Map([ 
-          ['https://graph.microsoft.com/v1.0/me', ['user.read']]
+          [appConstants.microsoftGraph, appConstants.scopes]
       ])
     })
   ],
   declarations: [AppComponent],
   providers: [InAppBrowser,
+    {
+       provide: HTTP_INTERCEPTORS,
+       useClass: BearerInterceptor,
+       multi: true
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: MsalInterceptor,

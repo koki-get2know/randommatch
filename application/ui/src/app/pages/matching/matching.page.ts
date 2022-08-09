@@ -5,6 +5,7 @@ import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
+
 @Component( {
   selector: 'app-matching',
   templateUrl: './matching.page.html',
@@ -19,10 +20,6 @@ export class MatchingPage implements OnInit {
    
   usersSelected = [];
 
-  isLoading = false;
-  isError = false;
-  isSuccess = false;
-  isSubmitted = false;
   selected_forbidden_connexion: [];
   userstoforbidden =[];
   usersconnexionforbidden: User[][] = [];
@@ -78,7 +75,7 @@ export class MatchingPage implements OnInit {
     toast.present();
   }
 
-  portChange(event: {
+  userChange(event: {
     component: IonicSelectableComponent,
     value: any} ) {
     console.log( "Selec" );
@@ -164,14 +161,14 @@ export class MatchingPage implements OnInit {
           id: Math.floor(Math.random() * Date.now()),
           name: lorem.generateWords(2),
           group: randomgroup,
-          avatar: this.avatars[avatarId]
+          avatar: this.matchService.generateAvatarSvg()
         };
         users.push( user );
         this.userstoforbidden.push(user);
       }
 
       let group = {
-        group: randomgroup,
+        group: `Group ${g} ${randomgroup}`,
         users: users 
       };
       
@@ -185,9 +182,8 @@ export class MatchingPage implements OnInit {
     return this.matchingForm.controls;
   }
 
-  selectUsers(event,user) {
-  
-    if (!!event.target.checked === false ) {
+  selectUsers(event: PointerEvent,user) {
+    if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
     }
     else {
@@ -197,10 +193,9 @@ export class MatchingPage implements OnInit {
   }
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: number) {
-    let index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
+    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
-    event.stopPropagation();
-}
+  }
   // select a group of user
   selectGroup(event, group){
   
@@ -216,45 +211,41 @@ export class MatchingPage implements OnInit {
 
   ramdommatch () {
     
-    this.isSubmitted = true;
-    this.isError = false;
-    this.isSuccess = false;
-    this.isLoading = false
-    if ( this.form.invalid ) {
-      alert( "remplir tous les champs" );
-    }
-    this.isLoading = true;
 
-
-    let users: User[] = [];
-    for (let selected of this.usersSelected)
+    const users: User[] = [];
+    const forbiddenConnections: User[][] = [];
+    for (const selected of this.usersSelected)
     {
-      users.push({userId: selected.name})
+      users.push({id: selected.id, name: selected.name, avatar: selected.avatar})
+    }
+    for (const connection of this.usersconnexionforbidden) {
+      const newConnection = [];
+      for (let item of connection) {
+        newConnection.push({id: item.id, name: item.name});
+      }
+      forbiddenConnections.push(newConnection);
     }
     const matchingRequest: MatchingReq = {
       size: Number(this.form.matchingsize.value),
       users,
-      forbiddenConnections: this.usersconnexionforbidden
-
+      forbiddenConnections
     };
     console.log( "MACHT DATA" );
     console.log( matchingRequest );
 
     this.matchService.makematch(matchingRequest)
-      .subscribe( ( res: Matching[] ) => {
-        console.log( matchingRequest );
-        this.matchingresult(res);
+      .subscribe( ( matchings: Matching[] ) => {
+        console.log(matchings);
+        matchings.forEach(match => match.users.forEach(user => {
+          user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
+        }));
+        
+        this.matchingresult(matchings);
       })
   }
 
   // matching result
   matchingresult(matchings: Matching[]) {
-    for(const matching of matchings) {
-      for (const user of matching.users) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
-        user.avatar = this.avatars[avatarId];
-      }
-    }
     const navigationExtras: NavigationExtras = {
       state: {
         matchings

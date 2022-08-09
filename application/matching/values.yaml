@@ -1,5 +1,5 @@
 global:
-    registry: 'randommatchakscr.azurecr.io'
+    registry: 'randommatch2akscr.azurecr.io'
 
 ingress:
     labels: {}
@@ -18,7 +18,7 @@ backend:
     port: 8080
     image:
         repo: randommatch/api-core
-        tag: 93d5faa270eb4bcc177c2a86d749ffd06c719cb2-2606436253
+        tag: changeme
     resources:
         limits:
             cpu: 300m
@@ -26,6 +26,10 @@ backend:
         requests:
             cpu: 100m
             memory: 300Mi
+    aws_ses:
+        keyid: ""
+        keysecret: ""
+    dbhost: match-db
 
 matchdb:
     image:
@@ -37,8 +41,15 @@ matchdb:
         limits:
             cpu: 1000m
             memory: 2Gi
+    creds: ""
+
 # https://artifacthub.io/packages/helm/cert-manager/cert-manager
 cert-manager:
     installCRDs: false # since helm3 is not aware of dep order crds will be installed with kubectl before the chart
     nodeSelector:
         "kubernetes.io/os": linux
+
+ingress-nginx:
+    controller:
+        service:
+            loadBalancerIP: "20.49.128.134"

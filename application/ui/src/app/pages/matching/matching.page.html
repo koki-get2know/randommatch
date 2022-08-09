@@ -1,6 +1,10 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>matching</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Matching
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -29,7 +33,7 @@
       <ion-col>
         <ion-item>
           <ion-label>select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="usersSelected" itemValueField="id" itemTextField="Name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="Departement">
+          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="usersSelected" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="departement">
           </ionic-selectable>
         </ion-item>
         <ion-grid>
@@ -49,9 +53,9 @@
                         <ion-row>
                           <ion-col *ngFor="let user of connexionforbidden; let j=index">
                             <ion-label>
-                              <h3>{{user.Name}}</h3>
+                              <h3>{{user.name}}</h3>
                               <p>
-                                {{user.Departement}}
+                                {{user.departement}}
                               </p>
                             </ion-label>
                           </ion-col>
@@ -84,18 +88,18 @@
                 USERS LIST
               </ion-label>
             </ion-item-divider>
-
+        
             <ion-item-sliding *ngFor="let user of usersgroups" #slidingItem>
               <ion-item button>
                 <ion-label>
-                  <h3>{{user.Name}}</h3>
+                  <h3>{{user.name}}</h3>
                   <p>
-                    {{user.Departement}}
+                    {{user.departement}}
                   </p>
                 </ion-label>
                 <div class="ion-padding speaker-detail">
 
-                  <ion-chip *ngFor="let group of user.Groups; let i=index" [color]="getRandomColor (i)" button (click)="tagclick()">
+                  <ion-chip *ngFor="let group of user.groups; let i=index" [color]="getRandomColor (i)" button (click)="tagclick()">
                     <ion-label>{{group}}</ion-label>
                   </ion-chip>
                 </div>

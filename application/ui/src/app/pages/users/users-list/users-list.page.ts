@@ -7,6 +7,8 @@ import { ConferenceData } from '../../../providers/conference-data';
 import { UserData } from '../../../providers/user-data';
 import { UserFilterPage } from '../user-filter/user-filter.page';
 import { UsersService } from '../../../services/users.service';
+import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-users-list',
@@ -38,11 +40,13 @@ export class UsersListPage implements OnInit {
     public user: UserData,
     public config: Config,
     private userService: UsersService
-  ) { }
+  ) { 
+    
+  }
 
   userslist = [
     {
-      "id": 1,
+      "id": "1",
       "Name": "Pins Prestilien",
       "Email": "pinsdev24@gmail.com",
       "Groups": [
@@ -74,7 +78,7 @@ export class UsersListPage implements OnInit {
       "AverageMatchingRate": 0
     },
     {
-      "id": 2,
+      "id": "2",
       "Name": "Frank Tchatseu",
       "Email": "pinsdev24@gmail.com",
       "Groups": [
@@ -107,7 +111,7 @@ export class UsersListPage implements OnInit {
       "AverageMatchingRate": 0
     },
     {
-      "id": 3,
+      "id": "3",
       "Name": "Delano Roosvelt",
       "Email": "pinsdev24@gmail.com",
       "Groups": [
@@ -137,7 +141,7 @@ export class UsersListPage implements OnInit {
       "AverageMatchingRate": 0
     },
     {
-      "id": 4,
+      "id": "4",
       "Name": "Youmie Yannick",
       "Email": "pinsdev24@gmail.com",
       "Groups": [
@@ -167,7 +171,7 @@ export class UsersListPage implements OnInit {
       "AverageMatchingRate": 0
     },
     {
-      "id": 5,
+      "id": "5",
       "Name": "Ivan Ivan",
       "Email": "pinsdev24@gmail.com",
       "Groups": [
@@ -223,12 +227,17 @@ export class UsersListPage implements OnInit {
   ngOnInit() {
     this.updateSchedule();
 
-    this.ios = this.config.get('mode') === 'ios';
+    this.ios = this.config.get( 'mode' ) === 'ios';
+    const storagevalue= localStorage.getItem( "userlist" );
+    this.userslist = storagevalue ? JSON.parse( storagevalue ) : [];
+    
+    
   }
 
   tagclick () {
     
   }
+
 
 
 
@@ -295,8 +304,7 @@ export class UsersListPage implements OnInit {
         {
           text: 'Cancel',
           handler: () => {
-            // they clicked the cancel button, do not remove the session
-            // close the sliding item and hide the option buttons
+            
             slidingItem.close();
           }
         },
@@ -327,6 +335,8 @@ export class UsersListPage implements OnInit {
     fab.close();
   }
 
+  checkResponseUrl = "";
+  
   uploadCsv ( event ) {
     this.storeUsersList();
 
@@ -335,8 +345,51 @@ export class UsersListPage implements OnInit {
       fileData.append("file", file);
       this.userService.uploadUsersFile( fileData )
         .subscribe( resp => {
-          console.log( resp );            
-        });
+          if ( resp.status == 202 ) {
+            console.log( resp.headers.get( "Location" ) );
+            this.checkResponseUrl = resp.headers.get( "Location" );
+            this.checkserverresponse();
+          }
+          
+        } );
+      
+      
     }
-}
+  }
+  
+  checkserverresponse () {
+    const delay = 2;
+    const limit = 2;
+    let i = 1;
+    let responsestatus = "";
+
+    console.log('START!');
+    const limitedInterval = setInterval(() => {
+      console.log( `message ${ i }, appeared after ${ delay * i++ } seconds` );
+      this.userService.availabilyofusers( this.checkResponseUrl )
+        .subscribe( resp => {
+          console.log("Result");
+          console.log( resp[ "status" ] );
+          responsestatus = resp[ "status" ];
+          if ( responsestatus == 'Done' ) {
+            // get users list
+            this.getuserList();
+          }
+        } );
+      
+      if (responsestatus=='Done') {
+        clearInterval(limitedInterval);
+        console.log('interval cleared!');
+      }
+    }, delay * 1000);
+  }
+
+  getuserList () {
+    this.userService.getUsersdata()
+        .subscribe( resp => {
+          this.userslist = resp.data;
+          this.storeUsersList();
+          
+        } );
+  }
 }

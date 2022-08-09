@@ -138,6 +138,7 @@ export class MatchingGroupPage implements OnInit {
   selected_forbidden_connexion: [];
   userstoforbidden =[];
   usersconnexionforbidden: User[][] = [];
+  groups: User[][] = [];
 
   users_toselect_group1 = [];
   users_toselect_group2 = [];
@@ -370,12 +371,13 @@ export class MatchingGroupPage implements OnInit {
     let users: User[] = [];
     for (let selected of this.usersSelected)
     {
-      users.push({userId: selected.name})
+      users.push({id: selected.name})
     }
+    this.groups.push( this.result_selected_group1 );
+    this.groups.push( this.result_selected_group2 );
     const matchingRequest: MatchingGroupReq = {
       size: Number(this.form.matchingsize.value),
-      group1:this.result_selected_group1,
-      group2:this.result_selected_group2,
+      groups:this.groups,
       forbiddenConnections: this.usersconnexionforbidden
 
     };

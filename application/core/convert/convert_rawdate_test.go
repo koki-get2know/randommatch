@@ -11,69 +11,61 @@ func TestConvertRawDataToJson(t *testing.T) {
 	actual := string(jsonData)
 	expected := `[
 		{
-			"UserId": "",
-			"Name": "Pins Prestilien",
-			"Email": "pinsdev24@gmail.com",
-			"Groups": [
+			"id": "",
+			"name": "Pins Prestilien",
+			"email": "pinsdev24@gmail.com",
+			"groups": [
 				""
 			],
-			"Genre": "Male",
-			"Birthday": "10/01",
-			"Hobbies": [
+			"gender": "Male",
+			"birthday": "10/01",
+			"hobbies": [
 				"Data science",
 				"Space",
 				"Télévison"
 			],
-			"MatchPreference": [
+			"matchPreference": [
 				"girls"
 			],
-			"MatchPreferenceTime": [
+			"matchPreferenceTime": [
 				"14:00PM"
 			],
-			"PositionHeld": "CEO",
-			"MultiMatch": false,
-			"PhoneNumber": "699999999",
-			"Departement": "Informatique",
-			"Location": "Kao",
-			"Seniority": "",
-			"Role": "super-user",
-			"NumberOfMatching": 0,
-			"NumberMatchingAccepted": 0,
-			"NumberMatchingDeclined": 0,
-			"AverageMatchingRate": 0
+			"positionHeld": "CEO",
+			"multiMatch": false,
+			"phoneNumber": "699999999",
+			"department": "Informatique",
+			"location": "Kao",
+			"seniority": "",
+			"role": "super-user"
 		},
 		{
-			"UserId": "",
-			"Name": "Pins Prestilien",
-			"Email": "pinsdev24@gmail.com",
-			"Groups": [
+			"id": "",
+			"name": "Pins Prestilien",
+			"email": "pinsdev24@gmail.com",
+			"groups": [
 				"DS",
 				"IA",
 				"SPACE"
 			],
-			"Genre": "Male",
-			"Birthday": "10/01",
-			"Hobbies": [
+			"gender": "Male",
+			"birthday": "10/01",
+			"hobbies": [
 				"Jeux vidéos",
 				"Musique"
 			],
-			"MatchPreference": [
+			"matchPreference": [
 				"same groups"
 			],
-			"MatchPreferenceTime": [
+			"matchPreferenceTime": [
 				"14:00PM"
 			],
-			"PositionHeld": "Admin",
-			"MultiMatch": false,
-			"PhoneNumber": "699999999",
-			"Departement": "Math",
-			"Location": "Fpol",
-			"Seniority": "",
-			"Role": "user",
-			"NumberOfMatching": 0,
-			"NumberMatchingAccepted": 0,
-			"NumberMatchingDeclined": 0,
-			"AverageMatchingRate": 0
+			"positionHeld": "Admin",
+			"multiMatch": false,
+			"phoneNumber": "699999999",
+			"department": "Math",
+			"location": "Fpol",
+			"seniority": "",
+			"role": "user"
 		}
 	]`
 	require.JSONEq(t, expected, actual)
