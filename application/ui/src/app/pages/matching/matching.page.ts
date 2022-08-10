@@ -23,6 +23,10 @@ export class MatchingPage implements OnInit {
   selected_forbidden_connexion: [];
   userstoforbidden =[];
   usersconnexionforbidden: User[][] = [];
+  isIndeterminate:boolean;
+  masterCheck:boolean;
+  checkBoxList: any;
+  
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
@@ -38,10 +42,12 @@ export class MatchingPage implements OnInit {
     this.initForm();
   }
 
-  isIndeterminate:boolean;
-  masterCheck:boolean;
-  checkBoxList: any;
-  
+  initForm() {
+    this.matchingForm = this.formBuilder.group({
+      matchingsize: ['', Validators.required],
+    });
+  }
+
   checkMaster ( event ) {
     this.usersSelected = [];
     setTimeout( () => {
@@ -57,25 +63,25 @@ export class MatchingPage implements OnInit {
         this.onRemoveusersSelected( user.id );
         });
       }
-      
     });
   }
 
- selectUsers(event: PointerEvent, user: User) {
+  selectUsers(event: PointerEvent, user: User) {
     if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
     }
     else {
       this.onRemoveusersSelected( user.id );
     }
-
   }
+
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: string) {
     const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
   }
-    checkEvent(event: PointerEvent, user: User) {
+  
+  checkEvent(event: PointerEvent, user: User) {
     const totalItems = this.usersgroups.length;
     let checked = 0;
     
@@ -102,11 +108,6 @@ export class MatchingPage implements OnInit {
     }
   }
 
-  initForm() {
-    this.matchingForm = this.formBuilder.group({
-      matchingsize: ['', Validators.required],
-    });
-  }
   async presentToast(message) {
     const toast = await this.toastController.create({
       message: message,
@@ -174,15 +175,6 @@ export class MatchingPage implements OnInit {
   }
 
  
-  // select a group of user
-  selectGroup(event, group){
-  
-  this.usersSelected = [];
-  if ( event.target.checked === false ) {
-      this.usersSelected = group.users;
-    }
-  }
-  
   onSubmit() {
     this.ramdommatch();
   }

@@ -27,13 +27,14 @@ export class UsersListPage implements OnInit {
     this.getuserList();
   }
 
-  tagclick () {
+  tagclick (event: Event) {
+    event.stopPropagation();
   }
 
   
-  uploadCsv ( event ) {
+  uploadCsv ( event: Event ) {
     this.isloading = true;
-    for (const file of event.target.files) {
+    for (const file of event.target["files"]) {
       const fileData = new FormData();
       fileData.append("file", file);
       this.userService.uploadUsersFile( fileData )

@@ -43,7 +43,11 @@ export class MatchingGroupPage implements OnInit {
   }
 
   ngOnInit () {
-     this.initForm();
+    this.matchService.getUsersdata().subscribe(users => {
+      this.users_toselect_group1 = users;
+      this.users_toselect_group2 = users;
+    });
+    this.initForm();
   }
 
   initForm() {
@@ -80,13 +84,11 @@ export class MatchingGroupPage implements OnInit {
     component: IonicSelectableComponent,
     value: any
   } ) {
-   
+    console.log(event);
     console.log( this.users_selected_group1 );
-    this.result_selected_group1 = this.users_selected_group1;
+    this.result_selected_group1 = [...this.users_selected_group1];
     // users to forbid must be selected among the group 1 and 2
-    this.userstoforbidden = [];
-    this.userstoforbidden = this.userstoforbidden.concat( this.result_selected_group1 );
-    this.userstoforbidden = this.userstoforbidden.concat( this.result_selected_group2 );
+    this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
     // in the second group, just keep all the users who have not been selected in the group 1
     this.users_toselect_group2 = this.matchService.compareconnection( this.users_toselect_group1, this.result_selected_group1 );
     this.clearGroup1();
@@ -95,7 +97,7 @@ export class MatchingGroupPage implements OnInit {
     component: IonicSelectableComponent,
     value: any
   } ) {
-    this.result_selected_group2 = this.users_selected_group2;
+    this.result_selected_group2 = [...this.users_selected_group2];
 
     this.userstoforbidden = this.userstoforbidden.concat(this.result_selected_group2);
     
@@ -104,29 +106,25 @@ export class MatchingGroupPage implements OnInit {
 
     this.clearGroup2();
   }
+
   clear() {
     this.selectComponent.clear();
-    this.selectComponent.close();
     this.selected_forbidden_connexion = [];
     
   }
+
   clearGroup1() {
     this.selectComponentGroup1.clear();
-    this.selectComponentGroup1.close();
-    
-    
   }
+
   clearGroup2() {
     this.selectComponentGroup2.clear();
-    this.selectComponentGroup2.close();
-    
-    
   }
+
   addforbiddenUsersItem() {
     this.selectComponent.confirm ();
-    this.selectComponent.close(); 
-    
   }
+
   forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
     let i = 0;
     while ( i < this.usersconnexionforbidden.length ) {
@@ -161,7 +159,7 @@ export class MatchingGroupPage implements OnInit {
   // select users per groups
 
   selectUsersGroup1(event,user: User) {
-  
+    console.log(event);
     if ( !!event.target.checked === false ) {
       this.users_selected_group1.push( user );
     }

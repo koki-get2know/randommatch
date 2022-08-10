@@ -95,7 +95,7 @@
         <ion-list #scheduleList>
           <ion-item-group>
             <ion-item-sliding *ngFor="let user of usersgroups" #slidingItem>
-              <ion-item button>
+              <ion-item>
                 <ion-avatar slot="start">
                   <div [innerHTML]="user.avatar"></div>
                 </ion-avatar>
@@ -105,7 +105,7 @@
                     {{user.departement}}
                   </p>
                 </ion-label>
-                  <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick()">
+                  <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick($event)">
                     <ion-label>{{group}}</ion-label>
                   </ion-chip>
                 <ion-checkbox [(ngModel)]="user.isChecked" (click)="checkEvent($event,user)" color="primary"></ion-checkbox>
