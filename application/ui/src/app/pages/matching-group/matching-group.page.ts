@@ -14,8 +14,7 @@ export class MatchingGroupPage implements OnInit {
 
   matchingForm: FormGroup;
   checked: any;
-  usersgroups = [];
-  usersSelected = [];
+  usersSelected: User[] = [];
   ColorsTags = ColorsTags;
   
   isLoading = false;
@@ -149,7 +148,7 @@ export class MatchingGroupPage implements OnInit {
     return this.matchingForm.controls;
   }
 
-  selectUsers(event,user) {
+  selectUsers(event,user: User) {
   
     if (!!event.target.checked === false ) {
       this.usersSelected.push( user );
@@ -161,7 +160,7 @@ export class MatchingGroupPage implements OnInit {
   }
   // select users per groups
 
-  selectUsersGroup1(event,user) {
+  selectUsersGroup1(event,user: User) {
   
     if ( !!event.target.checked === false ) {
       this.users_selected_group1.push( user );
@@ -199,14 +198,6 @@ export class MatchingGroupPage implements OnInit {
     let index = this.users_selected_group2.findIndex(d => d.id === id); //find index in your array
     this.users_selected_group2.splice(index, 1);
  }
-  // select a group of user
-  selectGroup(event, group){
-  
-  this.usersSelected = [];
-  if ( event.target.checked == false ) {
-      this.usersSelected = group.users;
-    }
-  }
   
   onSubmit() {
     this.ramdommatch();
