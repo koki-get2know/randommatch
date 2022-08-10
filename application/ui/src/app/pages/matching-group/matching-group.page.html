@@ -21,7 +21,7 @@
         </ion-list>
 
         <div class="ion-padding">
-          <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
+          <ion-button type="submit" [disabled]="!matchingForm.valid || result_selected_group1.length === 0 || this.result_selected_group2.length === 0" expand="block">Match Users Randomly</ion-button>
         </div>
       </form>
     </ion-row>
@@ -31,7 +31,7 @@
       <ion-col>
         <ion-item>
           <ion-label>Users Group 1</ion-label>
-          <ionic-selectable #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChangeGroup1($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+          <ionic-selectable #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChangeGroup1($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
           </ionic-selectable>
         </ion-item>
         <ion-list>
@@ -57,7 +57,7 @@
       <ion-col>
         <ion-item>
           <ion-label>Users Group 2</ion-label>
-          <ionic-selectable #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChangeGroup2($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+          <ionic-selectable #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChangeGroup2($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
           </ionic-selectable>
         </ion-item>
         <ion-list>
@@ -82,7 +82,7 @@
       <ion-col>
         <ion-item>
           <ion-label>Select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
           </ionic-selectable>
         </ion-item>
         <ion-grid>

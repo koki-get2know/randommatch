@@ -3,8 +3,8 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
 import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
-import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
+import { ColorsTags } from '../../constants';
 
 @Component( {
   selector: 'app-matching',
@@ -15,10 +15,10 @@ import { IonicSelectableComponent } from 'ionic-selectable';
 export class MatchingPage implements OnInit {
   
   matchingForm: FormGroup;
-  checked: any;
-  usersgroups = [];
-   
-  usersSelected = [];
+  checked: boolean;
+  usersgroups: User[] = [];
+  ColorsTags = ColorsTags;
+  usersSelected: User[] = [];
 
   selected_forbidden_connexion: [];
   userstoforbidden =[];
@@ -32,9 +32,9 @@ export class MatchingPage implements OnInit {
   }
 
   ngOnInit () {
-    const storagevalue= localStorage.getItem( "userlist" );
-    this.usersgroups = storagevalue ? JSON.parse( storagevalue ) : [];
-    this.initusermatch();
+    this.matchService.getUsersdata().subscribe(users => {
+      this.usersgroups = users;
+    });
     this.initForm();
   }
 
@@ -61,13 +61,7 @@ export class MatchingPage implements OnInit {
     });
   }
 
-  initusermatch () {
-    this.usersgroups.forEach(obj => {
-        obj.isChecked = false;
-       // obj = { ...obj, isChecked: false};
-      });
-  }
- selectUsers(event: PointerEvent,user) {
+ selectUsers(event: PointerEvent, user: User) {
     if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
     }
@@ -77,18 +71,17 @@ export class MatchingPage implements OnInit {
 
   }
   // when user is unchecked, it should be remove
-  onRemoveusersSelected(id: number) {
+  onRemoveusersSelected(id: string) {
     const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
   }
-    checkEvent(event: PointerEvent,user) {
+    checkEvent(event: PointerEvent, user: User) {
     const totalItems = this.usersgroups.length;
     let checked = 0;
     
     if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
       checked++;
-      
     }
     else {
       this.onRemoveusersSelected( user.id );
@@ -143,12 +136,13 @@ export class MatchingPage implements OnInit {
     }
     this.clear();
   }
+
   forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
     let i = 0;
     while ( i < this.usersconnexionforbidden.length ) {
       let element = this.usersconnexionforbidden[i];
       if ( element.length === newconnection.length ) {
-        const diffUser = this.compareconnection( element, newconnection );
+        const diffUser = this.matchService.compareconnection( element, newconnection );
         if ( diffUser.length === 0 ) {
           console.log( diffUser.length);
           return true;
@@ -159,12 +153,6 @@ export class MatchingPage implements OnInit {
     return false;
   }
 
-  compareconnection<User>(forbconnec1:any,forbconnec2:any) {
-    return forbconnec1.filter((element) => {
-        return !forbconnec2.some(elt2 => element.id === elt2.id);
-      });
-    
-  }
   clear() {
     this.selectComponent.clear();
     this.selectComponent.close();
@@ -200,8 +188,9 @@ export class MatchingPage implements OnInit {
   }
 
   ramdommatch () {
-    
-
+    if (this.usersSelected.length < 2){
+      return;
+    }
     const users: User[] = [];
     const forbiddenConnections: User[][] = [];
     for (const selected of this.usersSelected)
@@ -223,19 +212,18 @@ export class MatchingPage implements OnInit {
 
     this.matchService.makematch(matchingRequest)
       .subscribe( ( matchings: Matching[] ) => {
-        if ( matchings!==null ) {
+        if ( matchings !== null ) {
             console.log(matchings);
             matchings.forEach(match => match.users.forEach(user => {
               user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
             }));
-            
             this.matchingresult(matchings);
         }
         else {
           this.presentToast("No matchings generated!");
         }
         
-      })
+      });
   }
 
   // matching result

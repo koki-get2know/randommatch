@@ -25,7 +25,7 @@
         </ion-list>
 
         <div class="ion-padding">
-          <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
+          <ion-button type="submit" [disabled]="!matchingForm.valid || (usersSelected.length < 2)" expand="block">Match Users Randomly</ion-button>
         </div>
       </form>
     </ion-row>
@@ -80,37 +80,35 @@
 
       <ion-col>
         <!-- Searchbar with cancel button always shown -->
-        <ion-searchbar showCancelButton="always"></ion-searchbar>
+        <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
         <ion-list>
           <ion-item-divider sticky>
             <ion-label>
-              USERS LIST
+              Users list
             </ion-label>
           </ion-item-divider>
           <ion-item>
-            <ion-label><strong>Select All</strong></ion-label>
+            <ion-label>Select All</ion-label>
             <ion-checkbox slot="start" [(ngModel)]="masterCheck" [indeterminate]="isIndeterminate" (click)="checkMaster($event)"></ion-checkbox>
           </ion-item>
         </ion-list>
         <ion-list #scheduleList>
           <ion-item-group>
-
             <ion-item-sliding *ngFor="let user of usersgroups" #slidingItem>
               <ion-item button>
+                <ion-avatar slot="start">
+                  <div [innerHTML]="user.avatar"></div>
+                </ion-avatar>
                 <ion-label>
                   <h3>{{user.name}}</h3>
                   <p>
                     {{user.departement}}
                   </p>
                 </ion-label>
-                <div class="ion-padding speaker-detail">
-
                   <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick()">
                     <ion-label>{{group}}</ion-label>
                   </ion-chip>
-                </div>
                 <ion-checkbox [(ngModel)]="user.isChecked" (click)="checkEvent($event,user)" color="primary"></ion-checkbox>
-
               </ion-item>
             </ion-item-sliding>
           </ion-item-group>

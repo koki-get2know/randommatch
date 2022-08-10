@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LoremIpsum } from 'lorem-ipsum';
@@ -10,7 +10,14 @@ import avatar from 'animal-avatar-generator';
 export class User {
   id: string;
   name?: string;
+  groups?: string[];
+  //angular only param
   avatar?: SafeHtml;
+  isChecked?: boolean = false;
+}
+
+interface UsersRes {
+  data : User[];
 }
 export interface MatchingReq {
   size: number;
@@ -29,6 +36,9 @@ export interface Matching {
 }
 interface MatchingResponse {
   data: Matching[];
+}
+interface JobResponse {
+  status: string;
 }
 
 @Injectable({
@@ -62,13 +72,19 @@ export class UsersService {
       .pipe( map( data => data ) );
   }
 
-  availabilyofusers(checkurl) {
-    return this.http.get<any>(`${this.urlApi}${checkurl}`)
-      .pipe(map(data => data));
+  availabilyofusers(checkurl): Observable<JobResponse> {
+    return this.http.get<JobResponse>(`${this.urlApi}${checkurl}`)
+      .pipe(shareReplay(1));
   }
-  getUsersdata() {
-    return this.http.get<any>(`${this.urlApi}/users`)
-      .pipe(map(data => data));
+
+  getUsersdata(): Observable<User[]> {
+    return this.http.get<UsersRes>(`${this.urlApi}/users`)
+      .pipe(map(res => {
+        for (const user of res.data) {
+          user.avatar = this.generateAvatarSvg();
+        }
+        return res.data;
+      }), shareReplay(1));
   }
 
   sendEmail(matches: Matching[]) {
@@ -112,6 +128,13 @@ export class UsersService {
     const seed = this.cyrb128(lorem.generateWords(2));
     const rand = this.mulberry32(seed[0]);
     return this.sanitizer.bypassSecurityTrustHtml(avatar(`${rand()}`, { size: 40 }));
+    
+  }
+
+  compareconnection(forbconnec1:User[],forbconnec2:User[]) {
+    return forbconnec1.filter((element) => {
+        return !forbconnec2.some(elt2 => element.id === elt2.id);
+      });
     
   }
 }

@@ -1,15 +1,9 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, IonList, IonRouterOutlet, LoadingController, ModalController, ToastController, Config } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 
-import { ScheduleFilterPage } from '../../schedule-filter/schedule-filter';
-import { ConferenceData } from '../../../providers/conference-data';
-import { UserData } from '../../../providers/user-data';
-import { UserFilterPage } from '../user-filter/user-filter.page';
-import { UsersService } from '../../../services/users.service';
-import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
-
+import { User, UsersService } from '../../../services/users.service';
+import { ColorsTags } from '../../../constants';
 @Component({
   selector: 'app-users-list',
   templateUrl: './users-list.page.html',
@@ -17,50 +11,25 @@ import { shareReplay } from 'rxjs/operators';
 })
 export class UsersListPage implements OnInit {
 
-  groups: any = [];
-
+  userslist: User[] = [];
+  isloading: boolean = false;
+  checkResponseUrl = "";
+  ColorsTags = ColorsTags;
   constructor(
     public router: Router,
     public toastCtrl: ToastController,
     private userService: UsersService
-  ) { 
-    
-  }
-
-  userslist = [];
-  key: string = 'userlist';
-  isloading: boolean = false;
-  
-  storeUsersList() {
-    localStorage.setItem(this.key, JSON.stringify(this.userslist));
-    const storagevalue= localStorage.getItem( this.key );
-    const val = storagevalue ? JSON.parse(storagevalue) : []
-  }
-  
-  ColorsTags = [
-    "twitter",
-    "instagram",
-    "dark"
-  ]
-  
-  getRandomColor () {
-    const min = 0;
-    const max = 2;
-    const index = Math.floor( Math.random() * ( max - min + 1 ) ) + min;
-    return this.ColorsTags[3%(index+1)];
-  }
+  ) { }
 
 
+  
   ngOnInit() {
-    const storagevalue= localStorage.getItem( "userlist" );
-    this.userslist = storagevalue ? JSON.parse( storagevalue ) : [];
+    this.getuserList();
   }
 
   tagclick () {
-    
   }
 
-  checkResponseUrl = "";
   
   uploadCsv ( event ) {
     this.isloading = true;
@@ -71,41 +40,38 @@ export class UsersListPage implements OnInit {
         .subscribe( resp => {
           if ( resp.status === 202 ) {
             this.checkResponseUrl = resp.headers.get( "Location" );
-            this.checkserverresponse();
+            this.checkJobStatus();
           }
-          
-        } );
+        }, _ => {
+          this.isloading = false;
+        });
     }
   }
   
-  checkserverresponse () {
+  checkJobStatus () {
     let responsestatus = "";
     const limitedInterval = setInterval(() => {
       this.userService.availabilyofusers( this.checkResponseUrl )
         .subscribe( resp => {
-          responsestatus = resp[ "status" ];
+          responsestatus = resp.status;
           if ( responsestatus === 'Done'  ) {
             this.getuserList();
             this.isloading = false;
-          } else if (responsestatus !== 'Running') {
+            clearInterval(limitedInterval);
+          } else if ((responsestatus !== "" && responsestatus !== 'Running' && responsestatus !== 'Pending')) {
             this.isloading = false;
+            clearInterval(limitedInterval);
+            console.log( `responsestatus ${responsestatus} interval cleared!` );
           }
         } );
       
-        if ((responsestatus !== 'Running' && responsestatus !== 'Pending')) {
-          clearInterval(limitedInterval);
-          console.log( 'interval cleared!' );
-
-        }
-    }, 300);
+    }, 500);
   }
 
   getuserList () {
     this.userService.getUsersdata()
-        .subscribe( resp => {
-          this.userslist = resp.data;
-          this.storeUsersList();
-          
+        .subscribe( users => {
+          this.userslist = users;
         } );
   }
 }
