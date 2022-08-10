@@ -16,7 +16,6 @@ export class MatchingGroupPage implements OnInit {
   checked: any;
   usersgroups = [];
   usersSelected = [];
-  userslist = [];
   ColorsTags = ColorsTags;
   
   isLoading = false;
