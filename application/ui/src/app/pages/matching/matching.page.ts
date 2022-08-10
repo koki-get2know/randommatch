@@ -30,13 +30,6 @@ export class MatchingPage implements OnInit {
     "dark"
   ]
 
-  avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
-  "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
-  "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
-  "/assets/img/speakers/mouse.jpg", "/assets/img/speakers/puppy.jpg", "/assets/img/speakers/rabbit.jpg",
-   "/assets/img/speakers/turtle.jpg",
-   "https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"];
-
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
     public navCtrl: NavController, private router: Router,
@@ -45,7 +38,6 @@ export class MatchingPage implements OnInit {
   }
 
   ngOnInit () {
-    //this.usersgroups = this.generateUsers();
     const storagevalue= localStorage.getItem( "userlist" );
     this.usersgroups = storagevalue ? JSON.parse( storagevalue ) : [];
 
@@ -175,9 +167,9 @@ export class MatchingPage implements OnInit {
     let i = 0;
     while ( i < this.usersconnexionforbidden.length ) {
       let element = this.usersconnexionforbidden[i];
-      if ( element.length == newconnection.length ) {
+      if ( element.length === newconnection.length ) {
         const diffUser = this.compareconnection( element, newconnection );
-        if ( diffUser.length == 0 ) {
+        if ( diffUser.length === 0 ) {
           console.log( diffUser.length);
           return true;
         }
@@ -228,8 +220,6 @@ export class MatchingPage implements OnInit {
       let users = [];
       let randomgroup = `Group ${ g} ${ lorem.generateWords( g ) } `;
       for (let i=1; i<usersNumber; i++) {
-        let avatarId = Math.floor( Math.random() * ( this.avatars.length ) );
-        // generate unique id
         let user = {
           id: Math.floor(Math.random() * Date.now()),
           name: lorem.generateWords(2),
