@@ -23,12 +23,6 @@ export class MatchingPage implements OnInit {
   selected_forbidden_connexion: [];
   userstoforbidden =[];
   usersconnexionforbidden: User[][] = [];
-  
-  ColorsTags = [
-    "twitter",
-    "instagram",
-    "dark"
-  ]
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
@@ -115,12 +109,6 @@ export class MatchingPage implements OnInit {
     }
   }
 
-  getRandomColor () {
-    const min = 0;
-    const max = 2;
-    const index = Math.floor( Math.random() * ( max - min + 1 ) ) + min;
-    return this.ColorsTags[3%(index+1)];
-  }
   initForm() {
     this.matchingForm = this.formBuilder.group({
       matchingsize: ['', Validators.required],
