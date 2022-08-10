@@ -51,7 +51,7 @@ export class MatchingPage implements OnInit {
   checkMaster ( event ) {
     this.usersSelected = [];
     setTimeout( () => {
-      if ( this.masterCheck === true ) {
+      if ( this.masterCheck ) {
         this.usersgroups.forEach(user => {
         user.isChecked = this.masterCheck;
         this.usersSelected.push( user );
@@ -193,46 +193,6 @@ export class MatchingPage implements OnInit {
   removeConnection (index) {
     this.usersconnexionforbidden.splice(index, 1);
   }
-  generateUsers() {
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 8,
-        min: 4
-      },
-      wordsPerSentence: {
-        max: 16,
-        min: 4
-      }
-    });
-    const min = 6;
-    const max = 30;
-    const usersNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    let usersgroups = [];
-    for (let g=1; g < 3; g++) {
-      let users = [];
-      let randomgroup = `Group ${ g} ${ lorem.generateWords( g ) } `;
-      for (let i=1; i<usersNumber; i++) {
-        let user = {
-          id: Math.floor(Math.random() * Date.now()),
-          name: lorem.generateWords(2),
-          group: randomgroup,
-          avatar: this.matchService.generateAvatarSvg()
-        };
-        users.push( user );
-        this.userstoforbidden.push(user);
-      }
-
-      let group = {
-        group: `Group ${g} ${randomgroup}`,
-        users: users 
-      };
-      
-      usersgroups.push( group );
-      
-    }
-    return usersgroups;
-}
 
   get form() {
     return this.matchingForm.controls;
