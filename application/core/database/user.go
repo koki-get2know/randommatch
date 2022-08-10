@@ -11,17 +11,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
-type jobStatus string
-
-const (
-	Pending   jobStatus = "Pending"
-	Running   jobStatus = "Running"
-	Done      jobStatus = "Done"
-	Failed    jobStatus = "Failed"
-	Suspended jobStatus = "Suspended"
-	Cancelled jobStatus = "Cancelled"
-)
-
 func CreateUser(user entity.User) (string, error) {
 	driver, err := Driver()
 	if err != nil {
@@ -80,20 +69,21 @@ func mapUsers(users []entity.User) []map[string]interface{} {
 	var result = make([]map[string]interface{}, len(users))
 
 	for index, item := range users {
+		item.Id = uuid.New().String()
 		result[index] = structs.Map(item)
 	}
 
 	return result
 }
 
-func CreateUsers(users []entity.User) (string, error) {
+func CreateUsers(users []entity.User, orgaUid string) (string, error) {
 	jobId := uuid.New().String()
 	if err := CreateJobStatus(jobId); err != nil {
 		return "", err
 	}
-	status := make(chan jobStatus)
+	status := make(chan JobStatus)
 	go func() {
-		if err := createUsers(users, status); err != nil {
+		if err := createUsers(users, orgaUid, status); err != nil {
 			fmt.Println(err)
 		}
 	}()
@@ -106,7 +96,6 @@ func CreateUsers(users []entity.User) (string, error) {
 		session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 		defer session.Close()
 		for st := range status {
-			fmt.Println("status", st)
 			if err := updateJobStatus(session, jobId, st); err != nil {
 				fmt.Println("Error while updating job", jobId, err)
 			}
@@ -115,7 +104,7 @@ func CreateUsers(users []entity.User) (string, error) {
 	return jobId, nil
 }
 
-func createUsers(users []entity.User, out chan jobStatus) error {
+func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error {
 	defer close(out)
 	driver, err := Driver()
 	if err != nil {
@@ -136,12 +125,19 @@ func createUsers(users []entity.User, out chan jobStatus) error {
 
 	for _, chunk := range userschunks {
 		_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run("UNWIND $users AS user "+
-				"MERGE (n: User{name: user.Name, email: user.Email}) "+
-				"ON CREATE SET n += {uid: $uid, "+
+			result, err := tx.Run("MATCH (o: Organization{uid: $orguid }) "+
+				"UNWIND $users AS user "+
+				"MERGE (u: User{name: user.Name, email: user.Email}) "+
+				"ON CREATE SET u += {uid: user.Id, "+
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
-				"RETURN n.uid",
-				map[string]interface{}{"users": mapUsers(chunk), "uid": uuid.New().String()})
+				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
+				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
+				"WITH user.Groups AS tags, u AS u "+
+				"UNWIND tags AS tag "+
+				"MERGE (t: Tag {name: tag}) "+
+				"MERGE (u)-[rut:HAS_TAG]->(t) "+
+				"RETURN u.uid",
+				map[string]interface{}{"users": mapUsers(chunk), "orguid": orgaUid})
 
 			if err != nil {
 				return "", err
@@ -176,18 +172,25 @@ func GetUsers() ([]entity.User, error) {
 	defer session.Close()
 
 	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n: User) RETURN n", map[string]interface{}{})
+		result, err := tx.Run("MATCH (n: User) OPTIONAL MATCH (n)-[r:HAS_TAG]->(t: Tag) RETURN  n, COLLECT(t.name)",
+			map[string]interface{}{})
 		var users []entity.User
 
 		if err != nil {
 			return users, err
 		}
 		for result.Next() {
+			var tags []string
+			for _, tag := range result.Record().Values[1].([]interface{}) {
+				tags = append(tags, tag.(string))
+			}
 			user := result.Record().Values[0].(dbtype.Node).Props
+
 			users = append(users,
 				entity.User{
-					Id:   user["uid"].(string),
-					Name: user["name"].(string),
+					Id:     user["uid"].(string),
+					Name:   user["name"].(string),
+					Groups: tags,
 				})
 		}
 
@@ -202,4 +205,37 @@ func GetUsers() ([]entity.User, error) {
 		return []entity.User{}, err
 	}
 	return users.([]entity.User), nil
+}
+
+func GetEmailsFromUIds(uids []string) (map[string]string, error) {
+	driver, err := Driver()
+	if err != nil {
+		return map[string]string{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	mapUidEmail, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: User) WHERE n.uid IN $uids RETURN  n.uid, n.email",
+			map[string]interface{}{"uids": uids})
+
+		if err != nil {
+			return map[string]string{}, err
+		}
+		var uidEmails = make(map[string]string)
+		for result.Next() {
+			uidEmails[result.Record().Values[0].(string)] = result.Record().Values[1].(string)
+		}
+
+		if result.Err() != nil {
+			return map[string]string{}, result.Err()
+		}
+
+		return uidEmails, nil
+
+	})
+
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return mapUidEmail.(map[string]string), nil
 }

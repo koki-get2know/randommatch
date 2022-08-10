@@ -38,8 +38,9 @@ func JwtAuth() gin.HandlerFunc {
 
 func Cors() gin.HandlerFunc {
 	return cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{"*"},
-		MaxAge:       12 * time.Hour,
+		AllowOrigins:  []string{"*"},
+		AllowHeaders:  []string{"*"},
+		ExposeHeaders: []string{"Location"},
+		MaxAge:        12 * time.Hour,
 	})
 }

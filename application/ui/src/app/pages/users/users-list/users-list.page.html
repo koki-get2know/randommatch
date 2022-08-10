@@ -1,56 +1,55 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Users</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content fullscreen="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Users</ion-title>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-searchbar placeholder="Search"></ion-searchbar>
+    </ion-toolbar>
 
-<ion-content>
-  <!-- Searchbar with cancel button always shown -->
-  <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
-  <input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="ion-hide" (change)="uploadCsv($event)" #csvFileUpload>
-  <ion-button shape="round" fill="clear" (click)="csvFileUpload.click()" >
-    <ion-icon slot="start" name="document-outline"></ion-icon>
-    upload users
-  </ion-button>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <ion-list>
-          <ion-item-group *ngFor="let group of usersgroups">
-            <ion-item-divider sticky>
-              <ion-label>
-                {{group.group}}
-              </ion-label>
-            </ion-item-divider>
+  </ion-header>
 
-            <ion-item-sliding *ngFor="let user of group.users">
-              <ion-item routerLink="/app/tabs/schedule/session/">
-                <ion-avatar slot="start">
-                  <img [src]="user.avatar" alt="">
-                </ion-avatar>
-                <ion-label>
-                  <h3>{{user.name}}</h3>
-                  <p>
-                    {{user.group}}
-                  </p>
-                </ion-label>
-              </ion-item>
-              <ion-item-options>
-                <ion-item-option color="favorite">
-                  Favorite
-                </ion-item-option>
-                <ion-item-option color="danger">
-                  Remove
-                </ion-item-option>
-              </ion-item-options>
-            </ion-item-sliding>
-          </ion-item-group>
-        </ion-list>
-      </ion-col>
-    </ion-row>
+  <br />
+  <div>
+    <input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="ion-hide" (change)="uploadCsv($event)" #csvFileUpload hidden=true>
+    <ion-button shape="round" fill="clear" (click)="csvFileUpload.click()">
+      <ion-icon slot="start" name="document-outline"></ion-icon>
+      upload users
+    </ion-button>
 
-  </ion-grid>
+  </div>
+  <ion-list>
+    <ion-item-group>
+      <ion-item-divider sticky>
+        <ion-label>
+          USERS LIST
+        </ion-label>
+        <ion-spinner *ngIf="isloading" name="circles"></ion-spinner>
+
+      </ion-item-divider>
+      <div *ngIf="userslist.length">
+        <ion-item-sliding *ngFor="let user of userslist" #slidingItem>
+          <ion-item button>
+            <ion-label>
+              <h3>{{user.name}}</h3>
+              <p>
+                {{user.departement}}
+              </p>
+            </ion-label>
+            <div class="ion-padding speaker-detail">
+
+              <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick()">
+                <ion-label>{{group}}</ion-label>
+              </ion-chip>
+            </div>
+
+          </ion-item>
+        </ion-item-sliding>
+      </div>
+
+    </ion-item-group>
+  </ion-list>
+
+
+
 </ion-content>
