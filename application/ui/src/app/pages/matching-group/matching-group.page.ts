@@ -45,11 +45,7 @@ export class MatchingGroupPage implements OnInit {
   }
 
   ngOnInit () {
-    const storagevalue= localStorage.getItem( "userlist" );
-    this.users_toselect_group1 = storagevalue ? JSON.parse( storagevalue ) : [];
-    this.users_toselect_group2 = storagevalue ? JSON.parse( storagevalue ) : [];
-
-    this.initForm();
+     this.initForm();
   }
 
   initForm() {
