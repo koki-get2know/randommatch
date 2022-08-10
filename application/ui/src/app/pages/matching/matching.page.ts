@@ -40,13 +40,7 @@ export class MatchingPage implements OnInit {
   ngOnInit () {
     const storagevalue= localStorage.getItem( "userlist" );
     this.usersgroups = storagevalue ? JSON.parse( storagevalue ) : [];
-
-    console.log( "NEW LIST" );
-    console.log( this.usersgroups );
     this.initusermatch();
-
-    console.log( "NEW LIST 2" );
-    console.log( this.usersgroups );
     this.initForm();
   }
 
@@ -57,7 +51,7 @@ export class MatchingPage implements OnInit {
   checkMaster ( event ) {
     this.usersSelected = [];
     setTimeout( () => {
-      if ( this.masterCheck == true ) {
+      if ( this.masterCheck === true ) {
         this.usersgroups.forEach(user => {
         user.isChecked = this.masterCheck;
         this.usersSelected.push( user );
@@ -110,7 +104,7 @@ export class MatchingPage implements OnInit {
       //If even one item is checked but not all
       this.isIndeterminate = true;
       this.masterCheck = false;
-    } else if (checked == totalItems) {
+    } else if (checked === totalItems) {
       //If all are checked
       this.masterCheck = true;
       this.isIndeterminate = false;
@@ -143,10 +137,9 @@ export class MatchingPage implements OnInit {
   userChange(event: {
     component: IonicSelectableComponent,
     value: any} ) {
-    console.log( "Selec" );
     // just add if the list in not empty
     if ( this.selected_forbidden_connexion.length > 1 ) {
-      if ( this.usersconnexionforbidden.length == 0 ) {
+      if ( this.usersconnexionforbidden.length === 0 ) {
         this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
       }
       else {
@@ -250,7 +243,7 @@ export class MatchingPage implements OnInit {
   selectGroup(event, group){
   
   this.usersSelected = [];
-  if ( event.target.checked == false ) {
+  if ( event.target.checked === false ) {
       this.usersSelected = group.users;
     }
   }
@@ -280,8 +273,6 @@ export class MatchingPage implements OnInit {
       users,
       forbiddenConnections
     };
-    console.log( "MACHT DATA" );
-    console.log( matchingRequest );
 
     this.matchService.makematch(matchingRequest)
       .subscribe( ( matchings: Matching[] ) => {
