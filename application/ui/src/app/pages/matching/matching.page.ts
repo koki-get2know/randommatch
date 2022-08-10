@@ -132,11 +132,10 @@ export class MatchingPage implements OnInit {
       }
       else {
         if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
-          console.log( "Lien inexistant" );
           this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
         }
         else {
-          this.presentToast("this connection already exist!");
+          this.presentToast("this connection already exists!");
         }
       }
     } else {
@@ -233,7 +232,7 @@ export class MatchingPage implements OnInit {
             this.matchingresult(matchings);
         }
         else {
-          this.presentToast("No match generated!");
+          this.presentToast("No matchings generated!");
         }
         
       })
