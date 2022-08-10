@@ -197,7 +197,9 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 			for _, u := range matchB.Users {
 				u := u
-				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
+				find, _ := search(users, u)
+				if !find && Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
+
 					matchA.Users = append(matchA.Users, u)
 
 				} else {

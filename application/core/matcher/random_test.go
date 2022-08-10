@@ -13,6 +13,7 @@ func TestRandomChoices(t *testing.T) {
 
 	var forbiddenConnections [][]entity.User
 	constraint := []Constraint{Unique}
+
 	matching := randomChoices(&g, 2, constraint, forbiddenConnections)
 
 	fmt.Printf("Match of %d: [", len(matching.Users))
@@ -122,8 +123,10 @@ func TestGenTuple(t *testing.T) {
 
 	users := []entity.User{}
 	var connections, forbiddenConnections [][]entity.User
+
 	A := []entity.User{{Id: "tata"}, {Id: "toto"}, {Id: "tutu"}}
 	B := []entity.User{{Id: "tete"}, {Id: "titi"}, {Id: "tato"}}
+
 	C := []entity.User{{Id: "tete"}, {Id: "titi"}, {Id: "tonton"}}
 	D := []entity.User{{Id: "tata"}, {Id: "titi"}}
 	forbiddenConnections = append(forbiddenConnections, C)
