@@ -15,12 +15,8 @@ export class MatchingGroupPage implements OnInit {
   matchingForm: FormGroup;
   checked: any;
   usersgroups = [];
-   
   usersSelected = [];
-
-
   userslist = [];
-
   ColorsTags = [
     "twitter",
     "instagram",
@@ -61,7 +57,6 @@ export class MatchingGroupPage implements OnInit {
   }
 
   ngOnInit () {
-    //this.usersgroups = this.generateUsers();
     const storagevalue= localStorage.getItem( "userlist" );
     this.users_toselect_group1 = storagevalue ? JSON.parse( storagevalue ) : [];
     this.users_toselect_group2 = storagevalue ? JSON.parse( storagevalue ) : [];
@@ -79,7 +74,6 @@ export class MatchingGroupPage implements OnInit {
     portChange(event: {
     component: IonicSelectableComponent,
     value: any} ) {
-    console.log( "Selec" );
     // just add if the list in not empty
     if ( this.selected_forbidden_connexion.length > 1 ) {
       if ( this.usersconnexionforbidden.length == 0 ) {
@@ -104,21 +98,15 @@ export class MatchingGroupPage implements OnInit {
     component: IonicSelectableComponent,
     value: any
   } ) {
-    console.log( "Selec group 1" );
    
     console.log( this.users_selected_group1 );
     this.result_selected_group1 = this.users_selected_group1;
-    // users to forbidden must be selected among the group 1 and 2
+    // users to forbid must be selected among the group 1 and 2
     this.userstoforbidden = [];
     this.userstoforbidden = this.userstoforbidden.concat( this.result_selected_group1 );
     this.userstoforbidden = this.userstoforbidden.concat( this.result_selected_group2 );
     // in the second group, just keep all the users who have not been selected in the group 1
     this.users_toselect_group2 = this.compareconnection( this.users_toselect_group1, this.result_selected_group1 );
-
-    const forbid = 
-
-    console.log( "LA CONCATs" );
-    console.log( this.userstoforbidden );
     this.clearGroup1();
   }
   portChangeGroup2(event: {
@@ -276,13 +264,9 @@ export class MatchingGroupPage implements OnInit {
 
     };
 
-    console.log( "Data Match Group" );
-    console.log( matchingRequest );
-
     this.matchService.makematchgroup(matchingRequest)
       .subscribe( ( res: Matching[] ) => {
         if ( res!==null ) {
-          console.log( matchingRequest );
           this.matchingresult(res);
         }
         else {
@@ -294,12 +278,6 @@ export class MatchingGroupPage implements OnInit {
 
   // matching result
   matchingresult(matchings: Matching[]) {
-    for(const matching of matchings) {
-      for (const user of matching.users) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
-        user.avatar = this.avatars[avatarId];
-      }
-    }
     const navigationExtras: NavigationExtras = {
       state: {
         matchings
