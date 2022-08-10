@@ -33,9 +33,11 @@ func fillGraph() {
 func TestAdd(t *testing.T) {
 	fillGraph()
 	g.String()
+
 	n1 := entity.User{Id: "4"}
 	n2 := entity.User{Id: "5"}
 	A := []*entity.User{&n1, &n2}
+
 	sub := g.Subgraph(A)
 	sub.String()
 

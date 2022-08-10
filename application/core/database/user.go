@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/fatih/structs"
@@ -79,40 +80,75 @@ func mapUsers(users []entity.User) []map[string]interface{} {
 	var result = make([]map[string]interface{}, len(users))
 
 	for index, item := range users {
+		item.Id = uuid.New().String()
 		result[index] = structs.Map(item)
 	}
 
 	return result
 }
 
-func CreateUsers(users []entity.User, jobId string) error {
+func CreateUsers(users []entity.User, orgaUid string) (string, error) {
+	jobId := uuid.New().String()
+	if err := CreateJobStatus(jobId); err != nil {
+		return "", err
+	}
+	status := make(chan jobStatus)
+	go func() {
+		if err := createUsers(users, orgaUid, status); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	go func() {
+		driver, err := Driver()
+		if err != nil {
+			fmt.Print("Driver error", err)
+			return
+		}
+		session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+		defer session.Close()
+		for st := range status {
+			if err := updateJobStatus(session, jobId, st); err != nil {
+				fmt.Println("Error while updating job", jobId, err)
+			}
+		}
+	}()
+	return jobId, nil
+}
 
+func createUsers(users []entity.User, orgaUid string, out chan jobStatus) error {
+	defer close(out)
 	driver, err := Driver()
 	if err != nil {
+		out <- Failed
 		return err
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	if len(users) == 0 {
-		updateJobStatus(session, jobId, Done)
+		out <- Done
 		return nil
 	}
 
-	if err = updateJobStatus(session, jobId, Running); err != nil {
-		return err
-	}
+	out <- Running
 	const chunkSize = 1000
 	userschunks := chunkSlice(users, chunkSize)
 
 	for _, chunk := range userschunks {
 		_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run("UNWIND $users AS user "+
-				"MERGE (n: User{name: user.Name, email: user.Email}) "+
-				"ON CREATE SET n += {uid: $uid, "+
+			result, err := tx.Run("MATCH (o: Organization{uid: $orguid }) "+
+				"UNWIND $users AS user "+
+				"MERGE (u: User{name: user.Name, email: user.Email}) "+
+				"ON CREATE SET u += {uid: user.Id, "+
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
-				"RETURN n.uid",
-				map[string]interface{}{"users": mapUsers(chunk), "uid": uuid.New().String()})
+				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
+				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
+				"WITH user.Groups AS tags, u AS u "+
+				"UNWIND tags AS tag "+
+				"MERGE (t: Tag {name: tag}) "+
+				"MERGE (u)-[rut:HAS_TAG]->(t) "+
+				"RETURN u.uid",
+				map[string]interface{}{"users": mapUsers(chunk), "orguid": orgaUid})
 
 			if err != nil {
 				return "", err
@@ -130,11 +166,12 @@ func CreateUsers(users []entity.User, jobId string) error {
 
 		})
 		if err != nil {
-			updateJobStatus(session, jobId, Failed)
+			out <- Failed
 			return err
 		}
 	}
-	return updateJobStatus(session, jobId, Done)
+	out <- Done
+	return nil
 }
 
 func GetUsers() ([]entity.User, error) {
@@ -146,18 +183,25 @@ func GetUsers() ([]entity.User, error) {
 	defer session.Close()
 
 	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n: User) RETURN n", map[string]interface{}{})
+		result, err := tx.Run("MATCH (n: User) OPTIONAL MATCH (n)-[r:HAS_TAG]->(t: Tag) RETURN  n, COLLECT(t.name)",
+			map[string]interface{}{})
 		var users []entity.User
 
 		if err != nil {
 			return users, err
 		}
 		for result.Next() {
+			var tags []string
+			for _, tag := range result.Record().Values[1].([]interface{}) {
+				tags = append(tags, tag.(string))
+			}
 			user := result.Record().Values[0].(dbtype.Node).Props
+
 			users = append(users,
 				entity.User{
-					Id:   user["uid"].(string),
-					Name: user["name"].(string),
+					Id:     user["uid"].(string),
+					Name:   user["name"].(string),
+					Groups: tags,
 				})
 		}
 

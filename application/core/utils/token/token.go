@@ -64,12 +64,9 @@ func getPEMPublicKeyCacheAware() func(kid string) (string, error) {
 	return func(kid string) (string, error) {
 
 		if ret, ok := cache[kid]; ok && ret.counter < callsBeforeExpiringCache {
-			fmt.Println("Getting public key from cache")
-
 			cache[kid] = keyCache{counter: ret.counter + 1, value: ret.value}
 			return ret.value, nil
 		}
-		fmt.Println("Getting public key live")
 		const kAzureOpenIDConfiguration = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration"
 
 		// get OpenId configuration

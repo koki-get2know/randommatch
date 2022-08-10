@@ -51,11 +51,84 @@ export class MatchingPage implements OnInit {
 
     console.log( "NEW LIST" );
     console.log( this.usersgroups );
+    this.initusermatch();
 
+    console.log( "NEW LIST 2" );
+    console.log( this.usersgroups );
     this.initForm();
   }
 
+  isIndeterminate:boolean;
+  masterCheck:boolean;
+  checkBoxList: any;
   
+  checkMaster ( event ) {
+    this.usersSelected = [];
+    setTimeout( () => {
+      if ( this.masterCheck == true ) {
+        this.usersgroups.forEach(user => {
+        user.isChecked = this.masterCheck;
+        this.usersSelected.push( user );
+        });
+      }
+      else {
+        this.usersgroups.forEach(user => {
+        user.isChecked = this.masterCheck;
+        this.onRemoveusersSelected( user.id );
+        });
+      }
+      
+    });
+  }
+
+  initusermatch () {
+    this.usersgroups.forEach(obj => {
+        obj.isChecked = false;
+       // obj = { ...obj, isChecked: false};
+      });
+  }
+ selectUsers(event: PointerEvent,user) {
+    if ((event.target as HTMLInputElement).checked === false ) {
+      this.usersSelected.push( user );
+    }
+    else {
+      this.onRemoveusersSelected( user.id );
+    }
+
+  }
+  // when user is unchecked, it should be remove
+  onRemoveusersSelected(id: number) {
+    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
+    this.usersSelected.splice(index, 1);
+  }
+    checkEvent(event: PointerEvent,user) {
+    const totalItems = this.usersgroups.length;
+    let checked = 0;
+    
+    if ((event.target as HTMLInputElement).checked === false ) {
+      this.usersSelected.push( user );
+      checked++;
+      
+    }
+    else {
+      this.onRemoveusersSelected( user.id );
+      checked--;
+    }
+    if (checked > 0 && checked < totalItems) {
+      //If even one item is checked but not all
+      this.isIndeterminate = true;
+      this.masterCheck = false;
+    } else if (checked == totalItems) {
+      //If all are checked
+      this.masterCheck = true;
+      this.isIndeterminate = false;
+    } else {
+      //If none is checked
+      this.isIndeterminate = false;
+      this.masterCheck = false;
+    }
+  }
+
   getRandomColor () {
     const min = 0;
     const max = 2;
@@ -182,20 +255,7 @@ export class MatchingPage implements OnInit {
     return this.matchingForm.controls;
   }
 
-  selectUsers(event: PointerEvent,user) {
-    if ((event.target as HTMLInputElement).checked === false ) {
-      this.usersSelected.push( user );
-    }
-    else {
-      this.onRemoveusersSelected( user.id );
-    }
-
-  }
-  // when user is unchecked, it should be remove
-  onRemoveusersSelected(id: number) {
-    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
-    this.usersSelected.splice(index, 1);
-  }
+ 
   // select a group of user
   selectGroup(event, group){
   
@@ -235,12 +295,18 @@ export class MatchingPage implements OnInit {
 
     this.matchService.makematch(matchingRequest)
       .subscribe( ( matchings: Matching[] ) => {
-        console.log(matchings);
-        matchings.forEach(match => match.users.forEach(user => {
-          user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
-        }));
+        if ( matchings!==null ) {
+            console.log(matchings);
+            matchings.forEach(match => match.users.forEach(user => {
+              user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
+            }));
+            
+            this.matchingresult(matchings);
+        }
+        else {
+          this.presentToast("No match generated!");
+        }
         
-        this.matchingresult(matchings);
       })
   }
 

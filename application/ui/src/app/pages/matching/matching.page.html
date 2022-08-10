@@ -81,14 +81,20 @@
       <ion-col>
         <!-- Searchbar with cancel button always shown -->
         <ion-searchbar showCancelButton="always"></ion-searchbar>
+        <ion-list>
+          <ion-item-divider sticky>
+            <ion-label>
+              USERS LIST
+            </ion-label>
+          </ion-item-divider>
+          <ion-item>
+            <ion-label><strong>Select All</strong></ion-label>
+            <ion-checkbox slot="start" [(ngModel)]="masterCheck" [indeterminate]="isIndeterminate" (click)="checkMaster($event)"></ion-checkbox>
+          </ion-item>
+        </ion-list>
         <ion-list #scheduleList>
           <ion-item-group>
-            <ion-item-divider sticky>
-              <ion-label>
-                USERS LIST
-              </ion-label>
-            </ion-item-divider>
-        
+
             <ion-item-sliding *ngFor="let user of usersgroups" #slidingItem>
               <ion-item button>
                 <ion-label>
@@ -99,11 +105,11 @@
                 </ion-label>
                 <div class="ion-padding speaker-detail">
 
-                  <ion-chip *ngFor="let group of user.groups; let i=index" [color]="getRandomColor (i)" button (click)="tagclick()">
+                  <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick()">
                     <ion-label>{{group}}</ion-label>
                   </ion-chip>
                 </div>
-                <ion-checkbox (click)="selectUsers($event,user)" color="primary"></ion-checkbox>
+                <ion-checkbox [(ngModel)]="user.isChecked" (click)="checkEvent($event,user)" color="primary"></ion-checkbox>
 
               </ion-item>
             </ion-item-sliding>

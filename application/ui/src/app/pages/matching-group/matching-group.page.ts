@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching, MatchingGroupReq } from '../../services/users.service';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
 import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
@@ -19,103 +19,7 @@ export class MatchingGroupPage implements OnInit {
   usersSelected = [];
 
 
-  userslist = [
-    {
-      "UserId": "",
-      "Name": "Pins Prestilien",
-      "Email": "pinsdev24@gmail.com",
-      "Groups": [
-        ""
-      ],
-      "Genre": "Male",
-      "Birthday": "10/01",
-      "Hobbies": [
-        "Data science",
-        "Space",
-        "Télévison"
-      ],
-      "MatchPreference": [
-        "girls"
-      ],
-      "MatchPreferenceTime": [
-        "14:00PM"
-      ],
-      "PositionHeld": "CEO",
-      "MultiMatch": false,
-      "PhoneNumber": "699999999",
-      "Departement": "Informatique",
-      "Location": "Kao",
-      "Seniority": "",
-      "Role": "super-user",
-      "NumberOfMatching": 0,
-      "NumberMatchingAccepted": 0,
-      "NumberMatchingDeclined": 0,
-      "AverageMatchingRate": 0
-    },
-    {
-      "UserId": "",
-      "Name": "Frank Tchatseu",
-      "Email": "pinsdev24@gmail.com",
-      "Groups": [
-        "DS",
-        "IA",
-        "SPACE"
-      ],
-      "Genre": "Male",
-      "Birthday": "10/01",
-      "Hobbies": [
-        "Jeux vidéos",
-        "Musique"
-      ],
-      "MatchPreference": [
-        "same groups"
-      ],
-      "MatchPreferenceTime": [
-        "14:00PM"
-      ],
-      "PositionHeld": "Admin",
-      "MultiMatch": false,
-      "PhoneNumber": "699999999",
-      "Departement": "Math",
-      "Location": "Fpol",
-      "Seniority": "",
-      "Role": "user",
-      "NumberOfMatching": 0,
-      "NumberMatchingAccepted": 0,
-      "NumberMatchingDeclined": 0,
-      "AverageMatchingRate": 0
-    },
-    {
-      "UserId": "",
-      "Name": "Pins Prestilien",
-      "Email": "pinsdev24@gmail.com",
-      "Groups": [
-        "Foot"
-      ],
-      "Genre": "Male",
-      "Birthday": "10/01",
-      "Hobbies": [
-        "Dance"
-      ],
-      "MatchPreference": [
-        "pretty girl"
-      ],
-      "MatchPreferenceTime": [
-        "14:00PM"
-      ],
-      "PositionHeld": "Chef",
-      "MultiMatch": false,
-      "PhoneNumber": "699999999",
-      "Departement": "Biology",
-      "Location": "Soa",
-      "Seniority": "",
-      "Role": "user",
-      "NumberOfMatching": 0,
-      "NumberMatchingAccepted": 0,
-      "NumberMatchingDeclined": 0,
-      "AverageMatchingRate": 0
-    }
-  ];
+  userslist = [];
 
   ColorsTags = [
     "twitter",
@@ -158,7 +62,7 @@ export class MatchingGroupPage implements OnInit {
   @ViewChild( 'selectComponentGroup1' ) selectComponentGroup1: IonicSelectableComponent
   @ViewChild( 'selectComponentGroup2') selectComponentGroup2:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController, private router: Router ) { 
+    public navCtrl: NavController, private router: Router,public toastController: ToastController ) { 
     
   }
 
@@ -177,19 +81,31 @@ export class MatchingGroupPage implements OnInit {
     });
   }
 
-  portChange(event: {
+ 
+    portChange(event: {
     component: IonicSelectableComponent,
-    value: any
-  } ) {
+    value: any} ) {
     console.log( "Selec" );
-    if ( this.selected_forbidden_connexion.length > 0 ) {
-      this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+    // just add if the list in not empty
+    if ( this.selected_forbidden_connexion.length > 1 ) {
+      if ( this.usersconnexionforbidden.length == 0 ) {
+        this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+      }
+      else {
+        if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
+          console.log( "Lien inexistant" );
+          this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
+        }
+        else {
+          this.presentToast("this connection already exist!");
+        }
+      }
+    } else {
+      this.presentToast("Please select more than one user!");
     }
-    console.log( this.usersconnexionforbidden );
-    console.log( 'port:', event.value );
-
     this.clear();
   }
+  
   portChangeGroup1(event: {
     component: IonicSelectableComponent,
     value: any
@@ -201,7 +117,9 @@ export class MatchingGroupPage implements OnInit {
     // users to forbidden must be selected among the group 1 and 2
     this.userstoforbidden = [];
     this.userstoforbidden = this.userstoforbidden.concat( this.result_selected_group1 );
-    this.userstoforbidden = this.userstoforbidden.concat(this.result_selected_group2);
+    this.userstoforbidden = this.userstoforbidden.concat( this.result_selected_group2 );
+    // in the second group, just keep all the users who have not been selected in the group 1
+    this.users_toselect_group2 = this.compareconnection( this.users_toselect_group1, this.result_selected_group1 );
 
     const forbid = 
 
@@ -218,6 +136,9 @@ export class MatchingGroupPage implements OnInit {
 
     this.userstoforbidden = this.userstoforbidden.concat(this.result_selected_group2);
     
+    // in the second group, just keep all the users who have not been selected in the group 1
+    this.users_toselect_group1 = this.compareconnection( this.users_toselect_group2, this.result_selected_group2 );
+
     this.clearGroup2();
   }
   clear() {
@@ -229,15 +150,39 @@ export class MatchingGroupPage implements OnInit {
   clearGroup1() {
     this.selectComponentGroup1.clear();
     this.selectComponentGroup1.close();
+    
+    
   }
   clearGroup2() {
     this.selectComponentGroup2.clear();
     this.selectComponentGroup2.close();
     
+    
   }
   addforbiddenUsersItem() {
     this.selectComponent.confirm ();
     this.selectComponent.close(); 
+    
+  }
+  forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
+    let i = 0;
+    while ( i < this.usersconnexionforbidden.length ) {
+      let element = this.usersconnexionforbidden[i];
+      if ( element.length == newconnection.length ) {
+        const diffUser = this.compareconnection( element, newconnection );
+        if ( diffUser.length == 0 ) {
+          console.log( diffUser.length);
+          return true;
+        }
+      }
+      i++;
+    }
+    return false;
+  }
+  compareconnection<User>(forbconnec1:any,forbconnec2:any) {
+    return forbconnec1.filter((element) => {
+        return !forbconnec2.some(elt2 => element.id === elt2.id);
+      });
     
   }
   generateUsers() {
@@ -387,8 +332,14 @@ export class MatchingGroupPage implements OnInit {
 
     this.matchService.makematchgroup(matchingRequest)
       .subscribe( ( res: Matching[] ) => {
-        console.log( matchingRequest );
-        this.matchingresult(res);
+        if ( res!==null ) {
+          console.log( matchingRequest );
+          this.matchingresult(res);
+        }
+        else {
+          this.presentToast("No match generated!");
+        }
+       
       })
   }
 
@@ -408,4 +359,11 @@ export class MatchingGroupPage implements OnInit {
     this.router.navigate(['/matching-result'],navigationExtras);
   }
 
+   async presentToast(message) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000
+    });
+    toast.present();
+  }
 }

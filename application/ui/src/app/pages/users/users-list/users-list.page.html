@@ -4,7 +4,7 @@
       <ion-title size="large">Users</ion-title>
     </ion-toolbar>
     <ion-toolbar>
-      <ion-searchbar [(ngModel)]="queryText" (ionChange)="updateSchedule()" placeholder="Search"></ion-searchbar>
+      <ion-searchbar placeholder="Search"></ion-searchbar>
     </ion-toolbar>
 
   </ion-header>
@@ -16,41 +16,37 @@
       <ion-icon slot="start" name="document-outline"></ion-icon>
       upload users
     </ion-button>
+
   </div>
-  
-  <ion-list #scheduleList [hidden]="shownSessions === 0">
+  <ion-list>
     <ion-item-group>
       <ion-item-divider sticky>
         <ion-label>
           USERS LIST
         </ion-label>
+        <ion-spinner *ngIf="isloading==true" name="circles"></ion-spinner>
+
       </ion-item-divider>
-    
-      <ion-item-sliding *ngFor="let user of userslist" #slidingItem >
-        <ion-item button>
-          <ion-label>
-            <h3>{{user.name}}</h3>
-            <p>
-              {{user.departement}}
-            </p>
-          </ion-label>
-          <div class="ion-padding speaker-detail">
+      <div *ngIf="userslist.length">
+        <ion-item-sliding *ngFor="let user of userslist" #slidingItem>
+          <ion-item button>
+            <ion-label>
+              <h3>{{user.name}}</h3>
+              <p>
+                {{user.departement}}
+              </p>
+            </ion-label>
+            <div class="ion-padding speaker-detail">
 
-            <ion-chip *ngFor="let group of user.groups; let i=index"  button (click)="tagclick()">
-              <ion-label>{{group}}</ion-label>
-            </ion-chip>
-          </div>
+              <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick()">
+                <ion-label>{{group}}</ion-label>
+              </ion-chip>
+            </div>
 
-        </ion-item>
-        <ion-item-options>
-          <ion-item-option color="favorite" (click)="addFavorite(slidingItem, user)" *ngIf="segment === 'all'">
-            Favorite
-          </ion-item-option>
-          <ion-item-option color="danger" (click)="removeFavorite(slidingItem, user, 'Remove Favorite')" *ngIf="segment === 'favorites'">
-            Remove
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
+          </ion-item>
+        </ion-item-sliding>
+      </div>
+
     </ion-item-group>
   </ion-list>
 

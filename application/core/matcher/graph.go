@@ -14,7 +14,9 @@ type UserGraph struct {
 }
 
 // AddNode adds a node to the graph
+
 func (g *UserGraph) AddUser(n *entity.User) {
+
 	if find, _ := Search(g.users, n); !find {
 		g.users = append(g.users, n)
 	}
@@ -32,6 +34,7 @@ func (g *UserGraph) AddEdge(n1, n2 *entity.User) {
 	if find, _ := Search(g.edges[(*n2).Id], n1); !find {
 		g.edges[(*n2).Id] = append(g.edges[(*n2).Id], n1)
 	}
+
 }
 
 // search a user in a list of user
@@ -127,8 +130,10 @@ func UsersToGraph(users []entity.User, connections [][]entity.User) *UserGraph {
 		if len(usersAlreadyMatch) > 0 {
 			node := usersAlreadyMatch[0]
 			for _, user := range usersAlreadyMatch[1:] {
+
 				user := user
 				graph.AddEdge(&node, &user)
+
 			}
 		}
 	}
@@ -136,6 +141,7 @@ func UsersToGraph(users []entity.User, connections [][]entity.User) *UserGraph {
 }
 
 // Subgraph extract a subgraph G' from a graph G
+
 func (g *UserGraph) Subgraph(users []*entity.User) *UserGraph {
 	var subG UserGraph
 	subG.edges = make(map[string][]*entity.User)
@@ -143,6 +149,7 @@ func (g *UserGraph) Subgraph(users []*entity.User) *UserGraph {
 
 	for _, user := range users {
 		subG.edges[(*user).Id] = g.edges[(*user).Id]
+
 	}
 	return &subG
 }

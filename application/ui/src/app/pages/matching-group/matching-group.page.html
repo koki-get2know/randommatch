@@ -37,18 +37,19 @@
         <ion-list>
           <ion-item-group *ngFor="let usergroup1 of result_selected_group1 ; let i=index">
             <ion-item-divider sticky>
+              <div class="ion-padding speaker-detail">
+
+                <ion-chip color="instagram"  button (click)="tagclick()">
+                  <ion-label>{{i}}</ion-label>
+                </ion-chip>
+              </div>
               <ion-label>
                 <h3>{{usergroup1.name}}</h3>
                 <p>
                   {{usergroup1.departement}}
                 </p>
               </ion-label>
-              <div class="ion-padding speaker-detail">
 
-                <ion-chip  button (click)="tagclick()">
-                  <ion-label>{{usergroup1.Location}}</ion-label>
-                </ion-chip>
-              </div>
             </ion-item-divider>
           </ion-item-group>
         </ion-list>
@@ -62,18 +63,18 @@
         <ion-list>
           <ion-item-group *ngFor="let usergroup1 of result_selected_group2 ; let i=index">
             <ion-item-divider sticky>
+              <div class="ion-padding speaker-detail">
+
+                <ion-chip color="twitter" button (click)="tagclick()">
+                  <ion-label>{{i}}</ion-label>
+                </ion-chip>
+              </div>
               <ion-label>
                 <h3>{{usergroup1.name}}</h3>
                 <p>
                   {{usergroup1.departement}}
                 </p>
               </ion-label>
-              <div class="ion-padding speaker-detail">
-
-                <ion-chip  button (click)="tagclick()">
-                  <ion-label>{{usergroup1.Location}}</ion-label>
-                </ion-chip>
-              </div>
             </ion-item-divider>
           </ion-item-group>
         </ion-list>
