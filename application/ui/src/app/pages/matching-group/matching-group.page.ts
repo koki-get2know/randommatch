@@ -23,14 +23,6 @@ export class MatchingGroupPage implements OnInit {
     "dark"
   ]
   
-  getRandomColor () {
-    const min = 0;
-    const max = 2;
-    const index = Math.floor( Math.random() * ( max - min + 1 ) ) + min;
-    return this.ColorsTags[3%(index+1)];
-  }
-
-
   isLoading = false;
   isError = false;
   isSuccess = false;
