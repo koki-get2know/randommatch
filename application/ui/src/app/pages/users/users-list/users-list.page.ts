@@ -19,7 +19,6 @@ export class UsersListPage implements OnInit {
 
   groups: any = [];
 
-
   constructor(
     public router: Router,
     public toastCtrl: ToastController,
@@ -64,15 +63,13 @@ export class UsersListPage implements OnInit {
   checkResponseUrl = "";
   
   uploadCsv ( event ) {
-    //this.storeUsersList();
     this.isloading = true;
     for (const file of event.target.files) {
       const fileData = new FormData();
       fileData.append("file", file);
       this.userService.uploadUsersFile( fileData )
         .subscribe( resp => {
-          if ( resp.status == 202 ) {
-            console.log( resp.headers.get( "Location" ) );
+          if ( resp.status === 202 ) {
             this.checkResponseUrl = resp.headers.get( "Location" );
             this.checkserverresponse();
           }
@@ -82,32 +79,25 @@ export class UsersListPage implements OnInit {
   }
   
   checkserverresponse () {
-    const delay = 2;
-    const limit = 10;
-    let i = 1;
     let responsestatus = "";
-
-    console.log('START!');
     const limitedInterval = setInterval(() => {
-      console.log( `message ${ i }, appeared after ${ delay * i++ } seconds` );
       this.userService.availabilyofusers( this.checkResponseUrl )
         .subscribe( resp => {
           responsestatus = resp[ "status" ];
-          console.log( responsestatus);
-          if ( responsestatus === 'Done' ) {
-            // get users list
+          if ( responsestatus === 'Done'  ) {
             this.getuserList();
-            console.log( "LA Liste" );
+            this.isloading = false;
+          } else if (responsestatus !== 'Running') {
             this.isloading = false;
           }
         } );
       
-      if (responsestatus === 'Done' || i>=limit ) {
-        clearInterval(limitedInterval);
-        console.log( 'interval cleared!' );
-        
-      }
-    }, delay * 1000);
+        if ((responsestatus !== 'Running' && responsestatus !== 'Pending')) {
+          clearInterval(limitedInterval);
+          console.log( 'interval cleared!' );
+
+        }
+    }, 300);
   }
 
   getuserList () {
