@@ -293,9 +293,6 @@ func Matcher(g *UserGraph, k uint,
 					groupB.RemoveUser(&match)
 
 				}
-				groupA.String()
-				groupB.String()
-
 			}
 
 			matching[i] = matched
