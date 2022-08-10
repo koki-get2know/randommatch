@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/database"
@@ -113,7 +112,19 @@ func uploadUsers(c *gin.Context) {
 		return
 	}
 
-	jobId, err := database.CreateUsers(users)
+	// in a next phase organization creation should be done via a super admin that has the appropriate roles
+	orga := entity.Organization{
+		Name:        "dummy",
+		Description: "All users belongs to this organization on the MVP phase",
+	}
+	orgaUid, err := database.CreateOrganization(orga)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		return
+	}
+
+	jobId, err := database.CreateUsers(users, orgaUid)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "users creation failed " + err.Error()})
@@ -153,17 +164,14 @@ func emailMatches(c *gin.Context) {
 		return
 	}
 
-	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
-	adminEmail := claims["preferred_username"].(string)
-
 	// http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
-	go func() {
-		for _, match := range req.Matches {
-			match := match
-			calendar.SendInvite(&match, adminEmail)
-			break // send only once for now
-		}
-	}()
+
+	jobId, err := calendar.SendInvite(req.Matches)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "mails sending failed " + err.Error()})
+		return
+	}
+	c.Header("Location", fmt.Sprintf("/matching-email-job/%v", jobId))
 	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
 
 }
@@ -218,7 +226,7 @@ func duration(msg string, start time.Time) {
 }
 
 func main() {
-	os.Setenv("NEO4J_AUTH", "***/***")
+	//os.Setenv("NEO4J_AUTH", "****/****")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
@@ -247,9 +255,9 @@ func main() {
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
 	protected.GET("/users-creation-job/:id", getJobStatus)
+	protected.GET("/matching-email-job/:id", getJobStatus)
 	protected.GET("/users", getUsers)
 	protected.POST("/email-matches", emailMatches)
 
 	router.Run()
-
 }

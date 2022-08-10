@@ -21,19 +21,92 @@ export class MatchingPage implements OnInit {
   usersSelected = [];
 
   selected_forbidden_connexion: [];
-  userstoforbid =[];
-  usersconnexionforbidden =[];
+  userstoforbidden =[];
+  usersconnexionforbidden: User[][] = [];
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
-  constructor(private formBuilder: FormBuilder,
-    private matchService:UsersService,
-    public navCtrl: NavController,
-    private router: Router,
-    public toastController: ToastController) { }
+  constructor(private formBuilder: FormBuilder,private matchService:UsersService,
+    public navCtrl: NavController, private router: Router,
+    public toastController: ToastController) { 
+    
+  }
 
   ngOnInit () {
-    this.usersgroups = this.generateUsers();
+    const storagevalue= localStorage.getItem( "userlist" );
+    this.usersgroups = storagevalue ? JSON.parse( storagevalue ) : [];
+    this.initusermatch();
     this.initForm();
+  }
+
+  isIndeterminate:boolean;
+  masterCheck:boolean;
+  checkBoxList: any;
+  
+  checkMaster ( event ) {
+    this.usersSelected = [];
+    setTimeout( () => {
+      if ( this.masterCheck ) {
+        this.usersgroups.forEach(user => {
+        user.isChecked = this.masterCheck;
+        this.usersSelected.push( user );
+        });
+      }
+      else {
+        this.usersgroups.forEach(user => {
+        user.isChecked = this.masterCheck;
+        this.onRemoveusersSelected( user.id );
+        });
+      }
+      
+    });
+  }
+
+  initusermatch () {
+    this.usersgroups.forEach(obj => {
+        obj.isChecked = false;
+       // obj = { ...obj, isChecked: false};
+      });
+  }
+ selectUsers(event: PointerEvent,user) {
+    if ((event.target as HTMLInputElement).checked === false ) {
+      this.usersSelected.push( user );
+    }
+    else {
+      this.onRemoveusersSelected( user.id );
+    }
+
+  }
+  // when user is unchecked, it should be remove
+  onRemoveusersSelected(id: number) {
+    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
+    this.usersSelected.splice(index, 1);
+  }
+    checkEvent(event: PointerEvent,user) {
+    const totalItems = this.usersgroups.length;
+    let checked = 0;
+    
+    if ((event.target as HTMLInputElement).checked === false ) {
+      this.usersSelected.push( user );
+      checked++;
+      
+    }
+    else {
+      this.onRemoveusersSelected( user.id );
+      checked--;
+    }
+    if (checked > 0 && checked < totalItems) {
+      //If even one item is checked but not all
+      this.isIndeterminate = true;
+      this.masterCheck = false;
+    } else if (checked === totalItems) {
+      //If all are checked
+      this.masterCheck = true;
+      this.isIndeterminate = false;
+    } else {
+      //If none is checked
+      this.isIndeterminate = false;
+      this.masterCheck = false;
+    }
   }
 
   initForm() {
@@ -59,11 +132,10 @@ export class MatchingPage implements OnInit {
       }
       else {
         if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
-          console.log( "Unexisting link" );
           this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
         }
         else {
-          this.presentToast("this connection already exist!");
+          this.presentToast("this connection already exists!");
         }
       }
     } else {
@@ -75,9 +147,10 @@ export class MatchingPage implements OnInit {
     let i = 0;
     while ( i < this.usersconnexionforbidden.length ) {
       let element = this.usersconnexionforbidden[i];
-      if ( element.length == newconnection.length ) {
+      if ( element.length === newconnection.length ) {
         const diffUser = this.compareconnection( element, newconnection );
         if ( diffUser.length === 0 ) {
+          console.log( diffUser.length);
           return true;
         }
       }
@@ -86,7 +159,7 @@ export class MatchingPage implements OnInit {
     return false;
   }
 
-  compareconnection(forbconnec1:any,forbconnec2:any) {
+  compareconnection<User>(forbconnec1:any,forbconnec2:any) {
     return forbconnec1.filter((element) => {
         return !forbconnec2.some(elt2 => element.id === elt2.id);
       });
@@ -107,70 +180,17 @@ export class MatchingPage implements OnInit {
   removeConnection (index) {
     this.usersconnexionforbidden.splice(index, 1);
   }
-  generateUsers() {
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 8,
-        min: 4
-      },
-      wordsPerSentence: {
-        max: 16,
-        min: 4
-      }
-    });
-    const min = 6;
-    const max = 30;
-    const usersNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    let usersgroups = [];
-    for (let g=1; g < 3; g++) {
-      const users = [];
-      const randomgroup = `${ lorem.generateWords( 2 ) } `;
-      for (let i=1; i<usersNumber; i++) {
-        const user = {
-          id: Math.floor(Math.random() * Date.now()).toString(),
-          name: lorem.generateWords(2),
-          group: randomgroup,
-          avatar: this.matchService.generateAvatarSvg()
-        };
-        users.push( user );
-        this.userstoforbid.push(user);
-      }
-
-      let group = {
-        group: `Group ${g} ${randomgroup}`,
-        users: users 
-      };
-      
-      usersgroups.push( group );
-      
-    }
-    return usersgroups;
-}
 
   get form() {
     return this.matchingForm.controls;
   }
 
-  selectUsers(event: PointerEvent,user) {
-    if ((event.target as HTMLInputElement).checked === false ) {
-      this.usersSelected.push( user );
-    }
-    else {
-      this.onRemoveusersSelected( user.id );
-    }
-
-  }
-  // when user is unchecked, it should be remove
-  onRemoveusersSelected(id: number) {
-    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
-    this.usersSelected.splice(index, 1);
-  }
+ 
   // select a group of user
   selectGroup(event, group){
   
   this.usersSelected = [];
-  if ( event.target.checked == false ) {
+  if ( event.target.checked === false ) {
       this.usersSelected = group.users;
     }
   }
@@ -203,12 +223,18 @@ export class MatchingPage implements OnInit {
 
     this.matchService.makematch(matchingRequest)
       .subscribe( ( matchings: Matching[] ) => {
-        console.log(matchings);
-        matchings.forEach(match => match.users.forEach(user => {
-          user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
-        }));
+        if ( matchings!==null ) {
+            console.log(matchings);
+            matchings.forEach(match => match.users.forEach(user => {
+              user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
+            }));
+            
+            this.matchingresult(matchings);
+        }
+        else {
+          this.presentToast("No matchings generated!");
+        }
         
-        this.matchingresult(matchings);
       })
   }
 

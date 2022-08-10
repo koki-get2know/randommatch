@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/google/uuid"
+	"github.com/koki/randommatch/database"
 	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
@@ -63,15 +64,62 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 
 	var emailRaw bytes.Buffer
 	_, err := m.WriteTo(&emailRaw)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("m: %v\n", emailRaw.String())
-	return emailRaw.Bytes(), nil
+
+	return emailRaw.Bytes(), err
 }
 
-func SendInvite(match *matcher.Match, adminEmail string) {
+func SendInvite(matches []matcher.Match) (string, error) {
+	jobId := uuid.New().String()
+	if err := database.CreateJobStatus(jobId); err != nil {
+		return "", err
+	}
 
+	errorschannel := make(chan []string)
+	statuschannel := make(chan string)
+
+	go func() {
+		defer close(statuschannel)
+		defer close(errorschannel)
+		statuschannel <- "Running"
+		errors := []string{}
+		for _, match := range matches {
+			match := match
+			if err := sendInvite(&match); err != nil {
+				uids := []string{}
+				for _, user := range match.Users {
+					uids = append(uids, user.Id)
+				}
+				errors = append(errors, fmt.Sprintf("users: %v desc: %v", strings.Join(uids, ", "), err.Error()))
+			}
+		}
+		if len(errors) > 0 {
+			errorschannel <- errors
+			statuschannel <- "Failed"
+		} else {
+			statuschannel <- "Done"
+		}
+	}()
+	go func() {
+		for {
+			select {
+			case mailJobStatus := <-statuschannel:
+				fmt.Println("received", mailJobStatus)
+				database.UpdateJobStatus(jobId, database.JobStatus(mailJobStatus))
+				if mailJobStatus == "Done" || mailJobStatus == "Failed" {
+					return
+				}
+			case mailErrors := <-errorschannel:
+				fmt.Println("received", mailErrors)
+				if len(mailErrors) > 0 {
+					database.UpdateJobErrors(jobId, mailErrors)
+				}
+			}
+		}
+	}()
+	return jobId, nil
+}
+
+func sendInvite(match *matcher.Match) error {
 	const (
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
@@ -84,9 +132,22 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 		// The subject line for the email.
 		subject = "You are matched for a Koki!"
 	)
+	names := []string{}
 	userIds := []string{}
 	for _, user := range match.Users {
+		names = append(names, user.Name)
 		userIds = append(userIds, user.Id)
+	}
+
+	uidsMails, err := database.GetEmailsFromUIds(userIds)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	emails := []string{}
+	for _, email := range uidsMails {
+		emails = append(emails, email)
 	}
 
 	description := fmt.Sprintf(`Hello %v,
@@ -95,14 +156,12 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 	Please accept (one of the) proposed invite(s).
 	In case of conflict, contact your matching peer(s) to arrange the Koki conversation another time.
 	
-	Happy Koki!`, strings.Join(userIds, ", "))
+	Happy Koki!`, strings.Join(names, ", "))
 
-	attendees := []string{adminEmail}
-
-	rawMessage, err := generateIcsInvitation(sender, subject, description, attendees)
+	rawMessage, err := generateIcsInvitation(sender, subject, description, emails)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	// Create a new session in the us-east-1 region.
 	// Replace us-east-1 with the AWS Region you're using for Amazon SES.
@@ -112,7 +171,7 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 	})
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	// Create an SES session.
 	svc := ses.New(sess)
@@ -123,7 +182,7 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 		Source:     aws.String(sender),
 	}
 
-	result, err := svc.SendRawEmail(input)
+	_, err = svc.SendRawEmail(input)
 
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -138,13 +197,11 @@ func SendInvite(match *matcher.Match, adminEmail string) {
 				fmt.Println(aerr.Error())
 			}
 		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
 			fmt.Println(err.Error())
 		}
 
-		return
+		return err
 	}
 
-	fmt.Println("Email Sent", result)
+	return nil
 }
