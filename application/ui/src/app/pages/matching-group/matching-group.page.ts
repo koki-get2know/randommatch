@@ -51,12 +51,6 @@ export class MatchingGroupPage implements OnInit {
   result_selected_group1 = [];
   result_selected_group2= [];
 
-  avatars = ["/assets/img/speakers/bear.jpg", "/assets/img/speakers/cheetah.jpg", "/assets/img/speakers/duck.jpg", 
-  "/assets/img/speakers/eagle.jpg", "/assets/img/speakers/elephant.jpg", "/assets/img/speakers/giraffe.jpg", 
-  "/assets/img/speakers/iguana.jpg", "/assets/img/speakers/kitten.jpg", "/assets/img/speakers/lion.jpg",
-  "/assets/img/speakers/mouse.jpg", "/assets/img/speakers/puppy.jpg", "/assets/img/speakers/rabbit.jpg",
-   "/assets/img/speakers/turtle.jpg",
-   "https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"];
 
   @ViewChild( 'selectComponent' ) selectComponent: IonicSelectableComponent
   @ViewChild( 'selectComponentGroup1' ) selectComponentGroup1: IonicSelectableComponent
@@ -168,9 +162,9 @@ export class MatchingGroupPage implements OnInit {
     let i = 0;
     while ( i < this.usersconnexionforbidden.length ) {
       let element = this.usersconnexionforbidden[i];
-      if ( element.length == newconnection.length ) {
+      if ( element.length === newconnection.length ) {
         const diffUser = this.compareconnection( element, newconnection );
-        if ( diffUser.length == 0 ) {
+        if ( diffUser.length === 0 ) {
           console.log( diffUser.length);
           return true;
         }
@@ -185,51 +179,6 @@ export class MatchingGroupPage implements OnInit {
       });
     
   }
-  generateUsers() {
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 8,
-        min: 4
-      },
-      wordsPerSentence: {
-        max: 16,
-        min: 4
-      }
-    });
-    const min = 6;
-    const max = 30;
-    const usersNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    let usersgroups = [];
-    for (let g=1; g < 3; g++) {
-      let users = [];
-      let randomgroup = `Group ${ lorem.generateWords( 2 ) }`;
-      for (let i=1; i<usersNumber; i++) {
-        let avatarId = Math.floor(Math.random() * (this.avatars.length));
-        let user = {
-          id: i,
-          name: lorem.generateWords(2),
-          group: randomgroup,
-          avatar: this.avatars[avatarId]
-        };
-        users.push( user );
-        //this.userstoforbidden.push( user );
-        this.users_toselect_group1.push( user );
-        this.users_toselect_group2.push( user );
-
-      }
-
-      let group = {
-        group: randomgroup,
-        users: users 
-      };
-      
-      usersgroups.push( group );
-      
-    }
-    console.log( this.userstoforbidden );
-    return usersgroups;
-}
 
   get form() {
     return this.matchingForm.controls;
