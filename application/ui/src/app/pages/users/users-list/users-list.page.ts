@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { UsersService } from '../../../services/users.service';
+import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 
+import { User, UsersService } from '../../../services/users.service';
+import { ColorsTags } from '../../../constants';
 @Component({
   selector: 'app-users-list',
   templateUrl: './users-list.page.html',
@@ -8,91 +11,68 @@ import { UsersService } from '../../../services/users.service';
 })
 export class UsersListPage implements OnInit {
 
-  constructor(private userService:UsersService,) { }
+  userslist: User[] = [];
+  isloading: boolean = false;
+  checkResponseUrl = "";
+  ColorsTags = ColorsTags;
+  constructor(
+    public router: Router,
+    public toastCtrl: ToastController,
+    private userService: UsersService
+  ) { }
 
-  ngOnInit () {
-    console.log( "init" );
-    this.getUsers();
+
+  
+  ngOnInit() {
+    this.getuserList();
   }
 
-  usersgroups = [
-    {
-      groupe: "Groupe A",
-      nomber:6,
-      users: [
-        {
-        name: "Frank tchatseu",
-        groupe: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-      {
-        name: "Yannick Youmie",
-        groupe: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-      {
-        name: "Prestilien Pindoh",
-        groupe: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-    {
-      groupe: "Groupe B",
-      nomber:6,
-      users: [
-        {
-        name: "Frank tchatseu",
-        groupe: "Service client",
-        phone: "696812610",
-        avatar:"https://avatars.githubusercontent.com/u/50463560?s=400&u=d082fa7694a0d14dc2e464adc8e6e7ef4ce49aaa&v=4"
-      },
-      {
-        name: "Yannick Youmie",
-        groupe: "Service client",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/rabbit.jpg"
-      },
-      {
-        name: "Prestilien Pindoh",
-        groupe: "Service client2",
-        phone: "696812610",
-        avatar:"/assets/img/speakers/puppy.jpg"
-      },
-      ]
-    },
-  ];
-
-  uploadCsv ( fileChangeEvent ) {
-    
-  const photo = fileChangeEvent.target.files[ 0 ];
-    
-  let formData = new FormData();
-  formData.append("photo", photo, photo.name);
-  console.log( photo.name );
-  this.userService.uploadCsv( formData )
-    .then( resp => {
-      console.log( resp );
-      this.getUsers();
-        
-      } )
-    .catch( err => {
-      console.log( err );
-    });
-    
- }
-  getUsers() {
-    this.userService.get()
-    .then( resp => {
-      console.log( resp );
-      //this.usersgroups = resp;
-      } )
-    .catch( err => {
-      console.log( err );
-    });
+  tagclick (event: Event) {
+    event.stopPropagation();
   }
 
+  
+  uploadCsv ( event: Event ) {
+    this.isloading = true;
+    for (const file of event.target["files"]) {
+      const fileData = new FormData();
+      fileData.append("file", file);
+      this.userService.uploadUsersFile( fileData )
+        .subscribe( resp => {
+          if ( resp.status === 202 ) {
+            this.checkResponseUrl = resp.headers.get( "Location" );
+            this.checkJobStatus();
+          }
+        }, _ => {
+          this.isloading = false;
+        });
+    }
+  }
+  
+  checkJobStatus () {
+    let responsestatus = "";
+    const limitedInterval = setInterval(() => {
+      this.userService.availabilyofusers( this.checkResponseUrl )
+        .subscribe( resp => {
+          responsestatus = resp.status;
+          if ( responsestatus === 'Done'  ) {
+            this.getuserList();
+            this.isloading = false;
+            clearInterval(limitedInterval);
+          } else if ((responsestatus !== "" && responsestatus !== 'Running' && responsestatus !== 'Pending')) {
+            this.isloading = false;
+            clearInterval(limitedInterval);
+            console.log( `responsestatus ${responsestatus} interval cleared!` );
+          }
+        } );
+      
+    }, 500);
+  }
+
+  getuserList () {
+    this.userService.getUsersdata()
+        .subscribe( users => {
+          this.userslist = users;
+        } );
+  }
 }

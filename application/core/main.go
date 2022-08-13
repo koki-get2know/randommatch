@@ -1,13 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/koki/randommatch/calendar"
+	"github.com/koki/randommatch/convert"
+	"github.com/koki/randommatch/database"
+	"github.com/koki/randommatch/entity"
 	"github.com/koki/randommatch/matcher"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/koki/randommatch/middlewares"
 )
 
 // album represents data about a record album.
@@ -19,9 +26,23 @@ type album struct {
 }
 
 type matchingReq struct {
-	Size                 uint             `json:"size"`
-	Users                []matcher.User   `json:"users"`
-	ForbiddenConnections [][]matcher.User `json:"forbiddenConnections"`
+	Size                 uint            `json:"size"`
+	Users                []entity.User   `json:"users"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
+}
+
+type groupMatchingReq struct {
+	Size                 uint            `json:"size"`
+	Groups               [][]entity.User `json:"groups"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
+}
+
+type EmailReq struct {
+	Matches []matcher.Match `json:"matches"`
+}
+
+type UsersFile struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 // albums slice to seed record album data.
@@ -41,10 +62,118 @@ func generateMatchings(c *gin.Context) {
 	var req matchingReq
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
 	}
-	tuples := matcher.GenerateTuple(req.Users, req.ForbiddenConnections, req.Size)
+
+	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
+		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+func generateGroupMatchings(c *gin.Context) {
+	defer duration(track("generateGroupMatchings"))
+	var req groupMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	if len(req.Groups) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
+		return
+	}
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+
+		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
+
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+func uploadUsers(c *gin.Context) {
+	defer duration(track("uploadUsers"))
+	var usersFile UsersFile
+
+	if err := c.ShouldBind(&usersFile); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file sent " + err.Error()})
+		return
+	}
+
+	// https://stackoverflow.com/questions/45121457/how-to-get-file-posted-from-json-in-go-gin
+	// https://github.com/gin-gonic/gin#model-binding-and-validation
+	if usersFile.File.Size > 5*1024*1024 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "File exceeded max size"})
+		return
+	}
+
+	users, err := convert.CsvToUsers(usersFile.File)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
+		return
+	}
+
+	// in a next phase organization creation should be done via a super admin that has the appropriate roles
+	orga := entity.Organization{
+		Name:        "dummy",
+		Description: "All users belongs to this organization on the MVP phase",
+	}
+	orgaUid, err := database.CreateOrganization(orga)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		return
+	}
+
+	jobId, err := database.CreateUsers(users, orgaUid)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "users creation failed " + err.Error()})
+		return
+	}
+	c.Header("Location", fmt.Sprintf("/users-creation-job/%v", jobId))
+	c.JSON(http.StatusAccepted, gin.H{"message": "Job enqueued"})
+}
+
+func getUsers(c *gin.Context) {
+	defer duration(track("getUsers"))
+	users, err := database.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": users})
+}
+
+func getJobStatus(c *gin.Context) {
+	defer duration(track("getJobStatus"))
+	id := c.Param("id")
+	status, err := database.GetJobStatus(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": status})
+}
+
+func emailMatches(c *gin.Context) {
+	defer duration(track("emailMatches"))
+	var req EmailReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+
+	// http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
+
+	jobId, err := calendar.SendInvite(req.Matches)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "mails sending failed " + err.Error()})
+		return
+	}
+	c.Header("Location", fmt.Sprintf("/matching-email-job/%v", jobId))
+	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
+
 }
 
 // getAlbums responds with the list of all albums as JSON.
@@ -88,15 +217,6 @@ func getAlbumByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
-func helloFromNeo4j(c *gin.Context) {
-	defer duration(track("helloFromNeo4j"))
-	hello, err := helloNeo4j("bolt://match-db:7687", "neo4j", "test")
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Exiting because of error" + err.Error()})
-	}
-	c.IndentedJSON(http.StatusCreated, gin.H{"message": hello})
-}
-
 func track(msg string) (string, time.Time) {
 	return msg, time.Now()
 }
@@ -105,49 +225,39 @@ func duration(msg string, start time.Time) {
 	log.Printf("%v: %v\n", msg, time.Since(start))
 }
 
-func helloNeo4j(uri, username, password string) (string, error) {
-	driver, err := neo4j.NewDriver(uri, neo4j.BasicAuth(username, password, ""))
-	if err != nil {
-		return "", err
-	}
-	defer driver.Close()
-
-	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
-
-	defer session.Close()
-
-	greeting, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
-		result, err := transaction.Run(
-			"CREATE (a:Greeting) SET a.message = $message RETURN a.message + ', from node ' + id(a)",
-			map[string]interface{}{"message": "hello, world from neo4j"})
-		if err != nil {
-			return nil, err
-		}
-
-		if result.Next() {
-			return result.Record().Values[0], nil
-		}
-
-		return nil, result.Err()
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return greeting.(string), nil
-}
-
 func main() {
+	//os.Setenv("NEO4J_AUTH", "****/****")
+	_, exists := os.LookupEnv("NEO4J_AUTH")
+	if exists {
+		driver, err := database.Driver()
+		if err != nil {
+			fmt.Print(err)
+			return
+		}
+		defer (*driver).Close()
+	}
+
 	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
-	router.StaticFile("/api", "./api/swagger.yaml")
-	router.GET("health-check", getHealthCheck)
-	router.GET("/albums", getAlbums)
-	router.GET("/albums/:id", getAlbumByID)
-	router.POST("/albums", postAlbums)
-	router.GET("/neo4j", helloFromNeo4j)
-	router.POST("/matchings", generateMatchings)
+	router.Use(middlewares.Cors())
+
+	public := router.Group("")
+	public.StaticFile("/api", "./api/swagger.yaml")
+	public.GET("health-check", getHealthCheck)
+	public.GET("/albums", getAlbums)
+	public.GET("/albums/:id", getAlbumByID)
+	public.POST("/albums", postAlbums)
+
+	protected := router.Group("")
+	protected.Use(middlewares.JwtAuth())
+	protected.POST("/matchings", generateMatchings)
+	protected.POST("/group-matchings", generateGroupMatchings)
+	protected.POST("/upload-users", uploadUsers)
+	protected.GET("/users-creation-job/:id", getJobStatus)
+	protected.GET("/matching-email-job/:id", getJobStatus)
+	protected.GET("/users", getUsers)
+	protected.POST("/email-matches", emailMatches)
 
 	router.Run()
-
 }

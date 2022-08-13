@@ -1,120 +1,135 @@
 package convert
 
 import (
-	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/koki/randommatch/entity"
 )
 
-type User struct {
-	UserId                 string
-	Name                   string
-	Email                  string
-	Groups                 []string
-	Genre                  string
-	Birthday               string
-	Hobbies                []string
-	MatchPreference        []string
-	MatchPreferenceTime    []string
-	PositionHeld           string
-	MultiMatch             bool
-	PhoneNumber            string
-	Departement            string
-	Location               string
-	Seniority              string
-	Role                   string
-	NumberOfMatching       int
-	NumberMatchingAccepted int
-	NumberMatchingDeclined int
-	AverageMatchingRate    int
-	//SubjectOfInterest    []string
-}
-
-/* Generate random strings
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$#!@")
-
-func randStringRunes(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
-}*/
-
-func ConvertRawDataToJson(filename string) []byte {
-
-	csvFile, err := os.Open(filename)
+func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
+	csvReader := csv.NewReader(r)
+	records, err := csvReader.ReadAll()
 	if err != nil {
 		fmt.Println(err)
-	}
-	defer csvFile.Close()
-
-	// Skip first row data
-	row1, err := bufio.NewReader(csvFile).ReadSlice('\n')
-	if err != nil {
-		fmt.Println(err)
-	}
-	_, err = csvFile.Seek(int64(len(row1)), io.SeekStart)
-	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
-	// Read data
-	reader := csv.NewReader(csvFile)
-	reader.FieldsPerRecord = -1
-
-	csvData, err := reader.ReadAll()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	var header []string
+	var headerCellIndex = make(map[string]int)
+	if len(records) > 0 {
+		// skip the header
+		header = records[0]
+		records = records[1:]
+		for i, cell := range header {
+			headerCellIndex[cell] = i
+		}
 	}
 
-	var user User
-	var users []User
+	var users []entity.User
+	for _, record := range records {
+		user := entity.User{}
 
-	// Create a json data
-	for _, each := range csvData {
-		user.UserId = "" //randStringRunes(32)
-		user.Name = each[0]
-		user.Email = each[1]
-		user.Groups = strings.Split(each[2], "-") //[]string{each[4]}
-		user.Genre = each[3]
-		user.Birthday = each[4]
-		user.Hobbies = strings.Split(each[5], "-")             //[]string{each[7]}
-		user.MatchPreference = strings.Split(each[6], "-")     //[]string{each[8]}
-		user.MatchPreferenceTime = strings.Split(each[7], "-") //[]string{each[9]}
-		user.PositionHeld = each[8]
-		user.MultiMatch, _ = strconv.ParseBool(each[9])
-		user.PhoneNumber = each[10]
-		user.Departement = each[11]
-		user.Location = each[12]
-		user.Seniority = each[13]
-		user.Role = each[14]
+		if val, exists := headerCellIndex["Name"]; exists {
+			user.Name = record[val]
+		}
+		if val, exists := headerCellIndex["Email"]; exists {
+			user.Email = record[val]
+		}
+		if val, exists := headerCellIndex["Gender"]; exists {
+			user.Gender = record[val]
+		}
+		if val, exists := headerCellIndex["Birthday"]; exists {
+			user.Birthday = record[val]
+		}
+		if val, exists := headerCellIndex["PositionHeld"]; exists {
+			user.PositionHeld = record[val]
+		}
+		if val, exists := headerCellIndex["PhoneNumber"]; exists {
+			user.PhoneNumber = record[val]
+		}
+		if val, exists := headerCellIndex["Department"]; exists {
+			user.Department = record[val]
+		}
+		if val, exists := headerCellIndex["Location"]; exists {
+			user.Location = record[val]
+		}
+		if val, exists := headerCellIndex["Seniority"]; exists {
+			user.Seniority = record[val]
+		}
+		if val, exists := headerCellIndex["Role"]; exists {
+			user.Role = record[val]
+		}
+		if val, exists := headerCellIndex["Groups"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.Groups = strings.Split(record[val], "-")
+			}
+		}
 
-		user.NumberOfMatching = 0
-		user.NumberMatchingAccepted = 0
-		user.NumberMatchingDeclined = 0
-		user.AverageMatchingRate = 0
+		if val, exists := headerCellIndex["Hobbies"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.Hobbies = strings.Split(record[val], "-")
+			}
+		}
+		if val, exists := headerCellIndex["MatchPreference"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.MatchPreference = strings.Split(record[val], "-")
+			}
+		}
+
+		if val, exists := headerCellIndex["MatchPreferenceTime"]; exists {
+			if strings.TrimSpace(record[val]) != "" {
+				user.MatchPreferenceTime = strings.Split(record[val], "-")
+			}
+		}
+		if val, exists := headerCellIndex["MultiMatch"]; exists {
+			user.MultiMatch, err = strconv.ParseBool(record[val])
+		}
+		if err != nil {
+			fmt.Printf("Warning wrong boolean string value passed for user %v, value passed: %v\n", user.Name, user.MultiMatch)
+			user.MultiMatch = false
+		}
 
 		users = append(users, user)
 	}
+	return users, nil
+}
 
+func CsvToUsers(csvFile *multipart.FileHeader) ([]entity.User, error) {
+	openedFile, err := csvFile.Open()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return csvReaderToUsers(openedFile)
+}
+
+func ConvertRawDataToJson(filepath string) []byte {
+
+	csvFile, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println(err)
+		return []byte{}
+	}
+	defer csvFile.Close()
+	// Read data
+	users, err := csvReaderToUsers(csvFile)
+	if err != nil {
+		fmt.Println(err)
+		return []byte{}
+	}
 	// Convert to JSON
 	jsonData, err := json.Marshal(users)
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return []byte{}
 	}
 
 	return jsonData
@@ -127,6 +142,7 @@ func GenerateJsonFile(filename string) {
 	jsonFile, err := os.Create("./data.json")
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer jsonFile.Close()
 

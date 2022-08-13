@@ -10,7 +10,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { Storage } from '@ionic/storage';
 
 import { MsalBroadcastService, MsalGuardConfiguration, MsalService, MSAL_GUARD_CONFIG } from '@azure/msal-angular';
-import { EventMessage, EventType, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
+import { EventMessage, EventPayload, EventType, InteractionStatus, RedirectRequest } from '@azure/msal-browser';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { environment } from '../environments/environment';
@@ -31,6 +31,11 @@ export class AppComponent implements OnInit, OnDestroy {
     {
       title: 'New Match',
       url: 'matching',
+      icon: 'calendar'
+    },
+    {
+      title: 'New Group Match',
+      url: 'matching-group',
       icon: 'calendar'
     },
 
@@ -59,7 +64,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isIframe = window !== window.parent && !window.opener;
     this.broadcastService.msalSubject$
     .pipe(
-      filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS),
+      filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS) ,
     )
     .subscribe((result: EventMessage) => {
       console.log(result);

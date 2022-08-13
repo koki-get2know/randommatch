@@ -1,50 +1,60 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Matching result</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Matching results</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
+  <ion-fab vertical="top" horizontal="end" slot="fixed">
+    <ion-fab-button>
+      <ion-icon name="chevron-down"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="bottom">
+      <ion-fab-button (click)="sendMail()"><ion-icon name="mail" aria-label="mail the selection"></ion-icon></ion-fab-button>
+      <ion-fab-button (click)="reloadSelectedMatches()"><ion-icon name="reload" aria-label="rematch the selection"></ion-icon></ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
 
   <ion-grid>
     <ion-row>
       <ion-col>
         <ion-list>
-          <ion-item-group *ngFor="let group of usersgroups">
+          <ion-item-group *ngFor="let match of matchings; let i=index">
             <ion-item-divider sticky>
               <ion-label>
-                {{group.group}}
+                Match {{i}}
               </ion-label>
             </ion-item-divider>
 
             <ion-item-sliding>
-              <ion-item routerLink="/app/tabs/schedule/session/">
+              <ion-item>
+                
+                <ion-checkbox color="primary" (click)="selectTuple($event, match)"></ion-checkbox>
                 <ion-grid>
                   <ion-row>
-                    <ion-col *ngFor="let user of group.users">
+                    <ion-col *ngFor="let user of match.users">
                       <ion-avatar>
-                        <img [src]=" user.avatar" alt="">
+                        <div [innerHTML]="user.avatar"></div>
                       </ion-avatar>
                       <ion-label>
                         <h3>{{user.name}}</h3>
-                        <p>
-                          {{user.group}}
-                        </p>
+                       
                       </ion-label>
                     </ion-col>
                   </ion-row>
                 </ion-grid>
 
-                <ion-badge color="primary">3</ion-badge>
+                <ion-badge color="primary">{{match.users.length}}</ion-badge>
+
               </ion-item>
-              <ion-item-options>
-                <ion-item-option color="favorite">
-                  Favorite
-                </ion-item-option>
+              <!--ion-item-options>
                 <ion-item-option color="danger">
                   Remove
                 </ion-item-option>
-              </ion-item-options>
+              </ion-item-options-->
             </ion-item-sliding>
           </ion-item-group>
         </ion-list>

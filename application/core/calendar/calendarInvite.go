@@ -3,67 +3,175 @@ package calendar
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"strings"
+	"time"
 
+	ics "github.com/arran4/golang-ical"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/google/uuid"
+	"github.com/koki/randommatch/database"
+	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
 
-func gomailing(subject, htmlBody string) ([]byte, error) {
+func generateIcsInvitation(sender, subject, description string, attendees []string) ([]byte, error) {
+	startAt := time.Now()
+	language := "en-us"
+	location := "It's up to you"
+
+	cal := ics.NewCalendar()
+	cal.SetMethod(ics.MethodRequest)
+	event := cal.AddEvent(uuid.New().String())
+	event.SetCreatedTime(time.Now())
+	event.SetDtStampTime(time.Now())
+	event.SetModifiedAt(time.Now())
+	event.SetStartAt(startAt)
+	event.SetEndAt(startAt.Add(30 * time.Minute))
+	event.SetSummary(subject, &ics.KeyValues{Key: string(ics.ParameterLanguage), Value: []string{language}})
+	event.SetLocation(location)
+	event.SetDescription(description)
+	event.SetOrganizer("mailto:"+sender, ics.WithCN("Koki Admin"))
+	event.SetTimeTransparency(ics.TransparencyOpaque)
+
+	for _, attendee := range attendees {
+		event.AddAttendee(attendee, ics.CalendarUserTypeIndividual, ics.ParticipationStatusNeedsAction, ics.ParticipationRoleReqParticipant, ics.WithRSVP(true))
+	}
+	event.SetSequence(1)
+	reminder := event.AddAlarm()
+	reminder.SetAction(ics.ActionDisplay)
+	reminder.SetTrigger("-P15M")
+	fmt.Println(cal.Serialize())
+	filename := "invite.ics"
 	m := gomail.NewMessage()
 
-	m.SetHeader("From", "Ivanov Tmib <brobizzness@gmail.com>")
-	m.SetHeader("To", "tmibkage@yahoo.fr", "tmibkage@gmail.com", "ivan.tchomguemieguem@amadeus.com")
-	m.SetAddressHeader("Cc", "brobizzness@gmail.com", "Dan")
-	m.SetHeader("Subject", subject)
-	m.SetBody("text/html", htmlBody)
-	m.Attach("Iterationreview.ics")
+	m.SetHeader("subject", subject)
+	m.SetHeader("From", fmt.Sprintf("Koki Admin <%v>", sender))
+	m.SetHeader("To", strings.Join(attendees, ", "))
+	m.SetHeader("Content-Description", filename)
+	m.SetHeader("Content-class", "urn:content-classes:calendarmessage")
+	m.SetHeader("Filename", filename)
+	m.SetHeader("Path", filename)
+
+	m.SetBody("text/plain", description)
+	m.AddAlternative(`text/calendar; method="REQUEST"; name="invite.ics"`,
+		cal.Serialize(),
+		gomail.SetPartEncoding(gomail.Base64))
+
 	var emailRaw bytes.Buffer
 	_, err := m.WriteTo(&emailRaw)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	fmt.Printf("m: %v\n", emailRaw.String())
-	return emailRaw.Bytes(), nil
+
+	return emailRaw.Bytes(), err
 }
 
-func SendInvite() {
+func SendInvite(matches []matcher.Match) (string, error) {
+	jobId := uuid.New().String()
+	if err := database.CreateJobStatus(jobId); err != nil {
+		return "", err
+	}
 
+	errorschannel := make(chan []string)
+	statuschannel := make(chan string)
+
+	go func() {
+		defer close(statuschannel)
+		defer close(errorschannel)
+		statuschannel <- "Running"
+		errors := []string{}
+		for _, match := range matches {
+			match := match
+			if err := sendInvite(&match); err != nil {
+				uids := []string{}
+				for _, user := range match.Users {
+					uids = append(uids, user.Id)
+				}
+				errors = append(errors, fmt.Sprintf("users: %v desc: %v", strings.Join(uids, ", "), err.Error()))
+			}
+		}
+		if len(errors) > 0 {
+			errorschannel <- errors
+			statuschannel <- "Failed"
+		} else {
+			statuschannel <- "Done"
+		}
+	}()
+	go func() {
+		for {
+			select {
+			case mailJobStatus := <-statuschannel:
+				fmt.Println("received", mailJobStatus)
+				database.UpdateJobStatus(jobId, database.JobStatus(mailJobStatus))
+				if mailJobStatus == "Done" || mailJobStatus == "Failed" {
+					return
+				}
+			case mailErrors := <-errorschannel:
+				fmt.Println("received", mailErrors)
+				if len(mailErrors) > 0 {
+					database.UpdateJobErrors(jobId, mailErrors)
+				}
+			}
+		}
+	}()
+	return jobId, nil
+}
+
+func sendInvite(match *matcher.Match) error {
 	const (
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
-		Sender = "brobizzness@gmail.com"
+		sender = "koki.get2know@gmail.com"
 
 		// Specify a configuration set. To use a configuration
 		// set, comment the next line and line 92.
 		//ConfigurationSet = "ConfigSet"
 
 		// The subject line for the email.
-		Subject = "Amazon SES Test (AWS SDK for Go)"
-
-		// The HTML body for the email.
-		HtmlBody = "<h1>Amazon SES Test Email (AWS SDK for Go)</h1><p>This email was sent with " +
-			"<a href='https://aws.amazon.com/ses/'>Amazon SES</a> using the " +
-			"<a href='https://aws.amazon.com/sdk-for-go/'>AWS SDK for Go</a>.</p>"
+		subject = "You are matched for a Koki!"
 	)
+	names := []string{}
+	userIds := []string{}
+	for _, user := range match.Users {
+		names = append(names, user.Name)
+		userIds = append(userIds, user.Id)
+	}
 
-	rawMessage, err := gomailing(Subject, HtmlBody)
+	uidsMails, err := database.GetEmailsFromUIds(userIds)
+
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
+	}
+	emails := []string{}
+	for _, email := range uidsMails {
+		emails = append(emails, email)
+	}
+
+	description := fmt.Sprintf(`Hello %v,
+	You have been matched to connect during this cycle.
+	
+	Please accept (one of the) proposed invite(s).
+	In case of conflict, contact your matching peer(s) to arrange the Koki conversation another time.
+	
+	Happy Koki!`, strings.Join(names, ", "))
+
+	rawMessage, err := generateIcsInvitation(sender, subject, description, emails)
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
 	// Create a new session in the us-east-1 region.
 	// Replace us-east-1 with the AWS Region you're using for Amazon SES.
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
-	)
-
+		Region:      aws.String("us-east-1"),
+		Credentials: credentials.NewStaticCredentials(os.Getenv("SES_KEY_ID"), os.Getenv("SES_KEY_SECRET"), ""),
+	})
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	// Create an SES session.
 	svc := ses.New(sess)
@@ -71,14 +179,11 @@ func SendInvite() {
 	// Assemble the email.
 	input := &ses.SendRawEmailInput{
 		RawMessage: &ses.RawMessage{Data: rawMessage},
-		Source:     aws.String(Sender),
+		Source:     aws.String(sender),
 	}
 
-	// Attempt to send the email.
-	//result, err := svc.SendEmail(input)
-	result, err := svc.SendRawEmail(input)
+	_, err = svc.SendRawEmail(input)
 
-	// Display error messages if they occur.
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -92,18 +197,11 @@ func SendInvite() {
 				fmt.Println(aerr.Error())
 			}
 		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
 			fmt.Println(err.Error())
 		}
 
-		return
+		return err
 	}
 
-	fmt.Println("Email Sent")
-	fmt.Println(result)
-	// Authentication.
-	//auth := smtp.PlainAuth("ses-smtp-user.20220720-191343", "AKIAUQ5SMTNQKJH7CSR5", "BMiZx6u/2IC33GIt9fYQiz66c5+MC60fl/OixMatMCC/", smtpHost)
-	//auth := smtp.PlainAuth("ses-smtp-user.20220720-191343", "AKIAUQ5SMTNQEKMPO3C5", "BMBwPqGwY88P/unnpJdtilHsFImWaQ7y+J2cuCT2vwGP", smtpHost)
-
+	return nil
 }
