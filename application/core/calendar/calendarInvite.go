@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/google/uuid"
 	"github.com/koki/randommatch/database"
+	"github.com/koki/randommatch/entity"
 	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
@@ -96,6 +97,7 @@ func SendInvite(matches []matcher.Match) (string, error) {
 			errorschannel <- errors
 			statuschannel <- "Failed"
 		} else {
+			errorschannel <- errors // To be able to have the errors in both cases (empty or not)
 			statuschannel <- "Done"
 		}
 	}()
@@ -110,6 +112,7 @@ func SendInvite(matches []matcher.Match) (string, error) {
 				}
 			case mailErrors := <-errorschannel:
 				fmt.Println("received", mailErrors)
+				saveMatchingInfo(len(matches), len(mailErrors))
 				if len(mailErrors) > 0 {
 					database.UpdateJobErrors(jobId, mailErrors)
 				}
@@ -117,6 +120,26 @@ func SendInvite(matches []matcher.Match) (string, error) {
 		}
 	}()
 	return jobId, nil
+}
+
+func saveMatchingInfo(numGroups int, numFailed int) {
+	numConversations := numGroups - numFailed
+
+	matchingStat := entity.Matching{
+		NumGroups:        numGroups,
+		NumConversations: numConversations,
+		NumFailed:        numFailed,
+	}
+
+	MatchingId, err := database.CreateMatchingStat(matchingStat)
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(matchingStat)
+		fmt.Println(MatchingId)
+	}
+
 }
 
 func sendInvite(match *matcher.Match) error {
@@ -173,7 +196,7 @@ func sendInvite(match *matcher.Match) error {
 		fmt.Println(err)
 		return err
 	}
-	// Create an SES session.
+	//Create an SES session.
 	svc := ses.New(sess)
 
 	// Assemble the email.
@@ -183,6 +206,8 @@ func sendInvite(match *matcher.Match) error {
 	}
 
 	_, err = svc.SendRawEmail(input)
+
+	//err = randomBool()
 
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -205,3 +230,13 @@ func sendInvite(match *matcher.Match) error {
 
 	return nil
 }
+
+// For Local Test To simulate sending emails
+/*func randomBool() error {
+	if rand.Float32() != 0.683701 {
+		return nil
+	} else {
+		err := errors.New("math: square root of negative number")
+		return err
+	}
+}*/

@@ -176,6 +176,16 @@ func emailMatches(c *gin.Context) {
 
 }
 
+func getMatchings(c *gin.Context) {
+	defer duration(track("getMatchings"))
+	matchings, err := database.GetMatchings()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": matchings})
+}
+
 // getAlbums responds with the list of all albums as JSON.
 func getAlbums(c *gin.Context) {
 	defer duration(track("getAlbums"))
@@ -250,7 +260,7 @@ func main() {
 	public.POST("/albums", postAlbums)
 
 	protected := router.Group("")
-	protected.Use(middlewares.JwtAuth())
+	//protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
@@ -258,6 +268,7 @@ func main() {
 	protected.GET("/matching-email-job/:id", getJobStatus)
 	protected.GET("/users", getUsers)
 	protected.POST("/email-matches", emailMatches)
+	protected.GET("/matchings-stats", getMatchings)
 
 	router.Run()
 }

@@ -6,6 +6,17 @@ type Organization struct {
 	Description string
 }
 
+type MatchingCycle struct {
+	Id string
+}
+
+type Matching struct {
+	Id               string
+	NumGroups        int
+	NumConversations int
+	NumFailed        int
+}
+
 type User struct {
 	Id                     string   `json:"id"`
 	Name                   string   `json:"name"`
