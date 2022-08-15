@@ -135,6 +135,9 @@ export class UsersService {
     return forbconnec1.filter((element) => {
         return !forbconnec2.some(elt2 => element.id === elt2.id);
       });
-    
+  }
+
+  removeConnection (usersconnexionforbidden:User[][],index) {
+    usersconnexionforbidden.splice(index, 1);
   }
 }
