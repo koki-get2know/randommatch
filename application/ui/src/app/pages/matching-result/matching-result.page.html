@@ -31,11 +31,14 @@
 
             <ion-item-sliding>
               <ion-item>
+                
                 <ion-checkbox color="primary" (click)="selectTuple($event, match)"></ion-checkbox>
                 <ion-grid>
                   <ion-row>
                     <ion-col *ngFor="let user of match.users">
-                    
+                      <ion-avatar>
+                        <div [innerHTML]="user.avatar"></div>
+                      </ion-avatar>
                       <ion-label>
                         <h3>{{user.name}}</h3>
                        

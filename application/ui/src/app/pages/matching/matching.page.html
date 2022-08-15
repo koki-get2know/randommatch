@@ -25,17 +25,46 @@
         </ion-list>
 
         <div class="ion-padding">
-          <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
+          <ion-button type="submit" [disabled]="!matchingForm.valid || (usersSelected.length < 2)" expand="block">Match Users Randomly</ion-button>
         </div>
       </form>
     </ion-row>
     <ion-row>
       <ion-col>
-        <ion-item>
-          <ion-label>select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="usersSelected" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="group" groupTextField="departement">
-          </ionic-selectable>
-        </ion-item>
+        <ion-row>
+          <ion-col size="8">
+            <ion-item>
+              <ion-label>Select forbidden matches</ion-label>
+              <ionic-selectable #selectComponent headerColor="primary" [(ngModel)]="selected_forbidden_connexion" [items]="usersSelected" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="No user found! Please select the users before" [canClear]="true" groupValueField="group" groupTextField="departement">
+                <ng-template ionicSelectableCloseButtonTemplate>
+                  <ion-icon name="close-circle"></ion-icon>
+                </ng-template>
+                <ng-template ionicSelectableFooterTemplate>
+                  <ion-footer>
+                    <ion-row text-center>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=clear1()>Clear</ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=toogleAll()>Check All</ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=add()>Add</ion-button>
+                      </ion-col>
+                    </ion-row>
+                  </ion-footer>
+                </ng-template>
+              </ionic-selectable>
+
+            </ion-item>
+          </ion-col>
+          <ion-col size="4">
+            <ion-button fill="clear" color="danger" (click)="clearAllconnection()">
+              <ion-icon name="trash-bin-outline"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+
         <ion-grid>
           <ion-row>
             <ion-col>
@@ -80,37 +109,35 @@
 
       <ion-col>
         <!-- Searchbar with cancel button always shown -->
-        <ion-searchbar showCancelButton="always"></ion-searchbar>
+        <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
         <ion-list>
           <ion-item-divider sticky>
             <ion-label>
-              USERS LIST
+              Users list
             </ion-label>
           </ion-item-divider>
           <ion-item>
-            <ion-label><strong>Select All</strong></ion-label>
+            <ion-label>Select All</ion-label>
             <ion-checkbox slot="start" [(ngModel)]="masterCheck" [indeterminate]="isIndeterminate" (click)="checkMaster($event)"></ion-checkbox>
           </ion-item>
         </ion-list>
         <ion-list #scheduleList>
           <ion-item-group>
-
             <ion-item-sliding *ngFor="let user of usersgroups" #slidingItem>
-              <ion-item button>
+              <ion-item>
+                <ion-avatar slot="start">
+                  <div [innerHTML]="user.avatar"></div>
+                </ion-avatar>
                 <ion-label>
                   <h3>{{user.name}}</h3>
                   <p>
                     {{user.departement}}
                   </p>
                 </ion-label>
-                <div class="ion-padding speaker-detail">
-
-                  <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick()">
-                    <ion-label>{{group}}</ion-label>
-                  </ion-chip>
-                </div>
+                <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick($event)">
+                  <ion-label>{{group}}</ion-label>
+                </ion-chip>
                 <ion-checkbox [(ngModel)]="user.isChecked" (click)="checkEvent($event,user)" color="primary"></ion-checkbox>
-
               </ion-item>
             </ion-item-sliding>
           </ion-item-group>

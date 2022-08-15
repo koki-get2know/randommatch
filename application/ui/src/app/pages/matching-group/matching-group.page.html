@@ -21,25 +21,54 @@
         </ion-list>
 
         <div class="ion-padding">
-          <ion-button type="submit" [disabled]="!matchingForm.valid" expand="block">Match Users Randomly</ion-button>
+          <ion-button type="submit" [disabled]="!matchingForm.valid || result_selected_group1.length === 0 || this.result_selected_group2.length === 0" expand="block">Match Users Randomly</ion-button>
         </div>
       </form>
     </ion-row>
     <ion-row>
-
-
       <ion-col>
-        <ion-item>
-          <ion-label>Users Group 1</ion-label>
-          <ionic-selectable #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChangeGroup1($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
-          </ionic-selectable>
-        </ion-item>
+        <ion-row>
+          <ion-col size='8'>
+            <ion-item>
+              <ion-label>Users Group 1</ion-label>
+              <ionic-selectable headerColor="primary" [disabled]="disabledGroup1" #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+                <ng-template ionicSelectableCloseButtonTemplate>
+                  <ion-icon name="close-circle"></ion-icon>
+                </ng-template>
+                <ng-template ionicSelectableFooterTemplate>
+                  <ion-footer>
+                    <ion-row text-center>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=clearGroup1()>Clear</ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=toogleAll()>Check All</ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=addUsersGroup1()>Add</ion-button>
+                      </ion-col>
+                    </ion-row>
+                  </ion-footer>
+                </ng-template>
+              </ionic-selectable>
+
+            </ion-item>
+          </ion-col>
+          <ion-col size='4'>
+            <span>
+              <ion-button fill="clear" color="danger" (click)="resetGroup1()">
+                <ion-icon name="trash-bin-outline"></ion-icon>
+              </ion-button>
+            </span>
+          </ion-col>
+        </ion-row>
+
         <ion-list>
           <ion-item-group *ngFor="let usergroup1 of result_selected_group1 ; let i=index">
             <ion-item-divider sticky>
               <div class="ion-padding speaker-detail">
 
-                <ion-chip color="instagram"  button (click)="tagclick()">
+                <ion-chip color="instagram" button (click)="tagclick()">
                   <ion-label>{{i}}</ion-label>
                 </ion-chip>
               </div>
@@ -55,13 +84,42 @@
         </ion-list>
       </ion-col>
       <ion-col>
-        <ion-item>
-          <ion-label>Users Group 2</ion-label>
-          <ionic-selectable #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChangeGroup2($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
-          </ionic-selectable>
-        </ion-item>
+        <ion-row>
+          <ion-col size='8'>
+            <ion-item>
+              <ion-label>Users Group 2</ion-label>
+              <ionic-selectable headerColor="primary" [disabled]="disabledGroup2" #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+                <ng-template ionicSelectableCloseButtonTemplate>
+                  <ion-icon name="close-circle"></ion-icon>
+                </ng-template>
+                <ng-template ionicSelectableFooterTemplate>
+                  <ion-footer>
+                    <ion-row text-center>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=clearGroup2()>Clear</ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=toogleAll2()>Check All</ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button fill="clear" (click)=addUsersGroup2()>Add</ion-button>
+                      </ion-col>
+                    </ion-row>
+                  </ion-footer>
+                </ng-template>
+              </ionic-selectable>
+            </ion-item>
+          </ion-col>
+          <ion-col size='4'>
+            <span>
+              <ion-button fill="clear" color="danger" (click)="resetGroup2()">
+                <ion-icon name="trash-bin-outline"></ion-icon>
+              </ion-button>
+            </span>
+          </ion-col>
+        </ion-row>
         <ion-list>
-          <ion-item-group *ngFor="let usergroup1 of result_selected_group2 ; let i=index">
+          <ion-item-group *ngFor="let usergroup2 of result_selected_group2 ; let i=index">
             <ion-item-divider sticky>
               <div class="ion-padding speaker-detail">
 
@@ -70,9 +128,9 @@
                 </ion-chip>
               </div>
               <ion-label>
-                <h3>{{usergroup1.name}}</h3>
+                <h3>{{usergroup2.name}}</h3>
                 <p>
-                  {{usergroup1.departement}}
+                  {{usergroup2.departement}}
                 </p>
               </ion-label>
             </ion-item-divider>
@@ -80,11 +138,26 @@
         </ion-list>
       </ion-col>
       <ion-col>
-        <ion-item>
-          <ion-label>Select forbidden matches</ion-label>
-          <ionic-selectable #selectComponent [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="portChange($event)" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
-          </ionic-selectable>
-        </ion-item>
+        <ion-row>
+          <ion-col size='10'>
+            <ion-item>
+              <ion-label>Forbidden matches</ion-label>
+              <ionic-selectable #selectComponent headerColor="primary" [(ngModel)]="selected_forbidden_connexion" [items]="userstoforbidden" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="No user found! Please select the users before" [canClear]="true" groupValueField="departement" groupTextField="departement">
+                <ng-template ionicSelectableCloseButtonTemplate>
+                  <ion-icon name="close-circle"></ion-icon>
+                </ng-template>
+              </ionic-selectable>
+            </ion-item>
+          </ion-col>
+          <ion-col size='2'>
+            <span>
+              <ion-button fill="clear" color="danger" (click)="clearAllconnection()">
+                <ion-icon name="trash-bin-outline"></ion-icon>
+              </ion-button>
+            </span>
+          </ion-col>
+        </ion-row>
+
         <ion-grid>
           <ion-row>
             <ion-col>
@@ -115,7 +188,7 @@
                       <ion-badge color="primary">{{connexionforbidden.length}}</ion-badge>
                     </ion-item>
                     <ion-item-options>
-                      <ion-item-option color="danger">
+                      <ion-item-option color="danger" (click)="removeConnection(i)">
                         Remove
                       </ion-item-option>
                     </ion-item-options>

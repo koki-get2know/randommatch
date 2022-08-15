@@ -3,8 +3,8 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
 import { NavController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
-import { LoremIpsum } from 'lorem-ipsum';
 import { IonicSelectableComponent } from 'ionic-selectable';
+import { ColorsTags } from '../../constants';
 
 @Component( {
   selector: 'app-matching',
@@ -15,14 +15,20 @@ import { IonicSelectableComponent } from 'ionic-selectable';
 export class MatchingPage implements OnInit {
   
   matchingForm: FormGroup;
-  checked: any;
-  usersgroups = [];
-   
-  usersSelected = [];
+  checked: boolean;
+  usersgroups: User[] = [];
+  ColorsTags = ColorsTags;
+  usersSelected: User[] = [];
 
   selected_forbidden_connexion: [];
   userstoforbidden =[];
   usersconnexionforbidden: User[][] = [];
+  isIndeterminate:boolean;
+  masterCheck:boolean;
+  checkBoxList: any;
+  // we use it in order to toggle all item
+  toogle = true;
+  
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
@@ -32,16 +38,18 @@ export class MatchingPage implements OnInit {
   }
 
   ngOnInit () {
-    const storagevalue= localStorage.getItem( "userlist" );
-    this.usersgroups = storagevalue ? JSON.parse( storagevalue ) : [];
-    this.initusermatch();
+    this.matchService.getUsersdata().subscribe(users => {
+      this.usersgroups = users;
+    });
     this.initForm();
   }
 
-  isIndeterminate:boolean;
-  masterCheck:boolean;
-  checkBoxList: any;
-  
+  initForm() {
+    this.matchingForm = this.formBuilder.group({
+      matchingsize: ['', Validators.required],
+    });
+  }
+
   checkMaster ( event ) {
     this.usersSelected = [];
     setTimeout( () => {
@@ -57,38 +65,31 @@ export class MatchingPage implements OnInit {
         this.onRemoveusersSelected( user.id );
         });
       }
-      
     });
   }
 
-  initusermatch () {
-    this.usersgroups.forEach(obj => {
-        obj.isChecked = false;
-       // obj = { ...obj, isChecked: false};
-      });
-  }
- selectUsers(event: PointerEvent,user) {
+  selectUsers(event: PointerEvent, user: User) {
     if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
     }
     else {
       this.onRemoveusersSelected( user.id );
     }
-
   }
+
   // when user is unchecked, it should be remove
-  onRemoveusersSelected(id: number) {
+  onRemoveusersSelected(id: string) {
     const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
     this.usersSelected.splice(index, 1);
   }
-    checkEvent(event: PointerEvent,user) {
+  
+  checkEvent(event: PointerEvent, user: User) {
     const totalItems = this.usersgroups.length;
     let checked = 0;
     
     if ((event.target as HTMLInputElement).checked === false ) {
       this.usersSelected.push( user );
       checked++;
-      
     }
     else {
       this.onRemoveusersSelected( user.id );
@@ -109,11 +110,6 @@ export class MatchingPage implements OnInit {
     }
   }
 
-  initForm() {
-    this.matchingForm = this.formBuilder.group({
-      matchingsize: ['', Validators.required],
-    });
-  }
   async presentToast(message) {
     const toast = await this.toastController.create({
       message: message,
@@ -143,12 +139,13 @@ export class MatchingPage implements OnInit {
     }
     this.clear();
   }
+
   forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
     let i = 0;
     while ( i < this.usersconnexionforbidden.length ) {
       let element = this.usersconnexionforbidden[i];
       if ( element.length === newconnection.length ) {
-        const diffUser = this.compareconnection( element, newconnection );
+        const diffUser = this.matchService.compareconnection( element, newconnection );
         if ( diffUser.length === 0 ) {
           console.log( diffUser.length);
           return true;
@@ -159,12 +156,21 @@ export class MatchingPage implements OnInit {
     return false;
   }
 
-  compareconnection<User>(forbconnec1:any,forbconnec2:any) {
-    return forbconnec1.filter((element) => {
-        return !forbconnec2.some(elt2 => element.id === elt2.id);
-      });
+  add () {
+    
+    this.selectComponent.confirm();
+    this.selectComponent.clear();
     
   }
+  clearAllconnection () {
+    this.selected_forbidden_connexion = [];
+    this.usersconnexionforbidden = [];
+  }
+  toogleAll () {
+    this.selectComponent.toggleItems(this.toogle);
+    this.toogle = !this.toogle;
+  }
+
   clear() {
     this.selectComponent.clear();
     this.selectComponent.close();
@@ -177,8 +183,9 @@ export class MatchingPage implements OnInit {
     
   }
 
-  removeConnection (index) {
-    this.usersconnexionforbidden.splice(index, 1);
+  removeConnection ( index ) {
+    this.matchService.removeConnection( this.usersconnexionforbidden, index );
+    //this.usersconnexionforbidden.splice(index, 1);
   }
 
   get form() {
@@ -186,22 +193,14 @@ export class MatchingPage implements OnInit {
   }
 
  
-  // select a group of user
-  selectGroup(event, group){
-  
-  this.usersSelected = [];
-  if ( event.target.checked === false ) {
-      this.usersSelected = group.users;
-    }
-  }
-  
   onSubmit() {
     this.ramdommatch();
   }
 
   ramdommatch () {
-    
-
+    if (this.usersSelected.length < 2){
+      return;
+    }
     const users: User[] = [];
     const forbiddenConnections: User[][] = [];
     for (const selected of this.usersSelected)
@@ -223,19 +222,18 @@ export class MatchingPage implements OnInit {
 
     this.matchService.makematch(matchingRequest)
       .subscribe( ( matchings: Matching[] ) => {
-        if ( matchings!==null ) {
+        if ( matchings !== null ) {
             console.log(matchings);
             matchings.forEach(match => match.users.forEach(user => {
               user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
             }));
-            
             this.matchingresult(matchings);
         }
         else {
           this.presentToast("No matchings generated!");
         }
         
-      })
+      });
   }
 
   // matching result
