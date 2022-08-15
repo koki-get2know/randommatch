@@ -76,6 +76,19 @@ func mapUsers(users []entity.User) []map[string]interface{} {
 	return result
 }
 
+func mapMatches(tuples [][]entity.User) [][]map[string]interface{} {
+
+	var result = make([][]map[string]interface{}, len(tuples))
+	for index, item := range tuples {
+		users := []map[string]interface{}{}
+		for _, user := range item {
+			users = append(users, structs.Map(user))
+		}
+		result[index] = users
+	}
+	fmt.Println(result)
+	return result
+}
 func CreateUsers(users []entity.User, orgaUid string) (string, error) {
 	jobId := uuid.New().String()
 	if err := CreateJobStatus(jobId); err != nil {
@@ -161,6 +174,84 @@ func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error 
 	}
 	out <- Done
 	return nil
+}
+
+// Getlink  get all relationship from DB
+func GetLink() ([][]entity.User, error) {
+	driver, err := Driver()
+	if err != nil {
+		return [][]entity.User{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	links, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n:User)-[r:MET]->(ou:User) RETURN n, ou",
+			map[string]interface{}{})
+
+		link := [][]entity.User{}
+		if err != nil {
+			return link, err
+		}
+		for result.Next() {
+			user := result.Record().Values[0].(dbtype.Node).Props
+			ou := result.Record().Values[1].(dbtype.Node).Props
+			var users []entity.User
+			users = append(users,
+				entity.User{
+					Id:   user["uid"].(string),
+					Name: user["name"].(string),
+					//Groups: tags,
+				}, entity.User{
+					Id:   ou["uid"].(string),
+					Name: ou["name"].(string),
+					//Groups: tags,
+				})
+
+			link = append(link, users)
+		}
+
+		if result.Err() != nil {
+			return link, result.Err()
+		}
+
+		return link, nil
+
+	})
+	if err != nil {
+		return [][]entity.User{}, err
+	}
+	return links.([][]entity.User), nil
+}
+
+// CreateLink create relationship (known) between 2 users in BD
+func CreateLink(tuples [][]entity.User) error {
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("UNWIND $tuples AS tuple "+
+
+			" MATCH (a:User{uid:tuple[0].Id}),(b:User{uid:tuple[1].Id}) "+
+			"MERGE (a)-[r:MET]-(b) "+
+			"ON CREATE SET r.on = datetime({timezone: 'Z'}) ",
+			map[string]interface{}{"tuples": mapMatches(tuples)})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result.Consume()
+	})
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func GetUsers() ([]entity.User, error) {

@@ -68,7 +68,10 @@ func (g *UserGraph) SearchUser(n *entity.User) (bool, int) {
 // remove a user in a list of users
 
 func Remove(s []*entity.User, i int) []*entity.User {
-	s[i] = s[len(s)-1]
+	if i != len(s)-1 {
+		s[i] = s[len(s)-1]
+	}
+
 	return s[:len(s)-1]
 }
 
@@ -116,9 +119,7 @@ func UsersToGraph(users []entity.User, connections [][]entity.User) *UserGraph {
 
 	/* input :
 	         users: table users for matching
-			 connections: Matrix for connection in the graph;
-			               for each line:
-						      - first element is connected to all the rest
+			 connections: Matrix n*2for connection in the graph where each row is a pair of 2 users connected in the graph;
 	   output: return the graph
 	*/
 	var graph UserGraph

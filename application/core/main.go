@@ -57,6 +57,25 @@ func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func linkfromMatching(tuples []matcher.Match) error {
+	/*
+	   Input : tuples of matchings
+	   purpose: serialize the link in BD
+	*/
+	var connections [][]entity.User
+	for _, match := range tuples {
+		for _, u := range match.Users {
+			for _, u1 := range match.Users {
+				if u.Id != u1.Id {
+					connections = append(connections, []entity.User{u, u1})
+				}
+			}
+		}
+	}
+
+	return database.CreateLink(connections)
+}
+
 func generateMatchings(c *gin.Context) {
 	defer duration(track("generateMatchings"))
 	var req matchingReq
@@ -69,6 +88,7 @@ func generateMatchings(c *gin.Context) {
 	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
 		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
 }
 
 func generateGroupMatchings(c *gin.Context) {
@@ -83,11 +103,13 @@ func generateGroupMatchings(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
 		return
 	}
+
 	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
 
 		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
 
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
 }
 
 func uploadUsers(c *gin.Context) {
@@ -132,6 +154,18 @@ func uploadUsers(c *gin.Context) {
 	}
 	c.Header("Location", fmt.Sprintf("/users-creation-job/%v", jobId))
 	c.JSON(http.StatusAccepted, gin.H{"message": "Job enqueued"})
+}
+
+// End point to get all links in BD
+func getLinks(c *gin.Context) {
+	defer duration(track("getLinks"))
+	links, err := database.GetLink()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": links})
+
 }
 
 func getUsers(c *gin.Context) {
@@ -257,6 +291,6 @@ func main() {
 	protected.GET("/matching-email-job/:id", getJobStatus)
 	protected.GET("/users", getUsers)
 	protected.POST("/email-matches", emailMatches)
-
+	protected.GET("/links", getLinks)
 	router.Run()
 }
