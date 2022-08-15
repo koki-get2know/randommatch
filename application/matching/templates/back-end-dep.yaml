@@ -29,6 +29,8 @@ spec:
           value: {{ .Values.backend.aws_ses.keysecret }}
         - name: DB_HOST
           value: {{ .Values.backend.dbhost }}
+        - name: NEO4J_AUTH
+          value: {{ .Values.matchdb.creds }}
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
