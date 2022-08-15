@@ -176,9 +176,9 @@ func emailMatches(c *gin.Context) {
 
 }
 
-func getMatchings(c *gin.Context) {
+func getMatchingStats(c *gin.Context) {
 	defer duration(track("getMatchings"))
-	matchings, err := database.GetMatchings()
+	matchings, err := database.GetMatchingStats()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -268,7 +268,7 @@ func main() {
 	protected.GET("/matching-email-job/:id", getJobStatus)
 	protected.GET("/users", getUsers)
 	protected.POST("/email-matches", emailMatches)
-	protected.GET("/matchings-stats", getMatchings)
+	protected.GET("/matchings-stats", getMatchingStats)
 
 	router.Run()
 }

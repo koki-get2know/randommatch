@@ -2,7 +2,9 @@ package calendar
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -112,9 +114,14 @@ func SendInvite(matches []matcher.Match) (string, error) {
 				}
 			case mailErrors := <-errorschannel:
 				fmt.Println("received", mailErrors)
-				saveMatchingInfo(len(matches), len(mailErrors))
+
 				if len(mailErrors) > 0 {
 					database.UpdateJobErrors(jobId, mailErrors)
+				}
+				saveMsg, err := saveMatchingInfo(len(matches), len(mailErrors))
+
+				if err != nil {
+					database.UpdateJobErrors(jobId, []string{saveMsg})
 				}
 			}
 		}
@@ -122,10 +129,10 @@ func SendInvite(matches []matcher.Match) (string, error) {
 	return jobId, nil
 }
 
-func saveMatchingInfo(numGroups int, numFailed int) {
+func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
 	numConversations := numGroups - numFailed
 
-	matchingStat := entity.Matching{
+	matchingStat := entity.MatchingStat{
 		NumGroups:        numGroups,
 		NumConversations: numConversations,
 		NumFailed:        numFailed,
@@ -135,9 +142,11 @@ func saveMatchingInfo(numGroups int, numFailed int) {
 
 	if err != nil {
 		fmt.Println(err)
+		return "save Matching Info are failed", err
 	} else {
 		fmt.Println(matchingStat)
 		fmt.Println(MatchingId)
+		return "Save Matching Info are successful", nil
 	}
 
 }
@@ -207,7 +216,7 @@ func sendInvite(match *matcher.Match) error {
 
 	_, err = svc.SendRawEmail(input)
 
-	//err = randomBool()
+	err = randomBool()
 
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -232,11 +241,11 @@ func sendInvite(match *matcher.Match) error {
 }
 
 // For Local Test To simulate sending emails
-/*func randomBool() error {
+func randomBool() error {
 	if rand.Float32() != 0.683701 {
 		return nil
 	} else {
 		err := errors.New("math: square root of negative number")
 		return err
 	}
-}*/
+}

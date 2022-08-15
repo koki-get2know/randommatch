@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type Organization struct {
 	Id          string
 	Name        string
@@ -10,11 +12,12 @@ type MatchingCycle struct {
 	Id string
 }
 
-type Matching struct {
+type MatchingStat struct {
 	Id               string
 	NumGroups        int
 	NumConversations int
 	NumFailed        int
+	CreatedAt        time.Time
 }
 
 type User struct {

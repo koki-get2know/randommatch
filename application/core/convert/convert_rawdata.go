@@ -147,5 +147,4 @@ func GenerateJsonFile(filename string) {
 	defer jsonFile.Close()
 
 	jsonFile.Write(jsonData)
-	jsonFile.Close()
 }
