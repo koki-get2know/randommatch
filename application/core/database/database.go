@@ -10,9 +10,9 @@ import (
 
 //var once sync.Once
 var driver *neo4j.Driver
+var err error
 
 func Driver() (*neo4j.Driver, error) {
-	var err error
 	if driver == nil {
 	//once.Do(func() {
 		creds := strings.Split(os.Getenv("NEO4J_AUTH"), "/")
