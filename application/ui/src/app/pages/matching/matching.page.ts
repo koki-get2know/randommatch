@@ -166,8 +166,9 @@ export class MatchingPage implements OnInit {
     
   }
 
-  removeConnection (index) {
-    this.usersconnexionforbidden.splice(index, 1);
+  removeConnection ( index ) {
+    this.matchService.removeConnection( this.usersconnexionforbidden, index );
+    //this.usersconnexionforbidden.splice(index, 1);
   }
 
   get form() {

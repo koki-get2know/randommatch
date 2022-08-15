@@ -180,6 +180,12 @@ export class MatchingGroupPage implements OnInit {
     }
   }
 
+  // delete a forbiddenconnection
+  removeConnection ( index ) {
+    this.matchService.removeConnection( this.usersconnexionforbidden, index );
+    //this.usersconnexionforbidden.splice(index, 1);
+  }
+
 
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: string) {
