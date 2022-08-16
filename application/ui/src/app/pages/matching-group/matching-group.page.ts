@@ -88,8 +88,18 @@ export class MatchingGroupPage implements OnInit {
       this.presentToast("Please select more than one user!");
     }
     this.clear();
-  }
+    }
   
+  onOpenGroup1 ( event: { component: IonicSelectableComponent } ) {
+    let istoogle = this.result_selected_group1.length == 0 ? false : true;
+    this.selectComponentGroup1.toggleItems(istoogle,this.result_selected_group1);
+  }
+
+  onOpenGroup2 ( event: { component: IonicSelectableComponent } ) {
+    let istoogle = this.result_selected_group2.length == 0 ? false : true;
+    this.selectComponentGroup2.toggleItems(istoogle,this.result_selected_group2);
+  }
+
   addUsersGroup1 () {
     this.selectComponentGroup1.confirm();
     console.log( this.users_selected_group1 );
@@ -98,7 +108,6 @@ export class MatchingGroupPage implements OnInit {
         this.result_selected_group1 = [...this.users_selected_group1];
         // in the second group, just keep all the users who have not been selected in the group 1
         this.users_toselect_group2 = this.matchService.compareconnection( this.users_toselect_group1, this.result_selected_group1 );
-        this.disabledGroup1 = true;  
       }
       else {
         this.result_selected_group1 = [...this.users_selected_group1];
@@ -112,13 +121,13 @@ export class MatchingGroupPage implements OnInit {
           }
           this.presentToast(moveuser.length+ " users have been moved from Group 2 to Group 1!");
         });
-        this.disabledGroup1 = true;  
       }
            
     }
 
     // users to forbid must be selected among the group 1 and 2
     this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
+    this.users_toselect_group1 = this.usersdata;
     this.clearGroup1();    
   }
 
@@ -130,7 +139,6 @@ export class MatchingGroupPage implements OnInit {
         this.result_selected_group2 = [...this.users_selected_group2];
         // in the second group, just keep all the users who have not been selected in the group 1
         this.users_toselect_group1 = this.matchService.compareconnection( this.users_toselect_group2, this.result_selected_group2 );
-        this.disabledGroup2 = true;  
       }
       else {
         this.result_selected_group2 = [...this.users_selected_group2];
@@ -144,12 +152,12 @@ export class MatchingGroupPage implements OnInit {
           }
           this.presentToast(moveuser.length+ " users have been moved from Group 1 to Group 2!");
         });
-        this.disabledGroup2 = true;  
       }
            
     }
     // users to forbid must be selected among the group 1 and 2
     this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
+    this.users_toselect_group2 = this.usersdata;
     this.clearGroup2();
   }
 
@@ -157,14 +165,12 @@ export class MatchingGroupPage implements OnInit {
     this.userstoforbidden = [];
     this.result_selected_group1 = [];
     this.users_toselect_group1 = this.usersdata;
-    this.disabledGroup1 = false;
     this.selectComponentGroup1.clear()
   }
   resetGroup2 () {
     this.userstoforbidden = [];
     this.result_selected_group2 = [];
     this.users_toselect_group2 = this.usersdata;
-    this.disabledGroup2 = false;
     this.selectComponentGroup2.clear()
   }
 
@@ -274,6 +280,9 @@ export class MatchingGroupPage implements OnInit {
       forbiddenConnections: this.usersconnexionforbidden
 
     };
+    console.log( "LES GROUPS" );
+    console.log( this.result_selected_group1 );
+    console.log( this.result_selected_group2 );
 
     this.matchService.makematchgroup(matchingRequest)
       .subscribe( ( matchings: Matching[] ) => {

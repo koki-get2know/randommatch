@@ -28,6 +28,9 @@ export class MatchingPage implements OnInit {
   checkBoxList: any;
   // we use it in order to toggle all item
   toogle = true;
+
+  isItemSelected: boolean =true;
+  item: any;
   
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
@@ -167,7 +170,7 @@ export class MatchingPage implements OnInit {
     this.usersconnexionforbidden = [];
   }
   toogleAll () {
-    this.selectComponent.toggleItems(this.toogle);
+    this.selectComponent.toggleItems(this.toogle,);
     this.toogle = !this.toogle;
   }
 

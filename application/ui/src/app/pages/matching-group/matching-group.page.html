@@ -31,7 +31,7 @@
           <ion-col size='8'>
             <ion-item>
               <ion-label>Users Group 1</ion-label>
-              <ionic-selectable headerColor="primary" [disabled]="disabledGroup1" #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+              <ionic-selectable headerColor="primary" [disabled]="disabledGroup1" #selectComponentGroup1 [(ngModel)]="users_selected_group1" [items]="users_toselect_group1" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement" (onOpen)="onOpenGroup1($event)">
                 <ng-template ionicSelectableCloseButtonTemplate>
                   <ion-icon name="close-circle"></ion-icon>
                 </ng-template>
@@ -88,7 +88,7 @@
           <ion-col size='8'>
             <ion-item>
               <ion-label>Users Group 2</ion-label>
-              <ionic-selectable headerColor="primary" [disabled]="disabledGroup2" #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement">
+              <ionic-selectable headerColor="primary" [disabled]="disabledGroup2" #selectComponentGroup2 [(ngModel)]="users_selected_group2" [items]="users_toselect_group2" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" searchFailText="no user found" [canClear]="true" groupValueField="departement" groupTextField="departement" (onOpen)="onOpenGroup2($event)">
                 <ng-template ionicSelectableCloseButtonTemplate>
                   <ion-icon name="close-circle"></ion-icon>
                 </ng-template>
