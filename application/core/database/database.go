@@ -36,11 +36,5 @@ func Driver() (*neo4j.Driver, error) {
 		driver = &dr
 	//})
 	}
-	if driver == nil && err == nil {
-		err = fmt.Errorf("Driver pointer was not successfully defined")
-	} else if err != nil {
-		fmt.Println("Driver initialization error", err)
-	}
-
 	return driver, err
 }

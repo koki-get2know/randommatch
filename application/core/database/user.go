@@ -65,6 +65,52 @@ func chunkSlice(slice []entity.User, chunkSize int) [][]entity.User {
 	return chunks
 }
 
+func DeleteUser(id string) error{
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (u:User{uid:$uid}) "+
+			"DETACH DELETE u ",
+			map[string]interface{}{"uid": id})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result.Consume()
+	})
+	return err
+}
+
+func DeleteUsers() error {
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (u:User) "+
+			"DETACH DELETE u ",
+			map[string]interface{}{})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result.Consume()
+	})
+	return err
+}
+
 func mapUsers(users []entity.User) []map[string]interface{} {
 	var result = make([]map[string]interface{}, len(users))
 
@@ -235,7 +281,6 @@ func CreateLink(tuples [][]entity.User) error {
 
 	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run("UNWIND $tuples AS tuple "+
-
 			" MATCH (a:User{uid:tuple[0].Id}),(b:User{uid:tuple[1].Id}) "+
 			"MERGE (a)-[r:MET]-(b) "+
 			"ON CREATE SET r.on = datetime({timezone: 'Z'}) ",
@@ -247,9 +292,6 @@ func CreateLink(tuples [][]entity.User) error {
 
 		return result.Consume()
 	})
-	if err != nil {
-		return err
-	}
 
 	return err
 }
