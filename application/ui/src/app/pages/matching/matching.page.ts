@@ -28,7 +28,6 @@ export class MatchingPage implements OnInit {
   checkBoxList: any;
   // we use it in order to toggle all item
   toogle = true;
-  
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
