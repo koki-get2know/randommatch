@@ -183,7 +183,7 @@ func getMatchingStats(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"data": matchings})
+	c.JSON(http.StatusOK, gin.H{"data": matchings})
 }
 
 // getAlbums responds with the list of all albums as JSON.

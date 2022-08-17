@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,7 +19,7 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat) (string, error) {
 
 	uid, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run("MERGE (n:MatchingStat {uid: $id}) "+
-			"ON CREATE SET n += {uid: $id, num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
+			"ON CREATE SET n += {num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
 			"creation_date: $created_at, last_update: datetime({timezone: 'Z'})} "+
 			"RETURN n.uid",
 			map[string]interface{}{
@@ -32,19 +31,15 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat) (string, error) {
 			})
 
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		if result.Next() {
 			return result.Record().Values[0], nil
 		}
 
-		return nil, result.Err()
+		return "", result.Err()
 	})
-
-	if err != nil {
-		return "", err
-	}
 
 	return uid.(string), err
 }
@@ -60,16 +55,12 @@ func GetMatchingStats() ([]entity.MatchingStat, error) {
 	matchings, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run("MATCH (n:MatchingStat) RETURN n", map[string]interface{}{})
 		var matchings []entity.MatchingStat
-		var totalConvers = 0
-		var totalFailures = 0
 
 		if err != nil {
 			return matchings, err
 		}
 		for result.Next() {
 			matching := result.Record().Values[0].(dbtype.Node).Props
-			totalConvers += int(matching["num_conversations"].(int64))
-			totalFailures += int(matching["num_failures"].(int64))
 
 			matchings = append(matchings,
 				entity.MatchingStat{
@@ -80,8 +71,6 @@ func GetMatchingStats() ([]entity.MatchingStat, error) {
 					CreatedAt:        matching["creation_date"].(time.Time),
 				})
 		}
-		fmt.Println(totalConvers)
-		fmt.Println(totalFailures)
 		if result.Err() != nil {
 			return matchings, result.Err()
 		}

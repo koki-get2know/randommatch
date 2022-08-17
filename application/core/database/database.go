@@ -28,7 +28,6 @@ func Driver() (*neo4j.Driver, error) {
 			dbhost = "localhost"
 		}
 		dr, err = neo4j.NewDriver(fmt.Sprintf("bolt://%v:7687", dbhost), neo4j.BasicAuth(creds[0], creds[1], ""))
-		//dr, err = neo4j.NewDriver(fmt.Sprintf("%v", dbhost), neo4j.BasicAuth(creds[0], creds[1], ""))
 
 		if err != nil {
 			return
