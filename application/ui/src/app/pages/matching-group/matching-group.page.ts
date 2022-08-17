@@ -77,7 +77,6 @@ export class MatchingGroupPage implements OnInit {
       }
       else {
         if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
-          console.log( "Unexisting link" );
           this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
         }
         else {
@@ -91,19 +90,19 @@ export class MatchingGroupPage implements OnInit {
     }
   
   onOpenGroup1 ( event: { component: IonicSelectableComponent } ) {
-    let istoogle = this.result_selected_group1.length == 0 ? false : true;
+    const istoogle = this.result_selected_group1.length > 0;
     this.selectComponentGroup1.toggleItems(istoogle,this.result_selected_group1);
   }
 
   onOpenGroup2 ( event: { component: IonicSelectableComponent } ) {
-    let istoogle = this.result_selected_group2.length == 0 ? false : true;
+    const istoogle = this.result_selected_group2.length > 0;
     this.selectComponentGroup2.toggleItems(istoogle,this.result_selected_group2);
   }
 
   addUsersGroup1 () {
     this.selectComponentGroup1.confirm();
     console.log( this.users_selected_group1 );
-    if ( this.users_selected_group1.length != 0 ) {
+    if ( this.users_selected_group1.length !== 0 ) {
       if ( this.result_selected_group2.length === 0 ) {
         this.result_selected_group1 = [...this.users_selected_group1];
         // in the second group, just keep all the users who have not been selected in the group 1
@@ -128,13 +127,13 @@ export class MatchingGroupPage implements OnInit {
     // users to forbid must be selected among the group 1 and 2
     this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
     this.users_toselect_group1 = this.usersdata;
-    this.clearGroup1();    
+    this.clearGroup(1);    
   }
 
   addUsersGroup2 () {
    this.selectComponentGroup2.confirm();
     console.log( this.users_selected_group2 );
-    if ( this.users_selected_group2.length != 0 ) {
+    if ( this.users_selected_group2.length !== 0 ) {
       if ( this.result_selected_group1.length === 0 ) {
         this.result_selected_group2 = [...this.users_selected_group2];
         // in the second group, just keep all the users who have not been selected in the group 1
@@ -158,7 +157,7 @@ export class MatchingGroupPage implements OnInit {
     // users to forbid must be selected among the group 1 and 2
     this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
     this.users_toselect_group2 = this.usersdata;
-    this.clearGroup2();
+    this.clearGroup(2);
   }
 
   resetGroup1 () {
@@ -179,32 +178,34 @@ export class MatchingGroupPage implements OnInit {
     this.selected_forbidden_connexion = [];
     this.usersconnexionforbidden = [];
   }
-  toogleAll () {
-    this.selectComponentGroup1.toggleItems(this.toogleGroup1);
-    this.toogleGroup1 = !this.toogleGroup1;
-  }
-  toogleAll2 () {
-    this.selectComponentGroup2.toggleItems(this.toogleGroup2);
-    this.toogleGroup2 = !this.toogleGroup2;
-  }
+ 
 
+  tooglAllUsers ( group_index) {
+    if ( group_index === 1 ) {
+      this.selectComponentGroup1.toggleItems(this.toogleGroup1);
+      this.toogleGroup1 = !this.toogleGroup1;
+    }
+    else {
+      this.selectComponentGroup2.toggleItems(this.toogleGroup2);
+      this.toogleGroup2 = !this.toogleGroup2;
+    }
+  }
 
   clear() {
     this.selectComponent.clear();
     this.selected_forbidden_connexion = [];
-    
   }
 
-  clearGroup1() {
-    this.selectComponentGroup1.clear();
-    this.selectComponentGroup1.close();
+  clearGroup (group_index) {
+    if ( group_index === 1 ) {
+      this.selectComponentGroup1.clear();
+      this.selectComponentGroup1.close();
+    }
+    else {
+      this.selectComponentGroup2.clear();
+      this.selectComponentGroup2.close();
+    }
   }
-
-  clearGroup2() {
-    this.selectComponentGroup2.clear();
-    this.selectComponentGroup2.close();
-  }
-
   addforbiddenUsersItem() {
     this.selectComponent.confirm ();
   }
@@ -245,7 +246,6 @@ export class MatchingGroupPage implements OnInit {
   // delete a forbiddenconnection
   removeConnection ( index ) {
     this.matchService.removeConnection( this.usersconnexionforbidden, index );
-    //this.usersconnexionforbidden.splice(index, 1);
   }
 
 
@@ -260,7 +260,7 @@ export class MatchingGroupPage implements OnInit {
   }
 
   ramdommatch () {
-    if (this.result_selected_group1.length == 0 || this.result_selected_group2.length ==0) {
+    if (this.result_selected_group1.length === 0 || this.result_selected_group2.length ===0) {
       return;
     }
     this.isSubmitted = true;
@@ -280,7 +280,6 @@ export class MatchingGroupPage implements OnInit {
       forbiddenConnections: this.usersconnexionforbidden
 
     };
-    console.log( "LES GROUPS" );
     console.log( this.result_selected_group1 );
     console.log( this.result_selected_group2 );
 
