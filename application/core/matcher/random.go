@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -156,8 +157,10 @@ func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, fo
 			indices = remove(indices, index)
 
 		}
+
 		matching.Users = matchedUsers
 		matching.Id = ""
+
 		return matching
 	}
 
@@ -282,10 +285,12 @@ func Matcher(g *UserGraph, k uint,
 		i := 0
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
+
 		for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)
+			fmt.Println(groupB.users)
 			if matched != nil {
 				for _, match := range matched.Users {
 					match := match
@@ -293,6 +298,7 @@ func Matcher(g *UserGraph, k uint,
 					groupB.RemoveUser(&match)
 
 				}
+
 			}
 
 			matching[i] = matched
@@ -328,6 +334,7 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 	switch s {
 	case Basic:
 		graph := UsersToGraph(users, connections)
+		graph.String()
 		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
 			forbiddenConnections, []*entity.User{}, []*entity.User{},
 			[]Constraint{}, []Constraint{})
@@ -351,8 +358,9 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 
 	}
 	for index, matching := range tuples {
-
-		results = append(results, Match{Id: strconv.Itoa(index), Users: matching.Users})
+		if len(matching.Users) > 1 {
+			results = append(results, Match{Id: strconv.Itoa(index), Users: matching.Users})
+		}
 	}
 	return results
 }

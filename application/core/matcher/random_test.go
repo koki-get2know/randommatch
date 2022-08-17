@@ -99,11 +99,13 @@ func TestMatcher2(t *testing.T) {
 	var forbiddenConnections [][]entity.User
 	C := []entity.User{{Id: "4"}, {Id: "1"}}
 	forbiddenConnections = append(forbiddenConnections, C)
-	A := []*entity.User{{Id: "5"}, {Id: "6"}}
-	B := []*entity.User{{Id: "1"}, {Id: "2"}, {Id: "4"}}
+	A := []*entity.User{{Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}, {Id: "4", Name: "tete"}}
+	//B := []entity.User{{Id: "tete"}, {Id: "titi"}, {Id: "tato"}}
+
+	B := []*entity.User{{Id: "1", Name: "tata"}, {Id: "2", Name: "toto"}}
 	interConstraint := []Constraint{Unique}
 	SELECTOR := Group
-	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, interConstraint, []Constraint{Unique})
+	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, interConstraint, []Constraint{})
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
@@ -121,22 +123,19 @@ func TestMatcher2(t *testing.T) {
 
 func TestGenTuple(t *testing.T) {
 
-	users := []entity.User{}
+	users := []entity.User{{Id: "2", Name: "toto"}, {Id: "3", Name: "tutu"}, {Id: "4", Name: "tete"}, {Id: "6", Name: "titi"}, {Id: "7", Name: "tato"}}
 	var connections, forbiddenConnections [][]entity.User
 
-	A := []entity.User{{Id: "tata"}, {Id: "toto"}, {Id: "tutu"}}
-	B := []entity.User{{Id: "tete"}, {Id: "titi"}, {Id: "tato"}}
+	A := []entity.User{{Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}, {Id: "4", Name: "tete"}, {Id: "19", Name: "paul"}}
 
-	C := []entity.User{{Id: "tete"}, {Id: "titi"}, {Id: "tonton"}}
-	D := []entity.User{{Id: "tata"}, {Id: "titi"}}
-	forbiddenConnections = append(forbiddenConnections, C)
-	forbiddenConnections = append(forbiddenConnections, D)
-	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, B)
+	D := []entity.User{{Id: "1", Name: "tata"}, {Id: "2", Name: "toto"}}
+
+	matching := GenerateTuple(users, connections, Basic, forbiddenConnections, 2, A, D)
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
 		for _, user := range match.Users {
-			fmt.Printf("%s,", user.String())
+			fmt.Printf("%s,", user.Name)
 		}
 
 		fmt.Printf("]")

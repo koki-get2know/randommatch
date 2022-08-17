@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/database"
@@ -57,6 +58,25 @@ func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func linkfromMatching(tuples []matcher.Match) error {
+	/*
+	   Input : tuples of matchings
+	   purpose: serialize the link in BD
+	*/
+	var connections [][]entity.User
+	for _, match := range tuples {
+		for _, u := range match.Users {
+			for _, u1 := range match.Users {
+				if u.Id != u1.Id {
+					connections = append(connections, []entity.User{u, u1})
+				}
+			}
+		}
+	}
+
+	return database.CreateLink(connections)
+}
+
 func generateMatchings(c *gin.Context) {
 	defer duration(track("generateMatchings"))
 	var req matchingReq
@@ -69,6 +89,7 @@ func generateMatchings(c *gin.Context) {
 	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
 		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
 }
 
 func generateGroupMatchings(c *gin.Context) {
@@ -83,11 +104,13 @@ func generateGroupMatchings(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
 		return
 	}
+
 	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
 
 		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
 
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
 }
 
 func uploadUsers(c *gin.Context) {
@@ -134,6 +157,18 @@ func uploadUsers(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"message": "Job enqueued"})
 }
 
+// End point to get all links in BD
+func getLinks(c *gin.Context) {
+	defer duration(track("getLinks"))
+	links, err := database.GetLink()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": links})
+
+}
+
 func getUsers(c *gin.Context) {
 	defer duration(track("getUsers"))
 	users, err := database.GetUsers()
@@ -141,7 +176,47 @@ func getUsers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"data": users})
+	c.JSON(http.StatusOK, gin.H{"data": users})
+}
+
+func deleteUser(c *gin.Context) {
+	defer duration(track("deleteUser"))
+	id := c.Param("id")
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	if err := database.DeleteUser(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+func contains(s []any, e string) bool {
+	for _, a := range s {
+			if a.(string) == e {
+					return true
+			}
+	}
+	return false
+}
+
+func deleteUsers(c *gin.Context) {
+	defer duration(track("deleteUsers"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	if err := database.DeleteUsers(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
 
 func getJobStatus(c *gin.Context) {
@@ -226,15 +301,14 @@ func duration(msg string, start time.Time) {
 }
 
 func main() {
-	os.Setenv("NEO4J_AUTH", "neo4j/ubuntu")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
 		if err != nil {
 			fmt.Print(err)
-			return
+		} else {
+			defer (*driver).Close()
 		}
-		defer (*driver).Close()
 	}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -257,7 +331,9 @@ func main() {
 	protected.GET("/users-creation-job/:id", getJobStatus)
 	protected.GET("/matching-email-job/:id", getJobStatus)
 	protected.GET("/users", getUsers)
+	protected.DELETE("/users", deleteUsers)
+	protected.DELETE("/users/:id", deleteUser)
 	protected.POST("/email-matches", emailMatches)
-
+	protected.GET("/links", getLinks)
 	router.Run()
 }
