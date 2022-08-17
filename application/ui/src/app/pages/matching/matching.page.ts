@@ -28,7 +28,6 @@ export class MatchingPage implements OnInit {
   checkBoxList: any;
   // we use it in order to toggle all item
   toogle = true;
-  
 
   @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
   constructor(private formBuilder: FormBuilder,private matchService:UsersService,
@@ -83,7 +82,33 @@ export class MatchingPage implements OnInit {
     this.usersSelected.splice(index, 1);
   }
   
- 
+  checkEvent(event: PointerEvent, user: User) {
+    const totalItems = this.usersgroups.length;
+    let checked = 0;
+    
+    if ((event.target as HTMLInputElement).checked === false ) {
+      this.usersSelected.push( user );
+      checked++;
+    }
+    else {
+      this.onRemoveusersSelected( user.id );
+      checked--;
+    }
+    if (checked > 0 && checked < totalItems) {
+      //If even one item is checked but not all
+      this.isIndeterminate = true;
+      this.masterCheck = false;
+    } else if (checked === totalItems) {
+      //If all are checked
+      this.masterCheck = true;
+      this.isIndeterminate = false;
+    } else {
+      //If none is checked
+      this.isIndeterminate = false;
+      this.masterCheck = false;
+    }
+  }
+
   async presentToast(message) {
     const toast = await this.toastController.create({
       message: message,
