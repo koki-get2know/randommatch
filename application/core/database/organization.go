@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/koki/randommatch/entity"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 func CreateOrganization(organization entity.Organization) (string, error) {
@@ -22,19 +23,68 @@ func CreateOrganization(organization entity.Organization) (string, error) {
 			map[string]interface{}{"name": organization.Name, "id": uuid.New().String(), "desc": organization.Description})
 
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		if result.Next() {
 			return result.Record().Values[0], nil
 		}
 
-		return nil, result.Err()
+		return "", result.Err()
 	})
 
+	return uid.(string), err
+}
+
+func GetOrganizationById(uid string) (entity.Organization, error) {
+	driver, err := Driver()
+	if err != nil {
+		return entity.Organization{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+	res, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: Organization{uid: $uid}) RETURN n LIMIT 1",
+			map[string]interface{}{"uid": uid})
+
+		if err != nil {
+			return entity.Organization{}, err
+		}
+		if result.Next() {
+			return entity.Organization{Id: result.Record().Values[0].(dbtype.Node).Props["uid"].(string),
+			 Name: result.Record().Values[0].(dbtype.Node).Props["name"].(string),
+			 Description: result.Record().Values[0].(dbtype.Node).Props["description"].(string),
+			 }, nil
+		}
+
+		return entity.Organization{}, result.Err()
+
+	})
+
+	return res.(entity.Organization), err
+}
+
+func GetOrganizationByName(name string) (string, error) {
+	driver, err := Driver()
 	if err != nil {
 		return "", err
 	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+	res, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: Organization{name: $name}) RETURN n",
+			map[string]interface{}{"name": name})
 
-	return uid.(string), err
+		if err != nil {
+			return "", err
+		}
+		if result.Next() {
+			return result.Record().Values[0].(dbtype.Node).Props["uid"], nil
+		}
+
+		return "", result.Err()
+
+	})
+
+	return res.(string), err
 }
