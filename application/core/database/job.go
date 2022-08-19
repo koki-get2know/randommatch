@@ -122,13 +122,13 @@ func GetJobStatus(uid string) (string, error) {
 			map[string]interface{}{"uid": uid})
 
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		if result.Next() {
 			return result.Record().Values[0].(dbtype.Node).Props["status"], nil
 		}
 
-		return nil, result.Err()
+		return "", result.Err()
 
 	})
 	if err != nil {

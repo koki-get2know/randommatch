@@ -6,9 +6,11 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/convert"
 	"github.com/koki/randommatch/database"
@@ -42,6 +44,7 @@ type EmailReq struct {
 }
 
 type UsersFile struct {
+	Organization string `form:"organization"`
 	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
@@ -57,6 +60,25 @@ func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func linkfromMatching(tuples []matcher.Match) error {
+	/*
+	   Input : tuples of matchings
+	   purpose: serialize the link in BD
+	*/
+	var connections [][]entity.User
+	for _, match := range tuples {
+		for _, u := range match.Users {
+			for _, u1 := range match.Users {
+				if u.Id != u1.Id {
+					connections = append(connections, []entity.User{u, u1})
+				}
+			}
+		}
+	}
+
+	return database.CreateLink(connections)
+}
+
 func generateMatchings(c *gin.Context) {
 	defer duration(track("generateMatchings"))
 	var req matchingReq
@@ -69,6 +91,7 @@ func generateMatchings(c *gin.Context) {
 	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
 		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
 }
 
 func generateGroupMatchings(c *gin.Context) {
@@ -83,19 +106,92 @@ func generateGroupMatchings(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
 		return
 	}
+
 	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
 
 		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
 
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
+}
+
+func getTags(c *gin.Context) {
+	defer duration(track("getTags"))
+	tags, err := database.GetTags()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": tags})
+}
+
+func getOrganization(c *gin.Context) {
+	defer duration(track("getOrganization"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	id := c.Param("id")
+
+	orga, err := database.GetOrganizationById(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message":  err.Error()})
+		return
+	}
+	if len(orga.Id) == 0 {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": orga})
+}
+
+func createOrganization(c *gin.Context) {
+	defer duration(track("createOrganization"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+
+	var orga entity.Organization
+
+	if err := c.BindJSON(&orga); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	orga.Name = strings.ToLower(orga.Name)
+	orgaUid, err := database.CreateOrganization(orga)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		return
+	}
+	orga.Id = orgaUid
+	c.Header("Location", fmt.Sprintf("/organizations/%v", orgaUid))
+	c.JSON(http.StatusCreated, gin.H{"data": orga})
 }
 
 func uploadUsers(c *gin.Context) {
 	defer duration(track("uploadUsers"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	orgs := itemsWithPrefixInRole(roles, "Org.")
+
+
 	var usersFile UsersFile
 
 	if err := c.ShouldBind(&usersFile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file sent " + err.Error()})
+		return
+	}
+	usersFile.Organization = strings.ToLower(usersFile.Organization)
+	if len(usersFile.Organization) > 0 && !containsString(orgs, usersFile.Organization) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
 		return
 	}
 
@@ -111,18 +207,18 @@ func uploadUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
 		return
 	}
-
-	// in a next phase organization creation should be done via a super admin that has the appropriate roles
-	orga := entity.Organization{
-		Name:        "dummy",
-		Description: "All users belongs to this organization on the MVP phase",
-	}
-	orgaUid, err := database.CreateOrganization(orga)
-
+	
+	orgaUid, err := database.GetOrganizationByName(usersFile.Organization)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+	
+	if len(orgaUid) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Organization " + usersFile.Organization + " not found"})
+		return		
+	}
+
 
 	jobId, err := database.CreateUsers(users, orgaUid)
 
@@ -141,8 +237,80 @@ func getUsers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"data": users})
+	c.JSON(http.StatusOK, gin.H{"data": users})
 }
+
+func deleteUser(c *gin.Context) {
+	defer duration(track("deleteUser"))
+	id := c.Param("id")
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	if err := database.DeleteUser(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+func deleteUsers(c *gin.Context) {
+	defer duration(track("deleteUsers"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	if err := database.DeleteUsers(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// End point to get all links in BD
+func getLinks(c *gin.Context) {
+	defer duration(track("getLinks"))
+	links, err := database.GetLink()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": links})
+
+}
+
+func contains(s []any, e string) bool {
+	for _, a := range s {
+			if a.(string) == e {
+					return true
+			}
+	}
+	return false
+}
+func containsString(s []string, e string) bool {
+	for _, a := range s {
+			if a == e {
+					return true
+			}
+	}
+	return false
+}
+
+func itemsWithPrefixInRole(s []any, prefix string) []string {
+	orgs := []string{}
+	for _, a := range s {
+			if strings.HasPrefix(a.(string), prefix) {
+					orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string),prefix)) )
+			}
+	}
+	return orgs
+}
+
+
 
 func getJobStatus(c *gin.Context) {
 	defer duration(track("getJobStatus"))
@@ -174,16 +342,6 @@ func emailMatches(c *gin.Context) {
 	c.Header("Location", fmt.Sprintf("/matching-email-job/%v", jobId))
 	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
 
-}
-
-func getMatchingStats(c *gin.Context) {
-	defer duration(track("getMatchings"))
-	matchings, err := database.GetMatchingStats()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": matchings})
 }
 
 // getAlbums responds with the list of all albums as JSON.
@@ -236,15 +394,14 @@ func duration(msg string, start time.Time) {
 }
 
 func main() {
-	//os.Setenv("NEO4J_AUTH", "****/****")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
 		if err != nil {
 			fmt.Print(err)
-			return
+		} else {
+			defer (*driver).Close()
 		}
-		defer (*driver).Close()
 	}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -260,15 +417,19 @@ func main() {
 	public.POST("/albums", postAlbums)
 
 	protected := router.Group("")
-	//protected.Use(middlewares.JwtAuth())
+	protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
 	protected.GET("/users-creation-job/:id", getJobStatus)
 	protected.GET("/matching-email-job/:id", getJobStatus)
+	protected.POST("/organizations", createOrganization)
+	protected.GET("/organizations/:id", getOrganization)
 	protected.GET("/users", getUsers)
+	protected.DELETE("/users", deleteUsers)
+	protected.DELETE("/users/:id", deleteUser)
+	protected.GET("/tags", getTags)
 	protected.POST("/email-matches", emailMatches)
-	protected.GET("/matchings-stats", getMatchingStats)
-
+	protected.GET("/links", getLinks)
 	router.Run()
 }
