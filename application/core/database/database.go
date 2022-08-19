@@ -15,6 +15,7 @@ var err error
 func Driver() (*neo4j.Driver, error) {
 	if driver == nil {
 	//once.Do(func() {
+
 		creds := strings.Split(os.Getenv("NEO4J_AUTH"), "/")
 		if len(creds) < 2 {
 			err = fmt.Errorf("NEO4J_AUTH env variable missing or not set correctly")
@@ -23,11 +24,16 @@ func Driver() (*neo4j.Driver, error) {
 		var dr neo4j.Driver
 
 		dbhost, found := os.LookupEnv("DB_HOST")
-		if !found {
-			fmt.Println("neo4j DB_HOST env variable not set, defaulting to localhost")
-			dbhost = "localhost"
+		connectionstring, ok := os.LookupEnv("NEO4J_CNX_STRING")
+
+		if !ok {
+			if !found {
+				fmt.Println("neither NEO4J_CNX_STRING nor DB_HOST env variable set, defaulting to localhost")
+				dbhost = "localhost"
+			}
+			connectionstring = fmt.Sprintf("bolt://%v:7687", dbhost)
 		}
-		dr, err = neo4j.NewDriver(fmt.Sprintf("bolt://%v:7687", dbhost), neo4j.BasicAuth(creds[0], creds[1], ""))
+		dr, err = neo4j.NewDriver(connectionstring, neo4j.BasicAuth(creds[0], creds[1], ""))
 
 		if err != nil {
 			fmt.Println(err)

@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -43,6 +44,7 @@ type EmailReq struct {
 }
 
 type UsersFile struct {
+	Organization string `form:"organization"`
 	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
@@ -113,12 +115,83 @@ func generateGroupMatchings(c *gin.Context) {
 
 }
 
+func getTags(c *gin.Context) {
+	defer duration(track("getTags"))
+	tags, err := database.GetTags()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": tags})
+}
+
+func getOrganization(c *gin.Context) {
+	defer duration(track("getOrganization"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	id := c.Param("id")
+
+	orga, err := database.GetOrganizationById(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message":  err.Error()})
+		return
+	}
+	if len(orga.Id) == 0 {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": orga})
+}
+
+func createOrganization(c *gin.Context) {
+	defer duration(track("createOrganization"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	if !contains(roles, "Privilege.Approve") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+
+	var orga entity.Organization
+
+	if err := c.BindJSON(&orga); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	orga.Name = strings.ToLower(orga.Name)
+	orgaUid, err := database.CreateOrganization(orga)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		return
+	}
+	orga.Id = orgaUid
+	c.Header("Location", fmt.Sprintf("/organizations/%v", orgaUid))
+	c.JSON(http.StatusCreated, gin.H{"data": orga})
+}
+
 func uploadUsers(c *gin.Context) {
 	defer duration(track("uploadUsers"))
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	orgs := itemsWithPrefixInRole(roles, "Org.")
+
+
 	var usersFile UsersFile
 
 	if err := c.ShouldBind(&usersFile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file sent " + err.Error()})
+		return
+	}
+	usersFile.Organization = strings.ToLower(usersFile.Organization)
+	if len(usersFile.Organization) > 0 && !containsString(orgs, usersFile.Organization) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
 		return
 	}
 
@@ -134,18 +207,18 @@ func uploadUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
 		return
 	}
-
-	// in a next phase organization creation should be done via a super admin that has the appropriate roles
-	orga := entity.Organization{
-		Name:        "dummy",
-		Description: "All users belongs to this organization on the MVP phase",
-	}
-	orgaUid, err := database.CreateOrganization(orga)
-
+	
+	orgaUid, err := database.GetOrganizationByName(usersFile.Organization)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "organization creation failed " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+	
+	if len(orgaUid) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Organization " + usersFile.Organization + " not found"})
+		return		
+	}
+
 
 	jobId, err := database.CreateUsers(users, orgaUid)
 
@@ -155,18 +228,6 @@ func uploadUsers(c *gin.Context) {
 	}
 	c.Header("Location", fmt.Sprintf("/users-creation-job/%v", jobId))
 	c.JSON(http.StatusAccepted, gin.H{"message": "Job enqueued"})
-}
-
-// End point to get all links in BD
-func getLinks(c *gin.Context) {
-	defer duration(track("getLinks"))
-	links, err := database.GetLink()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-	c.JSON(http.StatusCreated, gin.H{"data": links})
-
 }
 
 func getUsers(c *gin.Context) {
@@ -195,15 +256,6 @@ func deleteUser(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func contains(s []any, e string) bool {
-	for _, a := range s {
-			if a.(string) == e {
-					return true
-			}
-	}
-	return false
-}
-
 func deleteUsers(c *gin.Context) {
 	defer duration(track("deleteUsers"))
 	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
@@ -218,6 +270,47 @@ func deleteUsers(c *gin.Context) {
 	}
 	c.Status(http.StatusNoContent)
 }
+
+// End point to get all links in BD
+func getLinks(c *gin.Context) {
+	defer duration(track("getLinks"))
+	links, err := database.GetLink()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": links})
+
+}
+
+func contains(s []any, e string) bool {
+	for _, a := range s {
+			if a.(string) == e {
+					return true
+			}
+	}
+	return false
+}
+func containsString(s []string, e string) bool {
+	for _, a := range s {
+			if a == e {
+					return true
+			}
+	}
+	return false
+}
+
+func itemsWithPrefixInRole(s []any, prefix string) []string {
+	orgs := []string{}
+	for _, a := range s {
+			if strings.HasPrefix(a.(string), prefix) {
+					orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string),prefix)) )
+			}
+	}
+	return orgs
+}
+
+
 
 func getJobStatus(c *gin.Context) {
 	defer duration(track("getJobStatus"))
@@ -330,9 +423,12 @@ func main() {
 	protected.POST("/upload-users", uploadUsers)
 	protected.GET("/users-creation-job/:id", getJobStatus)
 	protected.GET("/matching-email-job/:id", getJobStatus)
+	protected.POST("/organizations", createOrganization)
+	protected.GET("/organizations/:id", getOrganization)
 	protected.GET("/users", getUsers)
 	protected.DELETE("/users", deleteUsers)
 	protected.DELETE("/users/:id", deleteUser)
+	protected.GET("/tags", getTags)
 	protected.POST("/email-matches", emailMatches)
 	protected.GET("/links", getLinks)
 	router.Run()
