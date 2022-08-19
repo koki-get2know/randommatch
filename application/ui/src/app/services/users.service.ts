@@ -8,7 +8,6 @@ import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import avatar from "animal-avatar-generator";
 import { MsalService } from "@azure/msal-angular";
 import { appConstants } from "../constants";
-import jwt_decode, { JwtPayload } from "jwt-decode";
 
 export class User {
   id: string;
