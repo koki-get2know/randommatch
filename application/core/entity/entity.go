@@ -1,9 +1,13 @@
 package entity
 
+type Tag struct {
+	Name        string `json:"name"`
+}
+
 type Organization struct {
-	Id          string
-	Name        string
-	Description string
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type User struct {
