@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -45,7 +45,6 @@
     "core-js": "^3.23.3",
     "ionic-selectable": "^4.8.0",
     "lorem-ipsum": "^2.0.8",
-    "ngx-clipboard": "^15.1.0",
     "rxjs": "^6.5.4",
     "sw-toolbox": "3.6.0",
     "swiper": "8.0.7",

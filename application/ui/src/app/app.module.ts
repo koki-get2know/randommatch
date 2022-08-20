@@ -24,7 +24,6 @@ import {
 import { IonicSelectableModule } from "ionic-selectable";
 import { BearerInterceptor } from "./http-interceptors/bearer-interceptor.service";
 import { appConstants } from "./constants";
-import { ClipboardModule } from "ngx-clipboard";
 
 const isIE =
   window.navigator.userAgent.indexOf("MSIE ") > -1 ||
@@ -43,7 +42,6 @@ const isIE =
     ServiceWorkerModule.register("ngsw-worker.js", {
       enabled: environment.production,
     }),
-    ClipboardModule,
     MsalModule.forRoot(
       new PublicClientApplication({
         auth: {
