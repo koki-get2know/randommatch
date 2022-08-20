@@ -3,6 +3,7 @@ package calendar
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -45,7 +46,7 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	reminder := event.AddAlarm()
 	reminder.SetAction(ics.ActionDisplay)
 	reminder.SetTrigger("-P15M")
-	fmt.Println(cal.Serialize())
+	log.Println(cal.Serialize())
 	filename := "invite.ics"
 	m := gomail.NewMessage()
 
@@ -103,13 +104,13 @@ func SendInvite(matches []matcher.Match) (string, error) {
 		for {
 			select {
 			case mailJobStatus := <-statuschannel:
-				fmt.Println("received", mailJobStatus)
+				log.Println("received", mailJobStatus)
 				database.UpdateJobStatus(jobId, database.JobStatus(mailJobStatus))
 				if mailJobStatus == "Done" || mailJobStatus == "Failed" {
 					return
 				}
 			case mailErrors := <-errorschannel:
-				fmt.Println("received", mailErrors)
+				log.Println("received", mailErrors)
 				if len(mailErrors) > 0 {
 					database.UpdateJobErrors(jobId, mailErrors)
 				}
@@ -142,7 +143,7 @@ func sendInvite(match *matcher.Match) error {
 	uidsMails, err := database.GetEmailsFromUIds(userIds)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	emails := []string{}
@@ -160,7 +161,7 @@ func sendInvite(match *matcher.Match) error {
 
 	rawMessage, err := generateIcsInvitation(sender, subject, description, emails)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	// Create a new session in the us-east-1 region.
@@ -170,7 +171,7 @@ func sendInvite(match *matcher.Match) error {
 		Credentials: credentials.NewStaticCredentials(os.Getenv("SES_KEY_ID"), os.Getenv("SES_KEY_SECRET"), ""),
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	// Create an SES session.
@@ -188,20 +189,20 @@ func sendInvite(match *matcher.Match) error {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case ses.ErrCodeMessageRejected:
-				fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
+				log.Println(ses.ErrCodeMessageRejected, aerr.Error())
 			case ses.ErrCodeMailFromDomainNotVerifiedException:
-				fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
+				log.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
 			case ses.ErrCodeConfigurationSetDoesNotExistException:
-				fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
+				log.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
 			default:
-				fmt.Println(aerr.Error())
+				log.Println(aerr.Error())
 			}
 		} else {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 		}
 
 		return err
 	}
-
 	return nil
 }
+

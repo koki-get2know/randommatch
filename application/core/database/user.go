@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"log"
 	"strings"
 
 	"github.com/fatih/structs"
@@ -20,8 +20,8 @@ func CreateUser(user entity.User) (string, error) {
 	defer session.Close()
 
 	uid, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MERGE (n: User{name: $name, email: $email}) "+
-			"ON CREATE SET n += {uid: $uid, "+
+		result, err := tx.Run("MERGE (n: User{lower_name: $name, lower_email: $email}) "+
+			"ON CREATE SET n += {uid: $uid, name: $name, email: $email, "+
 			"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
 			"RETURN n.uid",
 			map[string]interface{}{"name": user.Name, "uid": uuid.New().String(), "email": user.Email})
@@ -132,7 +132,7 @@ func mapMatches(tuples [][]entity.User) [][]map[string]interface{} {
 		}
 		result[index] = users
 	}
-	fmt.Println(result)
+	log.Println(result)
 	return result
 }
 func CreateUsers(users []entity.User, orgaUid string) (string, error) {
@@ -143,20 +143,20 @@ func CreateUsers(users []entity.User, orgaUid string) (string, error) {
 	status := make(chan JobStatus)
 	go func() {
 		if err := createUsers(users, orgaUid, status); err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 	}()
 	go func() {
 		driver, err := Driver()
 		if err != nil {
-			fmt.Print("Driver error", err)
+			log.Print("Driver error", err)
 			return
 		}
 		session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 		defer session.Close()
 		for st := range status {
 			if err := updateJobStatus(session, jobId, st); err != nil {
-				fmt.Println("Error while updating job", jobId, err)
+				log.Println("Error while updating job", jobId, err)
 			}
 		}
 	}()
@@ -186,14 +186,15 @@ func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error 
 		_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 			result, err := tx.Run("MATCH (o: Organization{uid: $orguid }) "+
 				"UNWIND $users AS user "+
-				"MERGE (u: User{name: user.Name, email: user.Email}) "+
-				"ON CREATE SET u += {uid: user.Id, "+
+				"MERGE (u: User{lower_name: toLower(user.Name), lower_email: toLower(user.Email)}) "+
+				"ON CREATE SET u += {uid: user.Id, name: user.Name, email: user.Email, "+
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
 				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
 				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
 				"WITH user.Groups AS tags, u AS u "+
 				"UNWIND tags AS tag "+
-				"MERGE (t: Tag {name: tag}) "+
+				"MERGE (t: Tag {lower_name: toLower(tag)}) "+
+				"ON CREATE SET t += {name: tag} " +
 				"MERGE (u)-[rut:HAS_TAG]->(t) "+
 				"RETURN u.uid",
 				map[string]interface{}{"users": mapUsers(chunk), "orguid": orgaUid})
@@ -246,11 +247,9 @@ func GetLink() ([][]entity.User, error) {
 				entity.User{
 					Id:   user["uid"].(string),
 					Name: user["name"].(string),
-					//Groups: tags,
 				}, entity.User{
 					Id:   ou["uid"].(string),
 					Name: ou["name"].(string),
-					//Groups: tags,
 				})
 
 			link = append(link, users)
@@ -296,7 +295,7 @@ func CreateLink(tuples [][]entity.User) error {
 	return err
 }
 
-func GetUsers() ([]entity.User, error) {
+func GetUsers(organization string) ([]entity.User, error) {
 	driver, err := Driver()
 	if err != nil {
 		return []entity.User{}, err
@@ -305,8 +304,10 @@ func GetUsers() ([]entity.User, error) {
 	defer session.Close()
 
 	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n: User) OPTIONAL MATCH (n)-[r:HAS_TAG]->(t: Tag) RETURN  n, COLLECT(t.name)",
-			map[string]interface{}{})
+		result, err := tx.Run("MATCH (n: User) OPTIONAL MATCH (n)-[r:HAS_TAG]->(t: Tag) "+
+		"MATCH (n)-[WORKS_FOR]->(o:Organization{lower_name: $lower_orga}) "+
+		 "RETURN  n, COLLECT(t.name)",
+			map[string]interface{}{"lower_orga": strings.ToLower(organization)})
 		var users []entity.User
 
 		if err != nil {
@@ -324,6 +325,46 @@ func GetUsers() ([]entity.User, error) {
 					Id:     user["uid"].(string),
 					Name:   user["name"].(string),
 					Groups: tags,
+				})
+		}
+
+		if result.Err() != nil {
+			return users, result.Err()
+		}
+
+		return users, nil
+
+	})
+	if err != nil {
+		return []entity.User{}, err
+	}
+	return users.([]entity.User), nil
+}
+
+func GetUsersByTag(organization string, tag string,) ([]entity.User, error) {
+	driver, err := Driver()
+	if err != nil {
+		return []entity.User{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: User)-[r:HAS_TAG]->(t: Tag{lower_name:$lower_tag_name}) " + 
+		"MATCH (n)-[WORKS_FOR]->(o: Organization{lower_name: $lower_org_name})RETURN  n",
+			map[string]interface{}{"lower_tag_name": strings.ToLower(tag), "lower_org_name": strings.ToLower(organization)})
+		var users []entity.User
+
+		if err != nil {
+			return users, err
+		}
+		for result.Next() {
+			user := result.Record().Values[0].(dbtype.Node).Props
+
+			users = append(users,
+				entity.User{
+					Id:     user["uid"].(string),
+					Name:   user["name"].(string),
 				})
 		}
 

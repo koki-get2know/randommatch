@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -24,7 +24,7 @@ func JwtAuth() gin.HandlerFunc {
 		bearerToken := extract(c.Request)
 		claims, err := token.Validate(bearerToken)
 		if err != nil {
-			fmt.Println("bearer token error", err)
+			log.Println("bearer token error", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Operation denied"})
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return

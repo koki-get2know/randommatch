@@ -27,11 +27,21 @@
       #csvFileUpload
       hidden="true"
     />
-    <ion-button shape="round" fill="clear" (click)="csvFileUpload.click()">
+    <ion-button (click)="csvFileUpload.click()">
       <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
       upload users
     </ion-button>
-    <ion-button slot="icon-only" shape="round" fill="clear" id="info-csv"
+
+    <ion-button shape="round" fill="clear" size="small" (click)="copyText()"
+      ><ion-icon name="copy-outline"></ion-icon>
+      <span>&nbsp;Copy csv sample</span>
+    </ion-button>
+    <ion-button
+      slot="icon-only"
+      shape="round"
+      size="small"
+      fill="clear"
+      id="info-csv"
       ><ion-icon name="information-circle-outline"></ion-icon>
     </ion-button>
     <ion-popover

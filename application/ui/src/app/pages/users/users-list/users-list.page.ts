@@ -5,6 +5,8 @@ import { ToastController } from "@ionic/angular";
 import { User, UsersService } from "../../../services/users.service";
 import { ColorsTags } from "../../../constants";
 
+import { ClipboardService } from "ngx-clipboard";
+
 @Component({
   selector: "app-users-list",
   templateUrl: "./users-list.page.html",
@@ -18,7 +20,8 @@ export class UsersListPage implements OnInit {
   constructor(
     public router: Router,
     public toastCtrl: ToastController,
-    private userService: UsersService
+    private userService: UsersService,
+    private clipboard: ClipboardService
   ) {}
 
   ngOnInit() {
@@ -27,6 +30,15 @@ export class UsersListPage implements OnInit {
 
   tagclick(event: Event) {
     event.stopPropagation();
+  }
+
+  copyText() {
+    const sample: string = `Name,Email,Groups
+John Kuf,john@mail.fr,Mgt-Fce
+Bob Len,bo@gmail.com,Newcomer
+Richard,rich@company.com,`;
+
+    this.clipboard.copy(sample);
   }
 
   uploadCsv(event: Event) {
