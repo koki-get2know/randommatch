@@ -32,7 +32,7 @@ func Driver() (*neo4j.Driver, error) {
 				log.Println("neither NEO4J_CNX_STRING nor DB_HOST env variable set, defaulting to localhost")
 				dbhost = "localhost"
 			}
-			connectionstring = fmt.Sprintf("%v", dbhost)
+			connectionstring = fmt.Sprintf("bolt://%v:7687", dbhost)
 		}
 		dr, err = neo4j.NewDriver(connectionstring, neo4j.BasicAuth(creds[0], creds[1], ""))
 
