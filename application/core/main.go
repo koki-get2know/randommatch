@@ -16,8 +16,6 @@ import (
 	"github.com/koki/randommatch/utils/helper"
 )
 
-
-
 type matchingReq struct {
 	Size                 uint            `json:"size"`
 	Users                []entity.User   `json:"users"`
@@ -33,8 +31,6 @@ type groupMatchingReq struct {
 type EmailReq struct {
 	Matches []matcher.Match `json:"matches"`
 }
-
-
 
 func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
@@ -176,6 +172,7 @@ func main() {
 	protected.DELETE("/users/:id", handler.DeleteUser)
 	protected.GET("/tags", getTags)
 	protected.POST("/email-matches", emailMatches)
+	protected.GET("/matchings-stats", handler.GetMatchingStats)
 	protected.GET("/links", getLinks)
 	router.Run()
 }
