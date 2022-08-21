@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header no-border>
   <ion-toolbar mode="md" color="primary">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
@@ -41,11 +41,6 @@
       size="auto"
     >
       <ng-template>
-        <!-- <ion-header>
-          <ion-toolbar>
-            <ion-title>Instructions</ion-title>
-          </ion-toolbar>
-        </ion-header-->
         <ion-content class="ion-padding">
           <ul class="information">
             <li>File to upload must be a CSV.</li>
@@ -75,13 +70,12 @@
             <div [innerHTML]="user.avatar"></div>
           </ion-avatar>
           <div class="user-tags">
-            <ion-labe class="flex-1"> {{user.name}} </ion-labe>
-            <div>
+            <ion-label class="no-overflow"> {{user.name}} </ion-label>
+            <div class="tags">
               <ion-chip
-                *ngFor="let group of user.groups"
+                *ngFor="let tag of user.groups"
                 [color]="ColorsTags[i%2]"
-                (click)="tagclick($event)"
-                >{{group}}
+                >{{tag}}
               </ion-chip>
             </div>
           </div>
