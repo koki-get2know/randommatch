@@ -2,7 +2,7 @@
 package matcher
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/koki/randommatch/entity"
 )
@@ -109,7 +109,7 @@ func (g *UserGraph) String() {
 		}
 		s += "\n"
 	}
-	fmt.Println(s)
+	log.Println(s)
 
 }
 
