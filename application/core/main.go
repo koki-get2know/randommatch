@@ -44,8 +44,8 @@ type EmailReq struct {
 }
 
 type UsersFile struct {
-	Organization string `form:"organization"`
-	File *multipart.FileHeader `form:"file" binding:"required"`
+	Organization string                `form:"organization"`
+	File         *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 // albums slice to seed record album data.
@@ -139,7 +139,7 @@ func getOrganization(c *gin.Context) {
 	orga, err := database.GetOrganizationById(id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message":  err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	if len(orga.Id) == 0 {
@@ -182,7 +182,6 @@ func uploadUsers(c *gin.Context) {
 	roles := claims["roles"].([]interface{})
 	orgs := itemsWithPrefixInRole(roles, "Org.")
 
-
 	var usersFile UsersFile
 
 	if err := c.ShouldBind(&usersFile); err != nil {
@@ -207,18 +206,17 @@ func uploadUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
 		return
 	}
-	
+
 	orgaUid, err := database.GetOrganizationByName(usersFile.Organization)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	if len(orgaUid) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Organization " + usersFile.Organization + " not found"})
-		return		
+		return
 	}
-
 
 	jobId, err := database.CreateUsers(users, orgaUid)
 
@@ -285,17 +283,17 @@ func getLinks(c *gin.Context) {
 
 func contains(s []any, e string) bool {
 	for _, a := range s {
-			if a.(string) == e {
-					return true
-			}
+		if a.(string) == e {
+			return true
+		}
 	}
 	return false
 }
 func containsString(s []string, e string) bool {
 	for _, a := range s {
-			if a == e {
-					return true
-			}
+		if a == e {
+			return true
+		}
 	}
 	return false
 }
@@ -303,14 +301,12 @@ func containsString(s []string, e string) bool {
 func itemsWithPrefixInRole(s []any, prefix string) []string {
 	orgs := []string{}
 	for _, a := range s {
-			if strings.HasPrefix(a.(string), prefix) {
-					orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string),prefix)) )
-			}
+		if strings.HasPrefix(a.(string), prefix) {
+			orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string), prefix)))
+		}
 	}
 	return orgs
 }
-
-
 
 func getJobStatus(c *gin.Context) {
 	defer duration(track("getJobStatus"))
@@ -342,6 +338,16 @@ func emailMatches(c *gin.Context) {
 	c.Header("Location", fmt.Sprintf("/matching-email-job/%v", jobId))
 	c.JSON(http.StatusOK, gin.H{"message": "emails are being sent"})
 
+}
+
+func getMatchingStats(c *gin.Context) {
+	defer duration(track("getMatchings"))
+	matchings, err := database.GetMatchingStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": matchings})
 }
 
 // getAlbums responds with the list of all albums as JSON.
@@ -417,7 +423,7 @@ func main() {
 	public.POST("/albums", postAlbums)
 
 	protected := router.Group("")
-	protected.Use(middlewares.JwtAuth())
+	//protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
@@ -430,6 +436,7 @@ func main() {
 	protected.DELETE("/users/:id", deleteUser)
 	protected.GET("/tags", getTags)
 	protected.POST("/email-matches", emailMatches)
+	protected.GET("/matchings-stats", getMatchingStats)
 	protected.GET("/links", getLinks)
 	router.Run()
 }

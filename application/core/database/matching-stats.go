@@ -18,16 +18,14 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat) (string, error) {
 	defer session.Close()
 
 	uid, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MERGE (n:MatchingStat {uid: $id}) "+
-			"ON CREATE SET n += {num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
-			"creation_date: $created_at, last_update: datetime({timezone: 'Z'})} "+
+		result, err := tx.Run("CREATE (n:MatchingStat {uid: $id, num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
+			"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})}) "+
 			"RETURN n.uid",
 			map[string]interface{}{
-				"id":         uuid.New().String(),
-				"numgroups":  MatchingStats.NumGroups,
-				"numconvs":   MatchingStats.NumConversations,
-				"numfailed":  MatchingStats.NumFailed,
-				"created_at": time.Now().UTC(),
+				"id":        uuid.New().String(),
+				"numgroups": MatchingStats.NumGroups,
+				"numconvs":  MatchingStats.NumConversations,
+				"numfailed": MatchingStats.NumFailed,
 			})
 
 		if err != nil {
@@ -78,8 +76,6 @@ func GetMatchingStats() ([]entity.MatchingStat, error) {
 		return matchings, nil
 
 	})
-	if err != nil {
-		return []entity.MatchingStat{}, err
-	}
-	return matchings.([]entity.MatchingStat), nil
+
+	return matchings.([]entity.MatchingStat), err
 }

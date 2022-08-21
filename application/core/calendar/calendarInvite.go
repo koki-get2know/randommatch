@@ -137,13 +137,7 @@ func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
 		NumFailed:        numFailed,
 	}
 
-	MatchingId, err := database.CreateMatchingStat(matchingStat)
-
-	if err != nil {
-		return "", err
-	} else {
-		return MatchingId, nil
-	}
+	return database.CreateMatchingStat(matchingStat)
 
 }
 

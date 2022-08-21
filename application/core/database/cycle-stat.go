@@ -15,8 +15,7 @@ func CreateStat(cycle entity.MatchingCycle) (string, error) {
 	defer session.Close()
 
 	uid, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("CREATE (n:Stat {uid: $id}) "+
-			"ON CREATE SET n += {creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
+		result, err := tx.Run("CREATE (n:Stat {uid: $id, creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})}) "+
 			"RETURN n.uid",
 			map[string]interface{}{"id": uuid.New().String()})
 
