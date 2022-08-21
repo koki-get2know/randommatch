@@ -1,23 +1,28 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar mode="md" color="primary">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Users</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="csvFileUpload.click()">
+        <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+        upload
+        <ion-spinner *ngIf="isloading" name="circles"></ion-spinner>
+      </ion-button>
+      <ion-button
+        slot="icon-only"
+        shape="round"
+        size="small"
+        fill="clear"
+        id="info-csv"
+        ><ion-icon name="information-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content fullscreen="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Users</ion-title>
-    </ion-toolbar>
-    <ion-toolbar>
-      <ion-searchbar placeholder="Search"></ion-searchbar>
-    </ion-toolbar>
-  </ion-header>
-
-  <br />
   <div>
     <input
       type="file"
@@ -27,27 +32,28 @@
       #csvFileUpload
       hidden="true"
     />
-    <ion-button shape="round" fill="clear" (click)="csvFileUpload.click()">
-      <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
-      upload users
-    </ion-button>
-    <ion-button slot="icon-only" shape="round" fill="clear" id="info-csv"
-      ><ion-icon name="information-circle-outline"></ion-icon>
-    </ion-button>
+
     <ion-popover
       class="info-csv-popover"
       mode="ios"
       trigger="info-csv"
-      size="auto"
       triggerAction="click"
+      size="auto"
     >
       <ng-template>
+        <!-- <ion-header>
+          <ion-toolbar>
+            <ion-title>Instructions</ion-title>
+          </ion-toolbar>
+        </ion-header-->
         <ion-content class="ion-padding">
-          <blockquote>
-            File to upload must be a CSV. To assign several tags to users
-            separate them by a dash (-). Name and Email are mandatory. See a
-            file sample below
-          </blockquote>
+          <ul class="information">
+            <li>File to upload must be a CSV.</li>
+            <li>Name and Email are mandatory.</li>
+            <li>Separate tags (groups) by a dash (-)</li>
+          </ul>
+
+          <p><strong>File sample</strong></p>
           <code>
             Name,Email,Groups<br />
             John Kuf,john@mail.fr,Mgt-Fce<br />
@@ -60,27 +66,25 @@
   </div>
   <ion-list>
     <ion-item-group>
-      <ion-item-divider sticky>
-        <ion-label> Users list </ion-label>
-        <ion-spinner *ngIf="isloading" name="circles"></ion-spinner>
-      </ion-item-divider>
-      <ion-item-sliding *ngFor="let user of userslist" #slidingItem>
-        <ion-item>
+      <ion-item-sliding
+        *ngFor="let user of userslist; let i=index"
+        #slidingItem
+      >
+        <ion-item class="ion-padding-xs">
           <ion-avatar slot="start">
             <div [innerHTML]="user.avatar"></div>
           </ion-avatar>
-          <ion-label>
-            <h3>{{user.name}}</h3>
-            <p>{{user.departement}}</p>
-          </ion-label>
-          <ion-chip
-            *ngFor="let group of user.groups; let i=index"
-            [color]="ColorsTags[3%(i+1)]"
-            button
-            (click)="tagclick($event)"
-          >
-            <ion-label>{{group}}</ion-label>
-          </ion-chip>
+          <div class="user-tags">
+            <ion-labe class="flex-1"> {{user.name}} </ion-labe>
+            <div>
+              <ion-chip
+                *ngFor="let group of user.groups"
+                [color]="ColorsTags[i%2]"
+                (click)="tagclick($event)"
+                >{{group}}
+              </ion-chip>
+            </div>
+          </div>
         </ion-item>
       </ion-item-sliding>
     </ion-item-group>

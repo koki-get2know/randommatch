@@ -1,7 +1,7 @@
 package matcher
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -290,7 +290,7 @@ func Matcher(g *UserGraph, k uint,
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)
-			fmt.Println(groupB.users)
+			log.Println(groupB.users)
 			if matched != nil {
 				for _, match := range matched.Users {
 					match := match

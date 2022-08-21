@@ -67,13 +67,7 @@ export class UsersService {
       .pipe(map((res) => res.data));
   }
 
-  uploadCsv(formData) {
-    return this.http
-      .post(`${this.urlApi}/matching`, formData, {})
-      .pipe(map((data) => data));
-  }
-
-  uploadUsersFile(fileData: FormData) {
+  getOrganizations(): Observable<string[]> {
     return this.authService
       .acquireTokenSilent({
         scopes: appConstants.scopes,
@@ -82,27 +76,36 @@ export class UsersService {
       })
       .pipe(
         map((authResult) => {
+          let orgs: string[];
           const roles: string[] | undefined = authResult.idTokenClaims["roles"];
           if (roles && roles.length > 0) {
             const prefix = "Org.";
-            const orgs = roles
+            orgs = roles
               .filter((x) => x.startsWith(prefix))
               .map((x) => x.slice(prefix.length));
-            if (orgs.length > 0) {
-              fileData.append("organization", orgs[0]);
-            }
           }
-          return fileData;
-        }),
-        switchMap((formdata) =>
-          this.http
-            .post(`${this.urlApi}/upload-users`, formdata, {
-              reportProgress: true,
-              observe: "response",
-            })
-            .pipe(map((data) => data))
-        )
+          return orgs;
+        })
       );
+  }
+
+  uploadUsersFile(fileData: FormData) {
+    return this.getOrganizations().pipe(
+      map((orgs) => {
+        if (orgs && orgs.length > 0) {
+          fileData.append("organization", orgs[0]);
+        }
+        return fileData;
+      }),
+      switchMap((formdata) =>
+        this.http
+          .post(`${this.urlApi}/upload-users`, formdata, {
+            reportProgress: true,
+            observe: "response",
+          })
+          .pipe(map((data) => data))
+      )
+    );
   }
 
   availabilyofusers(checkurl): Observable<JobResponse> {
@@ -112,15 +115,28 @@ export class UsersService {
   }
 
   getUsersdata(): Observable<User[]> {
-    return this.http.get<UsersRes>(`${this.urlApi}/users`).pipe(
-      map((res) => {
-        if (res.data) {
-          for (const user of res.data) {
-            user.avatar = this.generateAvatarSvg();
-          }
+    return this.getOrganizations().pipe(
+      map((orgs) => {
+        let orga = "";
+        if (orgs && orgs.length > 0) {
+          orga = orgs[0];
         }
-        return res.data;
+        return orga;
       }),
+      switchMap((orga) =>
+        this.http
+          .get<UsersRes>(`${this.urlApi}/users?organization=${orga}`)
+          .pipe(
+            map((res) => {
+              if (res.data) {
+                for (const user of res.data) {
+                  user.avatar = this.generateAvatarSvg();
+                }
+              }
+              return res.data;
+            })
+          )
+      ),
       shareReplay(1)
     );
   }

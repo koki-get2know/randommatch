@@ -3,45 +3,55 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Matching
-    </ion-title>
+    <ion-title>Matching </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-
   <ion-grid>
     <ion-row>
       <form [formGroup]="matchingForm" (submit)="onSubmit()">
         <ion-list lines="none">
           <ion-item>
-            <ion-label position="stacked" color="primary">Matching size</ion-label>
-            <ion-input name="username" formControlName="matchingsize" type="text">
+            <ion-label position="floating" for="matching-size"
+              >Matching size</ion-label
+            >
+            <ion-input
+              id="matching-size"
+              formControlName="matchingsize"
+              type="number"
+            >
             </ion-input>
           </ion-item>
 
           <!--ion-datetime locale="en-GB-u-hc-h12"></ion-datetime-->
-
         </ion-list>
 
         <div class="ion-padding">
-          <ion-button type="submit" [disabled]="!matchingForm.valid || (usersSelected.length < 2)" expand="block">Match Users Randomly</ion-button>
+          <ion-button
+            type="submit"
+            [disabled]="!matchingForm.valid || (usersSelected.length < 2)"
+            >Match Users Randomly</ion-button
+          >
         </div>
       </form>
     </ion-row>
     <ion-row>
-       <ion-col>
+      <ion-col>
         <!-- Searchbar with cancel button always shown -->
         <!--ion-searchbar showCancelButton="always"></ion-searchbar-->
         <ion-list>
           <ion-item-divider sticky>
-            <ion-label>
-              Users list
-            </ion-label>
+            <ion-label> Users list </ion-label>
           </ion-item-divider>
           <ion-item>
             <ion-label>Select All</ion-label>
-            <ion-checkbox slot="start" [(ngModel)]="masterCheck" [indeterminate]="isIndeterminate" (click)="checkMaster($event)"></ion-checkbox>
+            <ion-checkbox
+              slot="start"
+              [(ngModel)]="masterCheck"
+              [indeterminate]="isIndeterminate"
+              (click)="checkMaster($event)"
+            ></ion-checkbox>
           </ion-item>
         </ion-list>
         <ion-list #scheduleList>
@@ -53,14 +63,21 @@
                 </ion-avatar>
                 <ion-label>
                   <h3>{{user.name}}</h3>
-                  <p>
-                    {{user.departement}}
-                  </p>
+                  <p>{{user.departement}}</p>
                 </ion-label>
-                <ion-chip *ngFor="let group of user.groups; let i=index" [color]="ColorsTags[3%(i+1)]" button (click)="tagclick($event)">
+                <ion-chip
+                  *ngFor="let group of user.groups; let i=index"
+                  [color]="ColorsTags[3%(i+1)]"
+                  button
+                  (click)="tagclick($event)"
+                >
                   <ion-label>{{group}}</ion-label>
                 </ion-chip>
-                <ion-checkbox [(ngModel)]="user.isChecked" (click)="checkEvent($event,user)" color="primary"></ion-checkbox>
+                <ion-checkbox
+                  [(ngModel)]="user.isChecked"
+                  (click)="checkEvent($event,user)"
+                  color="primary"
+                ></ion-checkbox>
               </ion-item>
             </ion-item-sliding>
           </ion-item-group>
@@ -71,7 +88,21 @@
           <ion-col size="8">
             <ion-item>
               <ion-label>Select forbidden matches</ion-label>
-              <ionic-selectable #selectComponent headerColor="primary" [(ngModel)]="selected_forbidden_connexion" [items]="usersSelected" itemValueField="id" itemTextField="name" [canSearch]="true" [isMultiple]="true" (onChange)="userChange($event)" searchFailText="No user found! Please select the users before" [canClear]="true" groupValueField="group" groupTextField="departement">
+              <ionic-selectable
+                #selectComponent
+                headerColor="primary"
+                [(ngModel)]="selected_forbidden_connexion"
+                [items]="usersSelected"
+                itemValueField="id"
+                itemTextField="name"
+                [canSearch]="true"
+                [isMultiple]="true"
+                (onChange)="userChange($event)"
+                searchFailText="No user found! Please select the users before"
+                [canClear]="true"
+                groupValueField="group"
+                groupTextField="departement"
+              >
                 <ng-template ionicSelectableCloseButtonTemplate>
                   <ion-icon name="close-circle"></ion-icon>
                 </ng-template>
@@ -79,23 +110,32 @@
                   <ion-footer>
                     <ion-row text-center>
                       <ion-col size="4">
-                        <ion-button fill="clear" (click)="clear1()">Clear</ion-button>
+                        <ion-button fill="clear" (click)="clear1()"
+                          >Clear</ion-button
+                        >
                       </ion-col>
                       <ion-col size="4">
-                        <ion-button fill="clear" (click)="toogleAll()">Check All</ion-button>
+                        <ion-button fill="clear" (click)="toogleAll()"
+                          >Check All</ion-button
+                        >
                       </ion-col>
                       <ion-col size="4">
-                        <ion-button fill="clear" (click)="add()">Add</ion-button>
+                        <ion-button fill="clear" (click)="add()"
+                          >Add</ion-button
+                        >
                       </ion-col>
                     </ion-row>
                   </ion-footer>
                 </ng-template>
               </ionic-selectable>
-
             </ion-item>
           </ion-col>
           <ion-col size="4">
-            <ion-button fill="clear" color="danger" (click)="clearAllconnection()">
+            <ion-button
+              fill="clear"
+              color="danger"
+              (click)="clearAllconnection()"
+            >
               <ion-icon name="trash-bin-outline"></ion-icon>
             </ion-button>
           </ion-col>
@@ -105,32 +145,37 @@
           <ion-row>
             <ion-col>
               <ion-list *ngIf="usersconnexionforbidden.length">
-                <ion-item-group *ngFor="let connexionforbidden of usersconnexionforbidden; let i=index">
+                <ion-item-group
+                  *ngFor="let connexionforbidden of usersconnexionforbidden; let i=index"
+                >
                   <ion-item-divider sticky>
-                    <ion-label>
-                      Forbidden {{i}}
-                    </ion-label>
+                    <ion-label> Forbidden {{i}} </ion-label>
                   </ion-item-divider>
 
                   <ion-item-sliding>
                     <ion-item button>
                       <ion-grid>
                         <ion-row>
-                          <ion-col *ngFor="let user of connexionforbidden; let j=index">
+                          <ion-col
+                            *ngFor="let user of connexionforbidden; let j=index"
+                          >
                             <ion-label>
                               <h3>{{user.name}}</h3>
-                              <p>
-                                {{user.departement}}
-                              </p>
+                              <p>{{user.departement}}</p>
                             </ion-label>
                           </ion-col>
                         </ion-row>
                       </ion-grid>
 
-                      <ion-badge color="primary">{{connexionforbidden.length}}</ion-badge>
+                      <ion-badge color="primary"
+                        >{{connexionforbidden.length}}</ion-badge
+                      >
                     </ion-item>
                     <ion-item-options>
-                      <ion-item-option color="danger" (click)="removeConnection(i)">
+                      <ion-item-option
+                        color="danger"
+                        (click)="removeConnection(i)"
+                      >
                         Remove
                       </ion-item-option>
                     </ion-item-options>
@@ -139,11 +184,8 @@
               </ion-list>
             </ion-col>
           </ion-row>
-
         </ion-grid>
       </ion-col>
     </ion-row>
-
-
   </ion-grid>
 </ion-content>
