@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -14,7 +15,7 @@ var err error
 
 func Driver() (*neo4j.Driver, error) {
 	if driver == nil {
-	//once.Do(func() {
+		//once.Do(func() {
 
 		creds := strings.Split(os.Getenv("NEO4J_AUTH"), "/")
 		if len(creds) < 2 {
@@ -28,7 +29,7 @@ func Driver() (*neo4j.Driver, error) {
 
 		if !ok {
 			if !found {
-				fmt.Println("neither NEO4J_CNX_STRING nor DB_HOST env variable set, defaulting to localhost")
+				log.Println("neither NEO4J_CNX_STRING nor DB_HOST env variable set, defaulting to localhost")
 				dbhost = "localhost"
 			}
 			connectionstring = fmt.Sprintf("bolt://%v:7687", dbhost)
@@ -36,11 +37,11 @@ func Driver() (*neo4j.Driver, error) {
 		dr, err = neo4j.NewDriver(connectionstring, neo4j.BasicAuth(creds[0], creds[1], ""))
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return nil, err
 		}
 		driver = &dr
-	//})
+		//})
 	}
 	return driver, err
 }

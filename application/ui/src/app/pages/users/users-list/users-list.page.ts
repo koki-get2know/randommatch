@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { ToastController } from "@ionic/angular";
 
@@ -23,10 +23,6 @@ export class UsersListPage implements OnInit {
 
   ngOnInit() {
     this.getuserList();
-  }
-
-  tagclick(event: Event) {
-    event.stopPropagation();
   }
 
   uploadCsv(event: Event) {

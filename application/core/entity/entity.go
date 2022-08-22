@@ -1,13 +1,27 @@
 package entity
 
+import "time"
+
 type Tag struct {
-	Name        string `json:"name"`
+	Name string `json:"name"`
 }
 
 type Organization struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+type MatchingCycle struct {
+	Id string
+}
+
+type MatchingStat struct {
+	Id               string
+	NumGroups        int
+	NumConversations int
+	NumFailed        int
+	CreatedAt        time.Time
 }
 
 type User struct {

@@ -3,8 +3,8 @@ package convert
 import (
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"os"
 	"strconv"
@@ -17,7 +17,7 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 	csvReader := csv.NewReader(r)
 	records, err := csvReader.ReadAll()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, err
 	}
 
@@ -92,7 +92,7 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 			user.MultiMatch, err = strconv.ParseBool(record[val])
 		}
 		if err != nil {
-			fmt.Printf("Warning wrong boolean string value passed for user %v, value passed: %v\n", user.Name, user.MultiMatch)
+			log.Printf("Warning wrong boolean string value passed for user %v, value passed: %v\n", user.Name, user.MultiMatch)
 			user.MultiMatch = false
 		}
 
@@ -104,7 +104,7 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 func CsvToUsers(csvFile *multipart.FileHeader) ([]entity.User, error) {
 	openedFile, err := csvFile.Open()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, err
 	}
 	return csvReaderToUsers(openedFile)
@@ -114,21 +114,21 @@ func ConvertRawDataToJson(filepath string) []byte {
 
 	csvFile, err := os.Open(filepath)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return []byte{}
 	}
 	defer csvFile.Close()
 	// Read data
 	users, err := csvReaderToUsers(csvFile)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return []byte{}
 	}
 	// Convert to JSON
 	jsonData, err := json.Marshal(users)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return []byte{}
 	}
 
@@ -141,7 +141,7 @@ func GenerateJsonFile(filename string) {
 
 	jsonFile, err := os.Create("./data.json")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer jsonFile.Close()

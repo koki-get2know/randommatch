@@ -1,0 +1,94 @@
+.slide-container {
+  width: 100%;
+}
+
+.vertical-center {
+  margin-top: calc(50vh - 3.5rem);
+  transform: translateY(-50%);
+}
+
+h3 {
+  text-transform: capitalize;
+  font-weight: 500;
+  font-size: large;
+}
+
+.vhheight {
+  height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 0.5rem;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ion-color-primary);
+  border-radius: 10px;
+}
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ion-color-secondary);
+}
+
+.match-btn {
+  margin-bottom: 2rem;
+}
+.halfvh {
+  height: 35vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.border-bottom {
+  border-bottom: 1px solid var(--ion-color-light);
+}
+
+.matching-size-item {
+  width: 40%;
+  margin: 0 auto;
+}
+
+.slide-title {
+  font-weight: 500;
+}
+
+.user-tags {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.tags {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.no-overflow {
+  overflow: unset;
+}
+
+@media screen and (max-width: 74em) {
+  ion-chip {
+    height: 1.25rem;
+    font-size: 0.75rem;
+  }
+  .ion-padding-xs {
+    padding-top: 0.57rem;
+  }
+  .user-tags {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 0.57rem;
+    align-items: flex-start;
+  }
+  .tags {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .user-tags ion-label {
+    font-size: 1rem;
+  }
+}

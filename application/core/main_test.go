@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/koki/randommatch/handler"
 	"github.com/rs/xid"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,13 +20,13 @@ func SetUpRouter() *gin.Engine {
 
 func TestGetAlbums(t *testing.T) {
 	r := SetUpRouter()
-	r.GET("/albums", getAlbums)
+	r.GET("/albums", handler.GetAlbums)
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", "/albums", nil)
 	r.ServeHTTP(w, req)
 
-	var albums []album
+	var albums []handler.Album
 	json.Unmarshal(w.Body.Bytes(), &albums)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -34,12 +35,12 @@ func TestGetAlbums(t *testing.T) {
 
 func TestGetAlbumByID(t *testing.T) {
 	r := SetUpRouter()
-	r.GET("/albums/:id", getAlbumByID)
+	r.GET("/albums/:id", handler.GetAlbumByID)
 
 	req, _ := http.NewRequest("GET", "/albums/1", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
-	var album album
+	var album handler.Album
 	json.Unmarshal(w.Body.Bytes(), &album)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -58,9 +59,9 @@ func TestGetAlbumByID(t *testing.T) {
 
 func TestPostAlbums(t *testing.T) {
 	r := SetUpRouter()
-	r.POST("/albums", postAlbums)
+	r.POST("/albums", handler.PostAlbums)
 	albumId := xid.New().String()
-	album := album{
+	album := handler.Album{
 		ID:     albumId,
 		Title:  "Cryto is BTC the GOAT",
 		Artist: "The GOAT",

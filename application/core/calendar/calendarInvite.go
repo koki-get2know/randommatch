@@ -3,6 +3,7 @@ package calendar
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/google/uuid"
 	"github.com/koki/randommatch/database"
+	"github.com/koki/randommatch/entity"
 	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
@@ -45,7 +47,7 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	reminder := event.AddAlarm()
 	reminder.SetAction(ics.ActionDisplay)
 	reminder.SetTrigger("-P15M")
-	fmt.Println(cal.Serialize())
+	log.Println(cal.Serialize())
 	filename := "invite.ics"
 	m := gomail.NewMessage()
 
@@ -96,6 +98,7 @@ func SendInvite(matches []matcher.Match) (string, error) {
 			errorschannel <- errors
 			statuschannel <- "Failed"
 		} else {
+			errorschannel <- errors // To be able to have the errors in both cases (empty or not)
 			statuschannel <- "Done"
 		}
 	}()
@@ -103,20 +106,39 @@ func SendInvite(matches []matcher.Match) (string, error) {
 		for {
 			select {
 			case mailJobStatus := <-statuschannel:
-				fmt.Println("received", mailJobStatus)
+				log.Println("received", mailJobStatus)
 				database.UpdateJobStatus(jobId, database.JobStatus(mailJobStatus))
 				if mailJobStatus == "Done" || mailJobStatus == "Failed" {
 					return
 				}
 			case mailErrors := <-errorschannel:
-				fmt.Println("received", mailErrors)
+				log.Println("received", mailErrors)
 				if len(mailErrors) > 0 {
+					database.UpdateJobErrors(jobId, mailErrors)
+				}
+				_, err := saveMatchingInfo(len(matches), len(mailErrors))
+
+				if err != nil {
+					mailErrors = append(mailErrors, err.Error())
 					database.UpdateJobErrors(jobId, mailErrors)
 				}
 			}
 		}
 	}()
 	return jobId, nil
+}
+
+func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
+	numConversations := numGroups - numFailed
+
+	matchingStat := entity.MatchingStat{
+		NumGroups:        numGroups,
+		NumConversations: numConversations,
+		NumFailed:        numFailed,
+	}
+
+	return database.CreateMatchingStat(matchingStat)
+
 }
 
 func sendInvite(match *matcher.Match) error {
@@ -142,7 +164,7 @@ func sendInvite(match *matcher.Match) error {
 	uidsMails, err := database.GetEmailsFromUIds(userIds)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	emails := []string{}
@@ -160,7 +182,7 @@ func sendInvite(match *matcher.Match) error {
 
 	rawMessage, err := generateIcsInvitation(sender, subject, description, emails)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	// Create a new session in the us-east-1 region.
@@ -170,10 +192,10 @@ func sendInvite(match *matcher.Match) error {
 		Credentials: credentials.NewStaticCredentials(os.Getenv("SES_KEY_ID"), os.Getenv("SES_KEY_SECRET"), ""),
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
-	// Create an SES session.
+	//Create an SES session.
 	svc := ses.New(sess)
 
 	// Assemble the email.
@@ -188,20 +210,19 @@ func sendInvite(match *matcher.Match) error {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case ses.ErrCodeMessageRejected:
-				fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
+				log.Println(ses.ErrCodeMessageRejected, aerr.Error())
 			case ses.ErrCodeMailFromDomainNotVerifiedException:
-				fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
+				log.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
 			case ses.ErrCodeConfigurationSetDoesNotExistException:
-				fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
+				log.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
 			default:
-				fmt.Println(aerr.Error())
+				log.Println(aerr.Error())
 			}
 		} else {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 		}
 
 		return err
 	}
-
 	return nil
 }
