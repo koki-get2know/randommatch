@@ -176,10 +176,10 @@ export class MatchingPage implements OnInit {
     }
   }
 
-  async presentToast(message) {
+  async presentToast(message: string, durationInMs: number = 2000) {
     const toast = await this.toastController.create({
       message: message,
-      duration: 2000,
+      duration: durationInMs,
     });
     toast.present();
   }
@@ -201,6 +201,7 @@ export class MatchingPage implements OnInit {
           user.isChecked = false;
         });
         this.usersToRestrictSelected = [];
+        this.presentToast("Connection successfully added", 1000);
       } else {
         this.presentToast("this connection already exists!");
       }
@@ -214,7 +215,18 @@ export class MatchingPage implements OnInit {
   }
 
   prefer() {
-    this.addRestrictedConnection(this.preferredConnections);
+    if (
+      this.usersToRestrictSelected.length !==
+      Number(this.form.matchingSize.value)
+    ) {
+      this.addRestrictedConnection(this.preferredConnections);
+    } else {
+      this.presentToast(
+        `The number of users in the connection must be ${Number(
+          this.form.matchingSize.value
+        )}`
+      );
+    }
   }
 
   removeForbiddenConnection(index) {
