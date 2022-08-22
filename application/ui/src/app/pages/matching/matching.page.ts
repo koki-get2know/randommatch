@@ -67,9 +67,24 @@ export class MatchingPage implements OnInit {
   }
 
   nextSlide() {
-    this.slides.allowSlideNext = true;
-    this.slides.slideNext();
-    this.slides.allowSlideNext = false;
+    if (
+      this.slides.activeIndex === 1 &&
+      this.usersSelected.length < Number(this.form.matchingSize.value)
+    ) {
+      this.presentToast(
+        `Choose at least ${this.form.matchingSize.value} to be consistent with the size chosen previously`
+      );
+    } else if (
+      this.usersSelected.length === Number(this.form.matchingSize.value)
+    ) {
+      this.forbiddenConnections = [];
+      this.preferredConnections = [];
+      this.randommatch();
+    } else {
+      this.slides.allowSlideNext = true;
+      this.slides.slideNext();
+      this.slides.allowSlideNext = false;
+    }
   }
 
   checkMaster() {
@@ -214,7 +229,7 @@ export class MatchingPage implements OnInit {
 
   prefer() {
     if (
-      this.usersToRestrictSelected.length !==
+      this.usersToRestrictSelected.length ===
       Number(this.form.matchingSize.value)
     ) {
       this.addRestrictedConnection(this.preferredConnections);

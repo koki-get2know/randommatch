@@ -33,6 +33,13 @@
               for="matching-size"
               aria-label="&nbsp;users per group"
             ></ion-label>
+            <ion-label
+              *ngIf="!form.matchingSize.valid &&
+              form.matchingSize.dirty"
+              class="validator-error ion-text-wrap"
+            >
+              <p>You must have at least 2 people per group</p>
+            </ion-label>
           </ion-item>
           <ion-button
             class="ion-margin-top"
@@ -47,7 +54,9 @@
     </ng-template>
     <ng-template swiperSlide>
       <div class="slide-container">
-        <h2 class="slide-title">Select the users to match</h2>
+        <h2 class="slide-title">
+          Select the users to match<br />(at least {{form.matchingSize.value}})
+        </h2>
         <ion-button
           class="ion-margin-top"
           color="primary"
