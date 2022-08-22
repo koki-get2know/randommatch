@@ -126,21 +126,20 @@ export class MatchingPage implements OnInit {
     }
     return false;
   }
+
+  private removeUserIdFromArray(collection: User[], id: string) {
+    const index = collection.findIndex((d) => d.id === id);
+    if (index >= 0) {
+      collection.splice(index, 1);
+    }
+  }
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: string) {
-    const index = this.usersSelected.findIndex((d) => d.id === id); //find index in your array
-    const indexInUsers = this.users.findIndex((d) => d.id === id);
-    if (indexInUsers >= 0) {
-      this.users[indexInUsers].isChecked = false;
-    }
-    this.usersSelected.splice(index, 1);
+    this.removeUserIdFromArray(this.usersSelected, id);
   }
 
   removeUserRestriction(id: string) {
-    const index = this.usersToRestrictSelected.findIndex((d) => d.id === id);
-    if (index >= 0) {
-      this.usersToRestrictSelected.splice(index, 1);
-    }
+    this.removeUserIdFromArray(this.usersToRestrictSelected, id);
   }
 
   selectToRestrict(event: PointerEvent, user: User) {
@@ -153,7 +152,6 @@ export class MatchingPage implements OnInit {
 
   checkEvent(event: PointerEvent, user: User) {
     const totalItems = this.users.length;
-    console.log(this.totalSelected);
     if ((event.target as HTMLInputElement).checked === false) {
       this.markUserAsSelected(user);
       this.totalSelected++;
