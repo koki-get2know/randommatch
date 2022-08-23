@@ -65,7 +65,7 @@
           [disabled]="totalSelected < 2"
           >Next<ion-icon slot="end" name="arrow-forward-outline"></ion-icon
         ></ion-button>
-        <ion-item>
+        <ion-item *ngIf="users.length>0">
           <ion-label>Select All</ion-label>
           <ion-checkbox
             slot="start"
@@ -117,7 +117,7 @@
         </ion-button>
         <ion-grid>
           <ion-row class="ion-justify-content-center">
-            <ion-col>
+            <ion-col class="scroll-button-parent">
               <ion-button (click)="forbid()" color="danger" fill="clear">
                 Forbid
                 <ion-icon slot="end" name="thumbs-down-outline"></ion-icon>
@@ -126,9 +126,18 @@
                 Prefer
                 <ion-icon slot="end" name="thumbs-up-outline"></ion-icon>
               </ion-button>
+              <ion-button
+                *ngIf="forbiddenConnections.length>0 || preferredConnections.length>0 "
+                class="scroll-button"
+                (click)="scroll(forbidden)"
+                shape="round"
+                fill="clear"
+                color="primary"
+              >
+                <ion-icon slot="start" name="arrow-down-outline"></ion-icon>
+              </ion-button>
             </ion-col>
           </ion-row>
-
           <ion-row>
             <ion-col size="12" size-md="6" class="vhheight">
               <ion-item
@@ -156,32 +165,30 @@
                 </div>
               </ion-item>
             </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-grid>
+            <ion-col size-md="6">
+              <ion-grid class="grid-connections">
                 <ion-row class="border-bottom halfvh">
                   <ion-col>
-                    <h3>Forbidden connections</h3>
+                    <h3 #forbidden>Forbidden connections</h3>
                     <ion-list *ngIf="forbiddenConnections.length">
-                      <ion-item-group
+                      <ion-item
                         *ngFor="let forbiddenConnection of forbiddenConnections; let i=index"
                       >
-                        <ion-item>
-                          <ion-grid>
-                            <ion-row>
-                              <ion-col *ngFor="let user of forbiddenConnection">
-                                <ion-label> {{user.name}} </ion-label>
-                              </ion-col>
-                            </ion-row>
-                          </ion-grid>
-                          <ion-button
-                            fill="clear"
-                            color="danger"
-                            (click)="removeForbiddenConnection(i)"
-                          >
-                            <ion-icon name="close-outline"></ion-icon>
-                          </ion-button>
-                        </ion-item>
-                      </ion-item-group>
+                        <ion-grid>
+                          <ion-row>
+                            <ion-col *ngFor="let user of forbiddenConnection">
+                              <ion-label> {{user.name}} </ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                        <ion-button
+                          fill="clear"
+                          color="danger"
+                          (click)="removeForbiddenConnection(i)"
+                        >
+                          <ion-icon name="close-outline"></ion-icon>
+                        </ion-button>
+                      </ion-item>
                     </ion-list>
                   </ion-col>
                 </ion-row>
@@ -189,27 +196,25 @@
                   <ion-col>
                     <h3>Preferred connections</h3>
                     <ion-list *ngIf="preferredConnections.length">
-                      <ion-item-group
+                      <ion-item
                         *ngFor="let preferredConnection of preferredConnections; let i=index"
                       >
-                        <ion-item>
-                          <ion-grid>
-                            <ion-row>
-                              <ion-col *ngFor="let user of preferredConnection">
-                                <ion-label> {{user.name}} </ion-label>
-                              </ion-col>
-                            </ion-row>
-                          </ion-grid>
+                        <ion-grid>
+                          <ion-row>
+                            <ion-col *ngFor="let user of preferredConnection">
+                              <ion-label> {{user.name}} </ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
 
-                          <ion-button
-                            fill="clear"
-                            color="danger"
-                            (click)="removePreferredConnection(i)"
-                          >
-                            <ion-icon name="close-outline"></ion-icon>
-                          </ion-button>
-                        </ion-item>
-                      </ion-item-group>
+                        <ion-button
+                          fill="clear"
+                          color="danger"
+                          (click)="removePreferredConnection(i)"
+                        >
+                          <ion-icon name="close-outline"></ion-icon>
+                        </ion-button>
+                      </ion-item>
                     </ion-list>
                   </ion-col>
                 </ion-row>

@@ -81,10 +81,31 @@ export class MatchingPage implements OnInit {
       this.preferredConnections = [];
       this.randommatch();
     } else {
+      //remove connections that are not part of the selected users
+      this.forbiddenConnections = this.forbiddenConnections.filter((users) => {
+        for (const user of users) {
+          if (!this.usersSelected.find((u) => u.id === user.id)) {
+            return false;
+          }
+        }
+        return true;
+      });
+      this.preferredConnections = this.preferredConnections.filter((users) => {
+        for (const user of users) {
+          if (!this.usersSelected.find((u) => u.id === user.id)) {
+            return false;
+          }
+        }
+        return true;
+      });
       this.slides.allowSlideNext = true;
       this.slides.slideNext();
       this.slides.allowSlideNext = false;
     }
+  }
+
+  scroll(el: HTMLElement) {
+    el.scrollIntoView({ behavior: "smooth" });
   }
 
   checkMaster() {
@@ -153,7 +174,7 @@ export class MatchingPage implements OnInit {
     this.removeUserIdFromArray(this.usersSelected, id);
   }
 
-  removeUserRestriction(id: string) {
+  private removeUserRestriction(id: string) {
     this.removeUserIdFromArray(this.usersToRestrictSelected, id);
   }
 
@@ -235,7 +256,7 @@ export class MatchingPage implements OnInit {
       this.addRestrictedConnection(this.preferredConnections);
     } else {
       this.presentToast(
-        `The number of users in the connection must be ${Number(
+        `The number of users in preferred connection must be ${Number(
           this.form.matchingSize.value
         )}`
       );
