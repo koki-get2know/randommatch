@@ -10,11 +10,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dimchansky/utfbom"
 	"github.com/koki/randommatch/entity"
 )
 
 func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
-	csvReader := csv.NewReader(r)
+	csvReader := csv.NewReader(utfbom.SkipOnly(r))
 	records, err := csvReader.ReadAll()
 	if err != nil {
 		log.Println(err)
@@ -117,6 +118,7 @@ func ConvertRawDataToJson(filepath string) []byte {
 		log.Println(err)
 		return []byte{}
 	}
+
 	defer csvFile.Close()
 	// Read data
 	users, err := csvReaderToUsers(csvFile)
