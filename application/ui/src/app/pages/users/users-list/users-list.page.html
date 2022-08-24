@@ -68,28 +68,17 @@
       </ng-template>
     </ion-popover>
   </div>
-  <ion-list>
-    <ion-item-group>
-      <ion-item-sliding
-        *ngFor="let user of userslist; let i=index"
-        #slidingItem
-      >
-        <ion-item class="ion-padding-xs">
-          <ion-avatar slot="start">
-            <div [innerHTML]="user.avatar"></div>
-          </ion-avatar>
-          <div class="user-tags">
-            <ion-label class="no-overflow"> {{user.name}} </ion-label>
-            <div class="tags">
-              <ion-chip
-                *ngFor="let tag of user.groups"
-                [color]="ColorsTags[i%2]"
-                >{{tag}}
-              </ion-chip>
-            </div>
-          </div>
-        </ion-item>
-      </ion-item-sliding>
-    </ion-item-group>
-  </ion-list>
+  <ion-item *ngFor="let user of userslist; let i=index" class="ion-padding-xs">
+    <ion-avatar slot="start">
+      <div [innerHTML]="user.avatar"></div>
+    </ion-avatar>
+    <div class="user-tags">
+      <ion-label class="no-overflow"> {{user.name}} </ion-label>
+      <div class="tags">
+        <ion-chip *ngFor="let tag of user.groups" [color]="ColorsTags[i%2]"
+          >{{tag}}
+        </ion-chip>
+      </div>
+    </div>
+  </ion-item>
 </ion-content>

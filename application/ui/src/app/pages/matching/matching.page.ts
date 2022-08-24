@@ -313,7 +313,6 @@ export class MatchingPage implements OnInit {
       .makematch(matchingRequest)
       .subscribe((matchings: Matching[]) => {
         if (matchings !== null) {
-          console.log(matchings);
           matchings.forEach((match) =>
             match.users.forEach((user) => {
               user.avatar = matchingRequest.users.find(
@@ -321,7 +320,7 @@ export class MatchingPage implements OnInit {
               )?.avatar;
             })
           );
-          this.matchingresult(matchings);
+          this.matchingresult(matchings, matchingRequest);
         } else {
           this.presentToast("NO_MATCHING_GENERATED");
         }
@@ -329,10 +328,11 @@ export class MatchingPage implements OnInit {
   }
 
   // matching result
-  matchingresult(matchings: Matching[]) {
+  matchingresult(matchings: Matching[], matchingRequest: MatchingReq) {
     const navigationExtras: NavigationExtras = {
       state: {
         matchings,
+        matchingRequest,
       },
     };
     this.router.navigate(["/matching-result"], navigationExtras);
