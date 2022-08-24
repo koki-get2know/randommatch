@@ -193,6 +193,7 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 		copier.Copy(&users, &matchA.Users)
 		copier.Copy(gb, groupeB)
 		match := false
+		fmt.Println(gb.users)
 		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
 			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
 
@@ -200,8 +201,7 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 			for _, u := range matchB.Users {
 				u := u
-				find, _ := search(users, u)
-				if !find && Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
+				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
 
 					matchA.Users = append(matchA.Users, u)
 
@@ -213,9 +213,22 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 				gb.RemoveUser(&u)
 			}
 		}
+
 	}
+
 	return matchA
 
+}
+
+func doubleCheck(A []*entity.User, B []*entity.User) ([]*entity.User, []*entity.User) {
+	APrime := []*entity.User{}
+	for _, u1 := range A {
+		u1 := u1
+		if find, _ := Search(B, u1); !find {
+			APrime = append(APrime, u1)
+		}
+	}
+	return APrime, B
 }
 
 func Matcher(g *UserGraph, k uint,
@@ -263,7 +276,7 @@ func Matcher(g *UserGraph, k uint,
 			   - m2 = random choice  users dans B
 			   - check if m1 + m2 can be match
 		*/
-
+		A, B = doubleCheck(A, B)
 		if k < 2 {
 			break
 		}
@@ -283,10 +296,12 @@ func Matcher(g *UserGraph, k uint,
 			break
 		}
 		i := 0
+
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
 
 		for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
+			fmt.Println(groupB.users)
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)

@@ -128,9 +128,9 @@ func TestGenTuple(t *testing.T) {
 
 	A := []entity.User{{Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}, {Id: "4", Name: "tete"}, {Id: "19", Name: "paul"}}
 
-	D := []entity.User{{Id: "1", Name: "tata"}, {Id: "2", Name: "toto"}}
+	D := []entity.User{{Id: "1", Name: "tata"}, {Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}}
 
-	matching := GenerateTuple(users, connections, Basic, forbiddenConnections, 2, A, D)
+	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, D)
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")

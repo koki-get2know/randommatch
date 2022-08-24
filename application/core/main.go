@@ -91,27 +91,6 @@ func generateMatchings(c *gin.Context) {
 
 }
 
-func generateGroupMatchings(c *gin.Context) {
-	defer duration(track("generateGroupMatchings"))
-	var req groupMatchingReq
-
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
-		return
-	}
-	if len(req.Groups) < 2 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
-		return
-	}
-
-	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
-
-		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
-
-	c.JSON(http.StatusCreated, gin.H{"data": tuples})
-
-}
-
 func uploadUsers(c *gin.Context) {
 	defer duration(track("uploadUsers"))
 	var usersFile UsersFile
@@ -167,6 +146,82 @@ func getLinks(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"data": links})
 
 }
+
+func generateGroupMatchings(c *gin.Context) {
+	defer duration(track("generateGroupMatchings"))
+	var req groupMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	if len(req.Groups) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
+		return
+	}
+
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+
+		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
+
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+type tagMatchingReq struct {
+	Size                 uint            `json:"size"`
+	Tags                 []string        `json:"tags"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
+}
+
+func generateTagMatchings(c *gin.Context) {
+	defer duration(track("generateTagMatchings"))
+	var req tagMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	if len(req.Tags) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 tags"})
+		return
+	}
+	group1, _ := database.GetUsersFromTag(req.Tags[0], "koki")
+	group2, _ := database.GetUsersFromTag(req.Tags[1], "koki")
+	fmt.Println(group1)
+	fmt.Println(group2)
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+
+		req.ForbiddenConnections, req.Size, group1, group2)
+
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
+type UserTagReq struct {
+	Tag     string `json:"tag"`
+	OrgaUid string `json:"orguid"`
+}
+
+func getUsersFromTag(c *gin.Context) {
+	defer duration(track("getUserFromTag"))
+	var req UserTagReq
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	fmt.Println(req.Tag)
+	users, err := database.GetUsersFromTag(req.Tag, req.OrgaUid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": users})
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 
 func getUsers(c *gin.Context) {
 	defer duration(track("getUsers"))
@@ -283,7 +338,7 @@ func main() {
 	public.POST("/albums", postAlbums)
 
 	protected := router.Group("")
-	protected.Use(middlewares.JwtAuth())
+	//protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/upload-users", uploadUsers)
@@ -292,5 +347,7 @@ func main() {
 	protected.GET("/users", getUsers)
 	protected.POST("/email-matches", emailMatches)
 	protected.GET("/links", getLinks)
+	protected.POST("/user-by-tag", getUsersFromTag)
+	protected.POST("/tag-matchings", generateTagMatchings)
 	router.Run()
 }

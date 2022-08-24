@@ -253,6 +253,46 @@ func CreateLink(tuples [][]entity.User) error {
 
 	return err
 }
+func GetUsersFromTag(tag string, orgaUid string) ([]entity.User, error) {
+	driver, err := Driver()
+	if err != nil {
+		return []entity.User{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n:User)-[:WORKS_FOR]->(o:Organization{uid: $orguid}) "+
+			"MATCH (n)-[:HAS_TAG]->(Tag{name:$tag})"+
+			"RETURN  n",
+			map[string]interface{}{"tag": tag, "orguid": orgaUid})
+		var users []entity.User
+
+		if err != nil {
+			return users, err
+		}
+		for result.Next() {
+
+			user := result.Record().Values[0].(dbtype.Node).Props
+
+			users = append(users,
+				entity.User{
+					Id:   user["uid"].(string),
+					Name: user["name"].(string),
+				})
+
+		}
+		if result.Err() != nil {
+			return users, result.Err()
+		}
+		return users, nil
+
+	})
+	if err != nil {
+		return []entity.User{}, err
+	}
+	return users.([]entity.User), nil
+}
 
 func GetUsers() ([]entity.User, error) {
 	driver, err := Driver()
