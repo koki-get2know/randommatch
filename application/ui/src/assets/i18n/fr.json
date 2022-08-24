@@ -22,6 +22,7 @@
   "MATCHING": "Matching",
   "QUESTION_GROUP_SIZE": "Quelle est la taille des groupes à former ?",
   "QUESTION_GROUP_MIN_INSTR": "Vous devez avoir au moins 2 personnes par groupe",
+  "PREVIOUS": "RETOUR",
   "NEXT": "SUIVANT",
   "USERS_SELECTION_INSTR": "Sélectionnez les personnes à matcher",
   "AT_LEAST": "au moins",

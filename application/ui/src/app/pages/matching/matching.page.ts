@@ -68,6 +68,11 @@ export class MatchingPage implements OnInit {
     this.slides = swiper;
   }
 
+  prevSlide() {
+    this.slides.allowSlideNext = true;
+    this.slides.slidePrev();
+    this.slides.allowSlideNext = false;
+  }
   nextSlide() {
     if (
       this.slides.activeIndex === 1 &&

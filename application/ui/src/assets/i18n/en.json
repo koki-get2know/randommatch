@@ -22,6 +22,7 @@
   "MATCHING": "Matching",
   "QUESTION_GROUP_SIZE": "What is the size of the groups you want to form?",
   "QUESTION_GROUP_MIN_INSTR": "You must have at least 2 people per group",
+  "PREVIOUS": "BACK",
   "NEXT": "NEXT",
   "USERS_SELECTION_INSTR": "Select the users to match",
   "AT_LEAST": "at least",

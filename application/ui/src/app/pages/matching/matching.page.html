@@ -61,6 +61,15 @@
         </h2>
         <ion-button
           class="ion-margin-top"
+          color="secondary"
+          fill="clear"
+          (click)="prevSlide()"
+        >
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          {{ "PREVIOUS" | translate}}
+        </ion-button>
+        <ion-button
+          class="ion-margin-top"
           color="primary"
           fill="clear"
           (click)="nextSlide()"
@@ -111,6 +120,15 @@
         <h2 class="slide-title">
           {{"QUESTION_RESTRICTED_CONNECTION" | translate }}
         </h2>
+        <ion-button
+          class="ion-margin-top match-btn"
+          color="secondary"
+          fill="clear"
+          (click)="prevSlide()"
+        >
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          {{ "PREVIOUS" | translate}}
+        </ion-button>
         <ion-button
           class="ion-margin-top match-btn"
           color="primary"
