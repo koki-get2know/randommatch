@@ -9,8 +9,13 @@
   width: 100%;
 }
 
-.flex-1 {
-  flex: 1;
+.tags {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.no-overflow {
+  overflow: unset;
 }
 
 .information {
@@ -33,6 +38,11 @@
     justify-content: center;
     padding-bottom: 0.57rem;
     align-items: flex-start;
+  }
+  .tags {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
   .user-tags ion-label {
     font-size: 1rem;

@@ -25,10 +25,6 @@ export class UsersListPage implements OnInit {
     this.getuserList();
   }
 
-  tagclick(event: Event) {
-    event.stopPropagation();
-  }
-
   uploadCsv(event: Event) {
     this.isloading = true;
     for (const file of event.target["files"]) {

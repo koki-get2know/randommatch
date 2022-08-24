@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/google/uuid"
 	"github.com/koki/randommatch/database"
+	"github.com/koki/randommatch/entity"
 	"github.com/koki/randommatch/matcher"
 	"gopkg.in/gomail.v2"
 )
@@ -97,6 +98,7 @@ func SendInvite(matches []matcher.Match) (string, error) {
 			errorschannel <- errors
 			statuschannel <- "Failed"
 		} else {
+			errorschannel <- errors // To be able to have the errors in both cases (empty or not)
 			statuschannel <- "Done"
 		}
 	}()
@@ -114,10 +116,29 @@ func SendInvite(matches []matcher.Match) (string, error) {
 				if len(mailErrors) > 0 {
 					database.UpdateJobErrors(jobId, mailErrors)
 				}
+				_, err := saveMatchingInfo(len(matches), len(mailErrors))
+
+				if err != nil {
+					mailErrors = append(mailErrors, err.Error())
+					database.UpdateJobErrors(jobId, mailErrors)
+				}
 			}
 		}
 	}()
 	return jobId, nil
+}
+
+func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
+	numConversations := numGroups - numFailed
+
+	matchingStat := entity.MatchingStat{
+		NumGroups:        numGroups,
+		NumConversations: numConversations,
+		NumFailed:        numFailed,
+	}
+
+	return database.CreateMatchingStat(matchingStat)
+
 }
 
 func sendInvite(match *matcher.Match) error {
@@ -174,7 +195,7 @@ func sendInvite(match *matcher.Match) error {
 		log.Println(err)
 		return err
 	}
-	// Create an SES session.
+	//Create an SES session.
 	svc := ses.New(sess)
 
 	// Assemble the email.
@@ -205,4 +226,3 @@ func sendInvite(match *matcher.Match) error {
 	}
 	return nil
 }
-

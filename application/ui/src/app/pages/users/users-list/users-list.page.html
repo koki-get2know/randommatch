@@ -1,13 +1,13 @@
-<ion-header>
+<ion-header no-border>
   <ion-toolbar mode="md" color="primary">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Users</ion-title>
+    <ion-title>{{"USERS" | translate}}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="csvFileUpload.click()">
         <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
-        upload
+        {{"UPLOAD" | translate}}
         <ion-spinner *ngIf="isloading" name="circles"></ion-spinner>
       </ion-button>
       <ion-button
@@ -41,19 +41,23 @@
       size="auto"
     >
       <ng-template>
-        <!-- <ion-header>
-          <ion-toolbar>
-            <ion-title>Instructions</ion-title>
-          </ion-toolbar>
-        </ion-header-->
         <ion-content class="ion-padding">
           <ul class="information">
-            <li>File to upload must be a CSV.</li>
-            <li>Name and Email are mandatory.</li>
-            <li>Separate tags (groups) by a dash (-)</li>
+            <li>
+              {{"INSTRUCTION_FILE_TYPE" | translate}}File to upload must be a
+              CSV.
+            </li>
+            <li>
+              {{"INSTRUCTION_FILE_MANDATORY_PARAMETERS" | translate}}Name and
+              Email are mandatory.
+            </li>
+            <li>
+              {{"INSTRUCTION_FILE_MULTI_TAGS" | translate}}Separate tags
+              (groups) by a dash (-)
+            </li>
           </ul>
 
-          <p><strong>File sample</strong></p>
+          <p><strong>{{ "FILE_SAMPLE" | translate}}</strong></p>
           <code>
             Name,Email,Groups<br />
             John Kuf,john@mail.fr,Mgt-Fce<br />
@@ -75,13 +79,12 @@
             <div [innerHTML]="user.avatar"></div>
           </ion-avatar>
           <div class="user-tags">
-            <ion-labe class="flex-1"> {{user.name}} </ion-labe>
-            <div>
+            <ion-label class="no-overflow"> {{user.name}} </ion-label>
+            <div class="tags">
               <ion-chip
-                *ngFor="let group of user.groups"
+                *ngFor="let tag of user.groups"
                 [color]="ColorsTags[i%2]"
-                (click)="tagclick($event)"
-                >{{group}}
+                >{{tag}}
               </ion-chip>
             </div>
           </div>
