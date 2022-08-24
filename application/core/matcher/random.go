@@ -335,7 +335,7 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 	case Basic:
 		graph := UsersToGraph(users, connections)
 		graph.String()
-		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
+		tuples = Matcher(graph, size, []Constraint{Unique, ForbiddenConnections}, Basic,
 			forbiddenConnections, []*entity.User{}, []*entity.User{},
 			[]Constraint{}, []Constraint{})
 	case Group:
