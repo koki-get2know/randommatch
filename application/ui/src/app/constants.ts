@@ -3,4 +3,4 @@ export const appConstants = {
   scopes: ["user.read", "openid"],
 };
 
-export const ColorsTags = ["twitter", "instagram", "dark"];
+export const ColorsTags = ["primary", "secondary", "dark"];

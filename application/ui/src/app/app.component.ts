@@ -30,6 +30,7 @@ import {
 import { filter, takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { environment } from "../environments/environment";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: "app-root",
@@ -40,23 +41,24 @@ import { environment } from "../environments/environment";
 export class AppComponent implements OnInit, OnDestroy {
   appPages = [
     {
-      title: "Users",
+      title: "USERS",
       url: "/users-list",
       icon: "people",
     },
     {
-      title: "New Match",
+      title: "NEW_MATCH",
       url: "matching",
       icon: "calendar",
     },
     {
-      title: "New Group Match",
+      title: "NEW_GROUP_MATCH",
       url: "matching-group",
       icon: "calendar",
     },
   ];
   loggedIn = false;
   dark = false;
+  isFrench = false;
   isIframe = false;
   private readonly _destroying$ = new Subject<void>();
 
@@ -69,7 +71,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private toastCtrl: ToastController,
     @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
     private broadcastService: MsalBroadcastService,
-    private authService: MsalService
+    private authService: MsalService,
+    private translate: TranslateService
   ) {
     this.initializeApp();
   }
@@ -96,13 +99,16 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     this.swUpdate.versionUpdates.subscribe(async (res) => {
+      const [text, message]: string[] = await this.translate
+        .get(["RELOAD", "UPDATE_AVAILABLE"])
+        .toPromise();
       const toast = await this.toastCtrl.create({
-        message: "Update available!",
+        message: message,
         position: "bottom",
         buttons: [
           {
             role: "cancel",
-            text: "Reload",
+            text: text,
           },
         ],
       });
@@ -122,9 +128,28 @@ export class AppComponent implements OnInit, OnDestroy {
         StatusBar.hide();
         SplashScreen.hide();
       }
+      this.translate.setDefaultLang("en");
+
+      if (window.Intl && typeof window.Intl === "object") {
+        const lang = navigator.language.substring(0, 2);
+        this.isFrench = lang === "fr";
+        this.translate.use(lang);
+      } else {
+        this.translate.use("en");
+        this.isFrench = false;
+      }
     });
   }
 
+  changeLanguage() {
+    if (this.isFrench) {
+      this.translate.setDefaultLang("en");
+      this.translate.use("fr");
+    } else {
+      this.translate.setDefaultLang("en");
+      this.translate.use("en");
+    }
+  }
   login() {
     if (this.msalGuardConfig.authRequest) {
       this.authService.loginRedirect({

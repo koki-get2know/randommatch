@@ -9,6 +9,7 @@ import { MatchingPageRoutingModule } from "./matching-routing.module";
 import { MatchingPage } from "./matching.page";
 import { IonicSelectableModule } from "ionic-selectable";
 import { SwiperModule } from "swiper/angular";
+import { SharedModule } from "../../shared/shared.module";
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import { SwiperModule } from "swiper/angular";
     MatchingPageRoutingModule,
     IonicSelectableModule,
     SwiperModule,
+    SharedModule,
   ],
   declarations: [MatchingPage],
 })

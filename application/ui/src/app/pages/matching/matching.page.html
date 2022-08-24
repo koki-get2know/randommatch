@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Matching</ion-title>
+    <ion-title>{{"MATCHING" | translate}}</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -16,9 +16,7 @@
   >
     <ng-template swiperSlide>
       <div class="slide-container vertical-center">
-        <h2 class="slide-title">
-          What is the size of the groups you want to form?
-        </h2>
+        <h2 class="slide-title">{{"QUESTION_GROUP_SIZE" | translate}}</h2>
         <form [formGroup]="matchingForm" (submit)="nextSlide()">
           <ion-item class="ion-text-center matching-size-item">
             <ion-input
@@ -38,7 +36,7 @@
               form.matchingSize.dirty"
               class="validator-error ion-text-wrap"
             >
-              <p>You must have at least 2 people per group</p>
+              <p>{{ "QUESTION_GROUP_MIN_INSTR" | translate}}</p>
             </ion-label>
           </ion-item>
           <ion-button
@@ -47,7 +45,10 @@
             color="primary"
             fill="clear"
             [disabled]="!matchingForm.valid"
-            >Next<ion-icon slot="end" name="arrow-forward-outline"></ion-icon
+            >{{ "NEXT" | translate}}<ion-icon
+              slot="end"
+              name="arrow-forward-outline"
+            ></ion-icon
           ></ion-button>
         </form>
       </div>
@@ -55,7 +56,8 @@
     <ng-template swiperSlide>
       <div class="slide-container">
         <h2 class="slide-title">
-          Select the users to match<br />(at least {{form.matchingSize.value}})
+          {{"USERS_SELECTION_INSTR" | translate }}<br />
+          ({{ "AT_LEAST"| translate }} {{form.matchingSize.value}})
         </h2>
         <ion-button
           class="ion-margin-top"
@@ -63,10 +65,13 @@
           fill="clear"
           (click)="nextSlide()"
           [disabled]="totalSelected < 2"
-          >Next<ion-icon slot="end" name="arrow-forward-outline"></ion-icon
+          >{{ "NEXT" | translate}}<ion-icon
+            slot="end"
+            name="arrow-forward-outline"
+          ></ion-icon
         ></ion-button>
         <ion-item *ngIf="users.length>0">
-          <ion-label>Select All</ion-label>
+          <ion-label>{{ "SELECT_ALL" | translate }}</ion-label>
           <ion-checkbox
             slot="start"
             [(ngModel)]="masterCheck"
@@ -104,7 +109,7 @@
     <ng-template swiperSlide>
       <div class="slide-container">
         <h2 class="slide-title">
-          Are there any users you prefer or do not want to match (optional)?
+          {{"QUESTION_RESTRICTED_CONNECTION" | translate }}
         </h2>
         <ion-button
           class="ion-margin-top match-btn"
@@ -112,18 +117,18 @@
           (click)="randommatch()"
           [disabled]="usersSelected.length < 2"
         >
-          Match
+          {{ "MATCH" | translate}}
           <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
         </ion-button>
         <ion-grid>
           <ion-row class="ion-justify-content-center">
             <ion-col class="scroll-button-parent">
               <ion-button (click)="forbid()" color="danger" fill="clear">
-                Forbid
+                {{ "FORBID" | translate}}
                 <ion-icon slot="end" name="thumbs-down-outline"></ion-icon>
               </ion-button>
               <ion-button (click)="prefer()" color="success" fill="clear">
-                Prefer
+                {{ "PREFER" | translate}}
                 <ion-icon slot="end" name="thumbs-up-outline"></ion-icon>
               </ion-button>
               <ion-button
@@ -169,7 +174,7 @@
               <ion-grid class="grid-connections">
                 <ion-row class="border-bottom halfvh">
                   <ion-col>
-                    <h3 #forbidden>Forbidden connections</h3>
+                    <h3 #forbidden>{{"FORBIDDEN_CONNECTIONS" | translate}}</h3>
                     <ion-list *ngIf="forbiddenConnections.length">
                       <ion-item
                         *ngFor="let forbiddenConnection of forbiddenConnections; let i=index"
@@ -194,7 +199,7 @@
                 </ion-row>
                 <ion-row class="halfvh">
                   <ion-col>
-                    <h3>Preferred connections</h3>
+                    <h3>{{"PREFERRED_CONNECTIONS" | translate}}</h3>
                     <ion-list *ngIf="preferredConnections.length">
                       <ion-item
                         *ngFor="let preferredConnection of preferredConnections; let i=index"

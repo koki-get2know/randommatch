@@ -10,6 +10,7 @@ import { NavController, ToastController } from "@ionic/angular";
 import { NavigationExtras, Router } from "@angular/router";
 import { ColorsTags } from "../../constants";
 import SwiperCore, { Pagination, Swiper } from "swiper";
+import { TranslateService } from "@ngx-translate/core";
 
 SwiperCore.use([Pagination]);
 
@@ -40,7 +41,8 @@ export class MatchingPage implements OnInit {
     private matchService: UsersService,
     public navCtrl: NavController,
     private router: Router,
-    public toastController: ToastController
+    public toastController: ToastController,
+    private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -71,9 +73,9 @@ export class MatchingPage implements OnInit {
       this.slides.activeIndex === 1 &&
       this.usersSelected.length < Number(this.form.matchingSize.value)
     ) {
-      this.presentToast(
-        `Choose at least ${this.form.matchingSize.value} to be consistent with the size chosen previously`
-      );
+      this.presentToast("SELECTION_SIZE_CONSISTENCY_INSTR", {
+        value: this.form.matchingSize.value,
+      });
     } else if (
       this.usersSelected.length === Number(this.form.matchingSize.value)
     ) {
@@ -210,9 +212,16 @@ export class MatchingPage implements OnInit {
     }
   }
 
-  async presentToast(message: string, durationInMs: number = 2000) {
+  async presentToast(
+    message: string,
+    params?: Object,
+    durationInMs: number = 2000
+  ) {
+    const translatedMessage: string = await this.translate
+      .get(message, params)
+      .toPromise();
     const toast = await this.toastController.create({
-      message: message,
+      message: translatedMessage,
       duration: durationInMs,
     });
     toast.present();
@@ -235,12 +244,12 @@ export class MatchingPage implements OnInit {
           user.isChecked = false;
         });
         this.usersToRestrictSelected = [];
-        this.presentToast("Connection successfully added", 1000);
+        this.presentToast("CONNECTION_ADDED", {}, 1000);
       } else {
-        this.presentToast("this connection already exists!");
+        this.presentToast("CONNECTION_ALREADY_EXISTS");
       }
     } else {
-      this.presentToast("Please select more than one user!");
+      this.presentToast("SELECT_MORE_THAN_ONE_USER");
     }
   }
 
@@ -255,11 +264,9 @@ export class MatchingPage implements OnInit {
     ) {
       this.addRestrictedConnection(this.preferredConnections);
     } else {
-      this.presentToast(
-        `The number of users in preferred connection must be ${Number(
-          this.form.matchingSize.value
-        )}`
-      );
+      this.presentToast("MINIMUM_NUM_IN_PREFERRED_CONNECTION", {
+        value: this.form.matchingSize.value,
+      });
     }
   }
 
@@ -273,11 +280,11 @@ export class MatchingPage implements OnInit {
 
   randommatch() {
     if (Number(this.form.matchingSize.value) < 2) {
-      this.presentToast("Matching size should be at least 2");
+      this.presentToast("QUESTION_GROUP_MIN_INSTR");
       return;
     }
     if (this.usersSelected.length < Number(this.form.matchingSize.value)) {
-      this.presentToast("Users selected not consistent with matching size");
+      this.presentToast("SELECTION_INCONSISTENT_WITH_SIZE");
       return;
     }
     const users: User[] = [];
@@ -316,7 +323,7 @@ export class MatchingPage implements OnInit {
           );
           this.matchingresult(matchings);
         } else {
-          this.presentToast("No matchings generated!");
+          this.presentToast("NO_MATCHING_GENERATED");
         }
       });
   }
