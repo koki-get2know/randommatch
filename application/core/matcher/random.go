@@ -1,8 +1,6 @@
 package matcher
 
 import (
-	"fmt"
-
 	"log"
 
 	"math/rand"
@@ -196,7 +194,6 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 		copier.Copy(&users, &matchA.Users)
 		copier.Copy(gb, groupeB)
 		match := false
-		fmt.Println(gb.users)
 		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
 			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
 
@@ -304,7 +301,6 @@ func Matcher(g *UserGraph, k uint,
 		groupB := g.Subgraph(B)
 
 		for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
-			fmt.Println(groupB.users)
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)
