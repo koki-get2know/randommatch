@@ -206,10 +206,14 @@
                         </ion-grid>
                         <ion-button
                           fill="clear"
+                          shape="round"
                           color="danger"
                           (click)="removeForbiddenConnection(i)"
                         >
-                          <ion-icon name="close-outline"></ion-icon>
+                          <ion-icon
+                            slot="icon-only"
+                            name="close-outline"
+                          ></ion-icon>
                         </ion-button>
                       </ion-item>
                     </ion-list>
@@ -233,9 +237,13 @@
                         <ion-button
                           fill="clear"
                           color="danger"
+                          shape="round"
                           (click)="removePreferredConnection(i)"
                         >
-                          <ion-icon name="close-outline"></ion-icon>
+                          <ion-icon
+                            slot="icon-only"
+                            name="close-outline"
+                          ></ion-icon>
                         </ion-button>
                       </ion-item>
                     </ion-list>

@@ -40,5 +40,14 @@
   "SELECTION_INCONSISTENT_WITH_SIZE": "Le nombre de personnes sélectionnées n'est pas conforme au nombre de personne par groupe",
   "SELECTION_SIZE_CONSISTENCY_INSTR": "Choisissez au moins {{value}} personnes pour être conforme à la taille de groupe précédemment définie",
   "NO_MATCHING_GENERATED": "Aucun match généré!",
-  "MINIMUM_NUM_IN_PREFERRED_CONNECTION": "Les connexions préférentielles doivent avoir {{value}} personnes"
+  "MINIMUM_NUM_IN_PREFERRED_CONNECTION": "Les connexions préférentielles doivent avoir {{value}} personnes",
+  "SELECT_PEOPLE": "Sélectionner les personnes",
+  "NO_PEOPLE_FOUND": "Aucune personne trouvée",
+  "ADD_TO_GROUP": "Ajouter au groupe",
+  "EDIT": "Éditer",
+  "GROUP": "Groupe",
+  "CHECK_ALL": "Tout cocher",
+  "UNCHECK_ALL": "Tout décocher",
+  "GROUP_MATCH_INSTR": "Créer vos groupes",
+  "CREATE_GROUP": "Créer groupe"
 }
