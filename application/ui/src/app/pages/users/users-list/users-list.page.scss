@@ -1,0 +1,50 @@
+.info-csv-popover {
+  --min-width: 20rem;
+}
+
+.user-tags {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.tags {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.no-overflow {
+  overflow: unset;
+}
+
+.information {
+  margin-bottom: 2rem;
+  list-style: none;
+  padding: 0;
+}
+
+@media screen and (max-width: 33.75em) {
+  ion-chip {
+    height: 1.25rem;
+    font-size: 0.75rem;
+  }
+  .ion-padding-xs {
+    padding-top: 0.57rem;
+  }
+  .user-tags {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 0.57rem;
+    align-items: flex-start;
+  }
+  .tags {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .user-tags ion-label {
+    font-size: 1rem;
+  }
+}

@@ -2,6 +2,9 @@ package matcher
 
 import (
 	"fmt"
+
+	"log"
+
 	"math/rand"
 	"strconv"
 	"time"
@@ -90,8 +93,8 @@ constraintloop:
 			case ForbiddenConnections:
 				for _, usersNotToMatch := range forbiddenConnections {
 					if len(usersNotToMatch) > 0 {
-						if find1, _ := search(usersNotToMatch, *n); find1 {
-							if find2, _ := search(usersNotToMatch, user); find2 {
+						if find1, _ := n.UserIn(usersNotToMatch); find1 {
+							if find2, _ := user.UserIn(usersNotToMatch); find2 {
 								ok = false
 								break constraintloop
 							}
@@ -305,7 +308,9 @@ func Matcher(g *UserGraph, k uint,
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)
-			fmt.Println(groupB.users)
+
+			log.Println(groupB.users)
+
 			if matched != nil {
 				for _, match := range matched.Users {
 					match := match
@@ -350,7 +355,7 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 	case Basic:
 		graph := UsersToGraph(users, connections)
 		graph.String()
-		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
+		tuples = Matcher(graph, size, []Constraint{Unique, ForbiddenConnections}, Basic,
 			forbiddenConnections, []*entity.User{}, []*entity.User{},
 			[]Constraint{}, []Constraint{})
 	case Group:

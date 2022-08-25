@@ -1,105 +1,205 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { UsersService, MatchingReq, User, Matching } from '../../services/users.service';
-import { NavController, ToastController } from '@ionic/angular';
-import { NavigationExtras, Router } from '@angular/router';
-import { IonicSelectableComponent } from 'ionic-selectable';
-import { ColorsTags } from '../../constants';
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, Validators, FormGroup } from "@angular/forms";
+import {
+  UsersService,
+  MatchingReq,
+  User,
+  Matching,
+} from "../../services/users.service";
+import { NavController, ToastController } from "@ionic/angular";
+import { NavigationExtras, Router } from "@angular/router";
+import { ColorsTags } from "../../constants";
+import SwiperCore, { Pagination, Swiper } from "swiper";
 
-@Component( {
-  selector: 'app-matching',
-  templateUrl: './matching.page.html',
-  styleUrls: ['./matching.page.scss'],
-} )
+SwiperCore.use([Pagination]);
 
+@Component({
+  selector: "app-matching",
+  templateUrl: "./matching.page.html",
+  styleUrls: ["./matching.page.scss"],
+})
 export class MatchingPage implements OnInit {
-  
   matchingForm: FormGroup;
-  checked: boolean;
-  usersgroups: User[] = [];
+  totalSelected = 0;
+  users: User[] = [];
   ColorsTags = ColorsTags;
   usersSelected: User[] = [];
+  usersToRestrictSelected: User[] = [];
 
-  selected_forbidden_connexion: [];
-  userstoforbidden =[];
-  usersconnexionforbidden: User[][] = [];
-  isIndeterminate:boolean;
-  masterCheck:boolean;
+  forbiddenConnections: User[][] = [];
+  preferredConnections: User[][] = [];
+
+  isIndeterminate: boolean;
+  masterCheck: boolean;
   checkBoxList: any;
-  // we use it in order to toggle all item
-  toogle = true;
-  
 
-  @ViewChild('selectComponent') selectComponent:IonicSelectableComponent
-  constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController, private router: Router,
-    public toastController: ToastController) { 
-    
-  }
+  private slides: Swiper;
 
-  ngOnInit () {
-    this.matchService.getUsersdata().subscribe(users => {
-      this.usersgroups = users;
+  constructor(
+    private formBuilder: FormBuilder,
+    private matchService: UsersService,
+    public navCtrl: NavController,
+    private router: Router,
+    public toastController: ToastController
+  ) {}
+
+  ngOnInit() {
+    this.matchService.getUsersdata().subscribe((users) => {
+      this.users = users;
     });
     this.initForm();
   }
 
   initForm() {
     this.matchingForm = this.formBuilder.group({
-      matchingsize: ['', Validators.required],
+      matchingSize: [
+        "",
+        Validators.compose([Validators.required, Validators.min(2)]),
+      ],
     });
   }
+  get form() {
+    return this.matchingForm.controls;
+  }
 
-  checkMaster ( event ) {
+  setSwiperInstance(swiper: Swiper) {
+    this.slides = swiper;
+  }
+
+  nextSlide() {
+    if (
+      this.slides.activeIndex === 1 &&
+      this.usersSelected.length < Number(this.form.matchingSize.value)
+    ) {
+      this.presentToast(
+        `Choose at least ${this.form.matchingSize.value} to be consistent with the size chosen previously`
+      );
+    } else if (
+      this.usersSelected.length === Number(this.form.matchingSize.value)
+    ) {
+      this.forbiddenConnections = [];
+      this.preferredConnections = [];
+      this.randommatch();
+    } else {
+      //remove connections that are not part of the selected users
+      this.forbiddenConnections = this.forbiddenConnections.filter((users) => {
+        for (const user of users) {
+          if (!this.usersSelected.find((u) => u.id === user.id)) {
+            return false;
+          }
+        }
+        return true;
+      });
+      this.preferredConnections = this.preferredConnections.filter((users) => {
+        for (const user of users) {
+          if (!this.usersSelected.find((u) => u.id === user.id)) {
+            return false;
+          }
+        }
+        return true;
+      });
+      this.slides.allowSlideNext = true;
+      this.slides.slideNext();
+      this.slides.allowSlideNext = false;
+    }
+  }
+
+  scroll(el: HTMLElement) {
+    el.scrollIntoView({ behavior: "smooth" });
+  }
+
+  checkMaster() {
     this.usersSelected = [];
-    setTimeout( () => {
-      if ( this.masterCheck ) {
-        this.usersgroups.forEach(user => {
-        user.isChecked = this.masterCheck;
-        this.usersSelected.push( user );
+    setTimeout(() => {
+      if (this.masterCheck) {
+        this.users.forEach((user) => {
+          user.isChecked = this.masterCheck;
+          const copy = { ...user };
+          copy.isChecked = false;
+          this.usersSelected.push(copy);
         });
-      }
-      else {
-        this.usersgroups.forEach(user => {
-        user.isChecked = this.masterCheck;
-        this.onRemoveusersSelected( user.id );
+        this.totalSelected = this.usersSelected.length;
+      } else {
+        this.users.forEach((user) => {
+          user.isChecked = this.masterCheck;
+          this.onRemoveusersSelected(user.id);
         });
+        this.totalSelected = 0;
       }
     });
   }
 
-  selectUsers(event: PointerEvent, user: User) {
-    if ((event.target as HTMLInputElement).checked === false ) {
-      this.usersSelected.push( user );
-    }
-    else {
-      this.onRemoveusersSelected( user.id );
-    }
+  private addCopyInarray(users: User[], user: User) {
+    const copy = { ...user };
+    copy.isChecked = false;
+    users.push(copy);
+  }
+  private markUserAsSelected(user: User) {
+    this.addCopyInarray(this.usersSelected, user);
   }
 
+  private markUserAsRestricted(user: User) {
+    this.addCopyInarray(this.usersToRestrictSelected, user);
+  }
+
+  private connectionAlreadyExists(
+    connection: User[],
+    connections: User[][]
+  ): boolean {
+    let i = 0;
+    while (i < connections.length) {
+      let element = connections[i];
+      if (element.length === connection.length) {
+        const diffUser = this.matchService.compareconnection(
+          element,
+          connection
+        );
+        if (diffUser.length === 0) {
+          return true;
+        }
+      }
+      i++;
+    }
+    return false;
+  }
+
+  private removeUserIdFromArray(collection: User[], id: string) {
+    const index = collection.findIndex((d) => d.id === id);
+    if (index >= 0) {
+      collection.splice(index, 1);
+    }
+  }
   // when user is unchecked, it should be remove
   onRemoveusersSelected(id: string) {
-    const index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
-    this.usersSelected.splice(index, 1);
+    this.removeUserIdFromArray(this.usersSelected, id);
   }
-  
+
+  private removeUserRestriction(id: string) {
+    this.removeUserIdFromArray(this.usersToRestrictSelected, id);
+  }
+
+  selectToRestrict(event: PointerEvent, user: User) {
+    if ((event.target as HTMLInputElement).checked === false) {
+      this.markUserAsRestricted(user);
+    } else {
+      this.removeUserRestriction(user.id);
+    }
+  }
+
   checkEvent(event: PointerEvent, user: User) {
-    const totalItems = this.usersgroups.length;
-    let checked = 0;
-    
-    if ((event.target as HTMLInputElement).checked === false ) {
-      this.usersSelected.push( user );
-      checked++;
+    const totalItems = this.users.length;
+    if ((event.target as HTMLInputElement).checked === false) {
+      this.markUserAsSelected(user);
+      this.totalSelected++;
+    } else {
+      this.onRemoveusersSelected(user.id);
+      this.totalSelected--;
     }
-    else {
-      this.onRemoveusersSelected( user.id );
-      checked--;
-    }
-    if (checked > 0 && checked < totalItems) {
+    if (this.totalSelected > 0 && this.totalSelected < totalItems) {
       //If even one item is checked but not all
       this.isIndeterminate = true;
       this.masterCheck = false;
-    } else if (checked === totalItems) {
+    } else if (this.totalSelected === totalItems) {
       //If all are checked
       this.masterCheck = true;
       this.isIndeterminate = false;
@@ -110,129 +210,114 @@ export class MatchingPage implements OnInit {
     }
   }
 
-  async presentToast(message) {
+  async presentToast(message: string, durationInMs: number = 2000) {
     const toast = await this.toastController.create({
       message: message,
-      duration: 2000
+      duration: durationInMs,
     });
     toast.present();
   }
 
-  userChange(event: {
-    component: IonicSelectableComponent,
-    value: any} ) {
-    // just add if the list in not empty
-    if ( this.selected_forbidden_connexion.length > 1 ) {
-      if ( this.usersconnexionforbidden.length === 0 ) {
-        this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
-      }
-      else {
-        if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
-          this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
-        }
-        else {
-          this.presentToast("this connection already exists!");
-        }
+  private addRestrictedConnection(connections: User[][]) {
+    if (this.usersToRestrictSelected.length > 1) {
+      if (
+        !this.connectionAlreadyExists(
+          this.usersToRestrictSelected,
+          this.preferredConnections
+        ) &&
+        !this.connectionAlreadyExists(
+          this.usersToRestrictSelected,
+          this.forbiddenConnections
+        )
+      ) {
+        connections.push(this.usersToRestrictSelected);
+        this.usersSelected.forEach((user) => {
+          user.isChecked = false;
+        });
+        this.usersToRestrictSelected = [];
+        this.presentToast("Connection successfully added", 1000);
+      } else {
+        this.presentToast("this connection already exists!");
       }
     } else {
       this.presentToast("Please select more than one user!");
     }
-    this.clear();
   }
 
-  forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
-    let i = 0;
-    while ( i < this.usersconnexionforbidden.length ) {
-      let element = this.usersconnexionforbidden[i];
-      if ( element.length === newconnection.length ) {
-        const diffUser = this.matchService.compareconnection( element, newconnection );
-        if ( diffUser.length === 0 ) {
-          console.log( diffUser.length);
-          return true;
-        }
-      }
-      i++;
+  forbid() {
+    this.addRestrictedConnection(this.forbiddenConnections);
+  }
+
+  prefer() {
+    if (
+      this.usersToRestrictSelected.length ===
+      Number(this.form.matchingSize.value)
+    ) {
+      this.addRestrictedConnection(this.preferredConnections);
+    } else {
+      this.presentToast(
+        `The number of users in preferred connection must be ${Number(
+          this.form.matchingSize.value
+        )}`
+      );
     }
-    return false;
   }
 
-  add () {
-    
-    this.selectComponent.confirm();
-    this.selectComponent.clear();
-    
-  }
-  clearAllconnection () {
-    this.selected_forbidden_connexion = [];
-    this.usersconnexionforbidden = [];
-  }
-  toogleAll () {
-    this.selectComponent.toggleItems(this.toogle);
-    this.toogle = !this.toogle;
+  removeForbiddenConnection(index) {
+    this.matchService.removeConnection(this.forbiddenConnections, index);
   }
 
-  clear() {
-    this.selectComponent.clear();
-    this.selectComponent.close();
-    this.selected_forbidden_connexion = [];
-    
-  }
-  addforbiddenUsersItem() {
-    this.selectComponent.confirm ();
-    this.selectComponent.close(); 
-    
+  removePreferredConnection(index: number) {
+    this.matchService.removeConnection(this.preferredConnections, index);
   }
 
-  removeConnection ( index ) {
-    this.matchService.removeConnection( this.usersconnexionforbidden, index );
-    //this.usersconnexionforbidden.splice(index, 1);
-  }
-
-  get form() {
-    return this.matchingForm.controls;
-  }
-
- 
-  onSubmit() {
-    this.ramdommatch();
-  }
-
-  ramdommatch () {
-    if (this.usersSelected.length < 2){
+  randommatch() {
+    if (Number(this.form.matchingSize.value) < 2) {
+      this.presentToast("Matching size should be at least 2");
+      return;
+    }
+    if (this.usersSelected.length < Number(this.form.matchingSize.value)) {
+      this.presentToast("Users selected not consistent with matching size");
       return;
     }
     const users: User[] = [];
     const forbiddenConnections: User[][] = [];
-    for (const selected of this.usersSelected)
-    {
-      users.push({id: selected.id, name: selected.name, avatar: selected.avatar})
+    for (const selected of this.usersSelected) {
+      users.push({
+        id: selected.id,
+        name: selected.name,
+        avatar: selected.avatar,
+      });
     }
-    for (const connection of this.usersconnexionforbidden) {
+    for (const connection of this.forbiddenConnections) {
       const newConnection = [];
       for (let item of connection) {
-        newConnection.push({id: item.id, name: item.name});
+        newConnection.push({ id: item.id, name: item.name });
       }
       forbiddenConnections.push(newConnection);
     }
     const matchingRequest: MatchingReq = {
-      size: Number(this.form.matchingsize.value),
+      size: Number(this.form.matchingSize.value),
       users,
-      forbiddenConnections
+      forbiddenConnections,
     };
 
-    this.matchService.makematch(matchingRequest)
-      .subscribe( ( matchings: Matching[] ) => {
-        if ( matchings !== null ) {
-            console.log(matchings);
-            matchings.forEach(match => match.users.forEach(user => {
-              user.avatar = matchingRequest.users.find(usr => usr.id === user.id)?.avatar;
-            }));
-            this.matchingresult(matchings);
-        }
-        else {
+    this.matchService
+      .makematch(matchingRequest)
+      .subscribe((matchings: Matching[]) => {
+        if (matchings !== null) {
+          console.log(matchings);
+          matchings.forEach((match) =>
+            match.users.forEach((user) => {
+              user.avatar = matchingRequest.users.find(
+                (usr) => usr.id === user.id
+              )?.avatar;
+            })
+          );
+          this.matchingresult(matchings);
+        } else {
           this.presentToast("No matchings generated!");
         }
-        
       });
   }
 
@@ -240,10 +325,9 @@ export class MatchingPage implements OnInit {
   matchingresult(matchings: Matching[]) {
     const navigationExtras: NavigationExtras = {
       state: {
-        matchings
-      }
+        matchings,
+      },
     };
-    this.router.navigate(['/matching-result'],navigationExtras);
+    this.router.navigate(["/matching-result"], navigationExtras);
   }
-  
 }

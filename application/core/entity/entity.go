@@ -1,9 +1,27 @@
 package entity
 
+import "time"
+
+type Tag struct {
+	Name string `json:"name"`
+}
+
 type Organization struct {
-	Id          string
-	Name        string
-	Description string
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type MatchingCycle struct {
+	Id string
+}
+
+type MatchingStat struct {
+	Id               string
+	NumGroups        int
+	NumConversations int
+	NumFailed        int
+	CreatedAt        time.Time
 }
 
 type User struct {
@@ -30,6 +48,33 @@ type User struct {
 	//SubjectOfInterest    []string
 }
 
-func (n *User) String() string {
-	return n.Id
+func (u *User) String() string {
+	return u.Id
+}
+
+func remove(s []User, i int) []User {
+	if i != len(s)-1 {
+		s[i] = s[len(s)-1]
+	}
+
+	return s[:len(s)-1]
+}
+func (u *User) UserIn(users []User) (bool, int) {
+	index := -1
+	find := false
+	for i, user := range users {
+		if user.Id == u.Id {
+			find = true
+			index = i
+			break
+		}
+	}
+
+	return find, index
+}
+func (u *User) RmUser(users []User) []User {
+	if f, i := u.UserIn(users); f {
+		users = remove(users, i)
+	}
+	return users
 }

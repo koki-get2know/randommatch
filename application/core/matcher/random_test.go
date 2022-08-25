@@ -1,7 +1,7 @@
 package matcher
 
 import (
-	"fmt"
+	"log"
 	"testing"
 
 	"github.com/koki/randommatch/entity"
@@ -16,12 +16,12 @@ func TestRandomChoices(t *testing.T) {
 
 	matching := randomChoices(&g, 2, constraint, forbiddenConnections)
 
-	fmt.Printf("Match of %d: [", len(matching.Users))
+	log.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
-		fmt.Printf("%s,", user.String())
+		log.Printf("%s,", user.String())
 	}
 
-	fmt.Printf("]")
+	log.Printf("]")
 }
 
 func TestRanSubGroup(t *testing.T) {
@@ -31,20 +31,20 @@ func TestRanSubGroup(t *testing.T) {
 	interConstraint := []Constraint{Unique}
 	A := []*entity.User{{Id: "5"}}
 	subA := g.Subgraph(A)
-	fmt.Println("Sous groupe A")
+	log.Println("Sous groupe A")
 	subA.String()
 	B := []*entity.User{{Id: "3"}}
-	fmt.Println("Sous groupe B")
+	log.Println("Sous groupe B")
 	subB := g.Subgraph(B)
 	subB.String()
 	matching := RandSubGroup(subA, subB, 1, 1, interConstraint, []Constraint{Unique}, forbiddenConnections)
 
-	fmt.Printf("Match of %d: [", len(matching.Users))
+	log.Printf("Match of %d: [", len(matching.Users))
 	for _, user := range matching.Users {
-		fmt.Printf("%s,", user.String())
+		log.Printf("%s,", user.String())
 	}
 
-	fmt.Printf("]")
+	log.Printf("]")
 }
 func TestMatcher1(t *testing.T) {
 
@@ -59,14 +59,14 @@ func TestMatcher1(t *testing.T) {
 		[]*entity.User{}, []*entity.User{}, []Constraint{}, []Constraint{})
 
 	for _, match := range matching {
-		fmt.Printf("Match : [")
+		log.Printf("Match : [")
 		for _, user := range match.Users {
-			fmt.Printf("%s,", user.String())
+			log.Printf("%s,", user.String())
 
 		}
 
-		fmt.Printf("]")
-		fmt.Println("")
+		log.Printf("]")
+		log.Println("")
 
 	}
 	g.String()
@@ -108,14 +108,14 @@ func TestMatcher2(t *testing.T) {
 	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, interConstraint, []Constraint{})
 
 	for _, match := range matching {
-		fmt.Printf("Match : [")
+		log.Printf("Match : [")
 		for _, user := range match.Users {
-			fmt.Printf("%s,", user.String())
+			log.Printf("%s,", user.String())
 
 		}
 
-		fmt.Printf("]")
-		fmt.Println("")
+		log.Printf("]")
+		log.Println("")
 
 	}
 
@@ -133,12 +133,14 @@ func TestGenTuple(t *testing.T) {
 	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, D)
 
 	for _, match := range matching {
-		fmt.Printf("Match : [")
+		log.Printf("Match : [")
 		for _, user := range match.Users {
-			fmt.Printf("%s,", user.Name)
+
+			log.Printf("%s,", user.Name)
+
 		}
 
-		fmt.Printf("]")
-		fmt.Println("")
+		log.Printf("]")
+		log.Println("")
 	}
 }
