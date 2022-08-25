@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/koki/randommatch/entity"
@@ -39,6 +40,7 @@ func TestAdd(t *testing.T) {
 	A := []*entity.User{&n1, &n2}
 
 	sub := g.Subgraph(A)
-	sub.String()
-
+	fmt.Println(sub.users)
+	sub.RemoveUser(&n2)
+	fmt.Println(sub.users)
 }

@@ -28,7 +28,7 @@ func GetTags() ([]entity.Tag, error) {
 
 			tags = append(tags,
 				entity.Tag{
-					Name:   tag["name"].(string),
+					Name: tag["name"].(string),
 				})
 		}
 
