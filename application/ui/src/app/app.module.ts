@@ -1,15 +1,21 @@
-import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
+import {
+  HttpClient,
+  HttpClientModule,
+  HTTP_INTERCEPTORS,
+} from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { InAppBrowser } from "@ionic-native/in-app-browser/ngx";
 import { IonicModule } from "@ionic/angular";
 import { IonicStorageModule } from "@ionic/storage";
+import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import { environment } from "../environments/environment";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+
 import {
   MsalGuard,
   MsalModule,
@@ -24,10 +30,15 @@ import {
 import { IonicSelectableModule } from "ionic-selectable";
 import { BearerInterceptor } from "./http-interceptors/bearer-interceptor.service";
 import { appConstants } from "./constants";
+import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 
 const isIE =
   window.navigator.userAgent.indexOf("MSIE ") > -1 ||
   window.navigator.userAgent.indexOf("Trident/") > -1;
+
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, "./assets/i18n/", ".json");
+}
 
 @NgModule({
   imports: [
@@ -41,6 +52,16 @@ const isIE =
     IonicStorageModule.forRoot(),
     ServiceWorkerModule.register("ngsw-worker.js", {
       enabled: environment.production,
+    }),
+    TranslateModule.forRoot({
+      defaultLanguage: "en",
+    }),
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient],
+      },
     }),
     MsalModule.forRoot(
       new PublicClientApplication({
