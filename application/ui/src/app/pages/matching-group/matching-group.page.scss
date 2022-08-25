@@ -1,0 +1,148 @@
+.slide-container {
+  width: 100%;
+}
+
+.vertical-center {
+  margin-top: calc(50vh - 3.5rem);
+  transform: translateY(-50%);
+}
+
+h3 {
+  text-transform: capitalize;
+  font-weight: 500;
+  font-size: large;
+}
+
+.flex-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.grid-connections {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.vhheight {
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 0.5rem;
+}
+
+.halfvh {
+  min-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ion-color-primary);
+  border-radius: 10px;
+}
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ion-color-secondary);
+}
+
+.match-btn {
+  margin-bottom: 2rem;
+}
+
+@keyframes jumpman {
+  from {
+    transform: scale(1.1, 0.9);
+  }
+  50% {
+    transform: scale(0.9, 1.1) translateY(-0.5rem);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.scroll-button-parent {
+  position: relative;
+}
+.scroll-button {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: all 0.3s ease;
+}
+
+.border-bottom {
+  border-bottom: 1px solid var(--ion-color-light);
+}
+
+.matching-size-item {
+  max-width: 40%;
+  margin: 0 auto;
+}
+
+.slide-title {
+  font-weight: 500;
+}
+
+.user-tags {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.tags {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.no-overflow {
+  overflow: unset;
+}
+
+@media screen and (max-width: 47.99em) {
+  .scroll-button {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+    animation: jumpman 0.7s ease-in 0.3s 2 alternate;
+
+    transition: all 0.3s ease;
+  }
+}
+
+@media screen and (max-width: 74em) {
+  ion-chip {
+    height: 1.25rem;
+    font-size: 0.75rem;
+  }
+  .ion-padding-xs {
+    padding-top: 0.57rem;
+  }
+  .user-tags {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 0.57rem;
+    align-items: flex-start;
+  }
+  .tags {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .user-tags ion-label {
+    font-size: 1rem;
+  }
+  .matching-size-item {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+}

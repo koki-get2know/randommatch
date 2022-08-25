@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import {
   Matching,
+  MatchingGroupReq,
   MatchingReq,
   User,
   UsersService,
@@ -14,7 +15,7 @@ import {
 })
 export class MatchingResultPage implements OnInit {
   matchings: Matching[] = [];
-  matchingRequest: MatchingReq;
+  matchingRequest: MatchingReq | MatchingGroupReq;
   matchesSelected: Matching[] = [];
 
   constructor(
