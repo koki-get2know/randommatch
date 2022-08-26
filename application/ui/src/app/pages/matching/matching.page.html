@@ -61,6 +61,15 @@
         </h2>
         <ion-button
           class="ion-margin-top"
+          color="secondary"
+          fill="clear"
+          (click)="prevSlide()"
+        >
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          {{ "PREVIOUS" | translate}}
+        </ion-button>
+        <ion-button
+          class="ion-margin-top"
           color="primary"
           fill="clear"
           (click)="nextSlide()"
@@ -111,6 +120,15 @@
         <h2 class="slide-title">
           {{"QUESTION_RESTRICTED_CONNECTION" | translate }}
         </h2>
+        <ion-button
+          class="ion-margin-top match-btn"
+          color="secondary"
+          fill="clear"
+          (click)="prevSlide()"
+        >
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          {{ "PREVIOUS" | translate}}
+        </ion-button>
         <ion-button
           class="ion-margin-top match-btn"
           color="primary"
@@ -188,10 +206,14 @@
                         </ion-grid>
                         <ion-button
                           fill="clear"
+                          shape="round"
                           color="danger"
                           (click)="removeForbiddenConnection(i)"
                         >
-                          <ion-icon name="close-outline"></ion-icon>
+                          <ion-icon
+                            slot="icon-only"
+                            name="close-outline"
+                          ></ion-icon>
                         </ion-button>
                       </ion-item>
                     </ion-list>
@@ -215,9 +237,13 @@
                         <ion-button
                           fill="clear"
                           color="danger"
+                          shape="round"
                           (click)="removePreferredConnection(i)"
                         >
-                          <ion-icon name="close-outline"></ion-icon>
+                          <ion-icon
+                            slot="icon-only"
+                            name="close-outline"
+                          ></ion-icon>
                         </ion-button>
                       </ion-item>
                     </ion-list>

@@ -10,11 +10,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dimchansky/utfbom"
 	"github.com/koki/randommatch/entity"
 )
 
 func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
-	csvReader := csv.NewReader(r)
+	csvReader := csv.NewReader(utfbom.SkipOnly(r))
 	records, err := csvReader.ReadAll()
 	if err != nil {
 		log.Println(err)
@@ -28,7 +29,7 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 		header = records[0]
 		records = records[1:]
 		for i, cell := range header {
-			headerCellIndex[cell] = i
+			headerCellIndex[strings.TrimSpace(cell)] = i
 		}
 	}
 
@@ -37,59 +38,59 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 		user := entity.User{}
 
 		if val, exists := headerCellIndex["Name"]; exists {
-			user.Name = record[val]
+			user.Name = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Email"]; exists {
-			user.Email = record[val]
+			user.Email = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Gender"]; exists {
-			user.Gender = record[val]
+			user.Gender = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Birthday"]; exists {
-			user.Birthday = record[val]
+			user.Birthday = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["PositionHeld"]; exists {
-			user.PositionHeld = record[val]
+			user.PositionHeld = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["PhoneNumber"]; exists {
-			user.PhoneNumber = record[val]
+			user.PhoneNumber = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Department"]; exists {
-			user.Department = record[val]
+			user.Department = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Location"]; exists {
-			user.Location = record[val]
+			user.Location = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Seniority"]; exists {
-			user.Seniority = record[val]
+			user.Seniority = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Role"]; exists {
-			user.Role = record[val]
+			user.Role = strings.TrimSpace(record[val])
 		}
 		if val, exists := headerCellIndex["Groups"]; exists {
 			if strings.TrimSpace(record[val]) != "" {
-				user.Groups = strings.Split(record[val], "-")
+				user.Groups = strings.Split(strings.TrimSpace(record[val]), "-")
 			}
 		}
 
 		if val, exists := headerCellIndex["Hobbies"]; exists {
 			if strings.TrimSpace(record[val]) != "" {
-				user.Hobbies = strings.Split(record[val], "-")
+				user.Hobbies = strings.Split(strings.TrimSpace(record[val]), "-")
 			}
 		}
 		if val, exists := headerCellIndex["MatchPreference"]; exists {
 			if strings.TrimSpace(record[val]) != "" {
-				user.MatchPreference = strings.Split(record[val], "-")
+				user.MatchPreference = strings.Split(strings.TrimSpace(record[val]), "-")
 			}
 		}
 
 		if val, exists := headerCellIndex["MatchPreferenceTime"]; exists {
 			if strings.TrimSpace(record[val]) != "" {
-				user.MatchPreferenceTime = strings.Split(record[val], "-")
+				user.MatchPreferenceTime = strings.Split(strings.TrimSpace(record[val]), "-")
 			}
 		}
 		if val, exists := headerCellIndex["MultiMatch"]; exists {
-			user.MultiMatch, err = strconv.ParseBool(record[val])
+			user.MultiMatch, err = strconv.ParseBool(strings.TrimSpace(record[val]))
 		}
 		if err != nil {
 			log.Printf("Warning wrong boolean string value passed for user %v, value passed: %v\n", user.Name, user.MultiMatch)
@@ -117,6 +118,7 @@ func ConvertRawDataToJson(filepath string) []byte {
 		log.Println(err)
 		return []byte{}
 	}
+
 	defer csvFile.Close()
 	// Read data
 	users, err := csvReaderToUsers(csvFile)

@@ -1,273 +1,359 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>matching Group</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{"NEW_GROUP_MATCH" | translate}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-grid>
-    <ion-row>
-      <form [formGroup]="matchingForm" (submit)="onSubmit()">
-        <ion-list lines="none">
-          <ion-item>
-            <ion-label position="floating" for="matching-size" color="primary"
-              >Matching size</ion-label
-            >
+  <swiper
+    [slidesPerView]="1"
+    [pagination]="true"
+    [initialSlide]="0"
+    [allowSlideNext]="false"
+    (swiper)="setSwiperInstance($event)"
+  >
+    <ng-template swiperSlide>
+      <div class="slide-container vertical-center">
+        <h2 class="slide-title">{{"QUESTION_GROUP_SIZE" | translate}}</h2>
+        <form [formGroup]="matchingForm" (submit)="nextSlide()">
+          <ion-item class="ion-text-center matching-size-item">
             <ion-input
+              class="matching-size-input"
               id="matching-size"
-              formControlName="matchingsize"
-              type="text"
+              formControlName="matchingSize"
+              type="number"
+              [autofocus]="true"
+              clearInput
+            ></ion-input>
+            <ion-label
+              for="matching-size"
+              aria-label="&nbsp;users per group"
+            ></ion-label>
+            <ion-label
+              *ngIf="!form.matchingSize.valid &&
+          form.matchingSize.dirty"
+              class="validator-error ion-text-wrap"
             >
-            </ion-input>
+              <p>{{ "QUESTION_GROUP_MIN_INSTR" | translate}}</p>
+            </ion-label>
           </ion-item>
-
-          <!--ion-datetime locale="en-GB-u-hc-h12"></ion-datetime-->
-        </ion-list>
-
-        <div class="ion-padding">
           <ion-button
+            class="ion-margin-top"
             type="submit"
-            [disabled]="!matchingForm.valid || result_selected_group1.length === 0 || this.result_selected_group2.length === 0"
-            expand="block"
-            >Match Users Randomly</ion-button
+            color="primary"
+            fill="clear"
+            [disabled]="!matchingForm.valid"
+            >{{ "NEXT" | translate}}<ion-icon
+              slot="end"
+              name="arrow-forward-outline"
+            ></ion-icon
+          ></ion-button>
+        </form>
+      </div>
+    </ng-template>
+    <ng-template swiperSlide>
+      <div class="slide-container">
+        <h2 class="slide-title">{{"GROUP_MATCH_INSTR" | translate }} (2)</h2>
+        <ion-button
+          class="ion-margin-top"
+          color="secondary"
+          fill="clear"
+          (click)="prevSlide()"
+        >
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          {{ "PREVIOUS" | translate}}
+        </ion-button>
+        <ion-button
+          class="ion-margin-top"
+          color="primary"
+          fill="clear"
+          [disabled]="groups.length!==2"
+          (click)="nextSlide()"
+          >{{ "NEXT" | translate}}<ion-icon
+            slot="end"
+            name="arrow-forward-outline"
+          ></ion-icon
+        ></ion-button>
+        <div class="ion-padding-vertical">
+          <ion-button
+            color="primary"
+            (click)="addGroup()"
+            [disabled]="groups.length>=2"
           >
+            {{"CREATE_GROUP" | translate }}
+          </ion-button>
         </div>
-      </form>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <ion-row>
-          <ion-col size="8">
-            <ion-item>
-              <ion-label>Users Group 1</ion-label>
-              <ionic-selectable
-                headerColor="primary"
-                [disabled]="disabledGroup1"
-                #selectComponentGroup1
-                [(ngModel)]="users_selected_group1"
-                [items]="users_toselect_group1"
-                itemValueField="id"
-                itemTextField="name"
-                [canSearch]="true"
-                [isMultiple]="true"
-                searchFailText="no user found"
-                [canClear]="true"
-                groupValueField="departement"
-                groupTextField="departement"
-                (onOpen)="onOpenGroup1($event)"
-              >
-                <ng-template ionicSelectableCloseButtonTemplate>
-                  <ion-icon name="close-circle"></ion-icon>
-                </ng-template>
-                <ng-template ionicSelectableFooterTemplate>
-                  <ion-footer>
-                    <ion-row text-center>
-                      <ion-col size="4">
-                        <ion-button fill="clear" (click)="clearGroup(1)"
-                          >Clear</ion-button
-                        >
-                      </ion-col>
-                      <ion-col size="4">
-                        <ion-button fill="clear" (click)="tooglAllUsers(1)"
-                          >Check All</ion-button
-                        >
-                      </ion-col>
-                      <ion-col size="4">
-                        <ion-button fill="clear" (click)="addUsersGroup1()"
-                          >Add</ion-button
-                        >
-                      </ion-col>
-                    </ion-row>
-                  </ion-footer>
-                </ng-template>
-              </ionic-selectable>
-            </ion-item>
-          </ion-col>
-          <ion-col size="4">
-            <span>
-              <ion-button fill="clear" color="danger" (click)="resetGroup1()">
-                <ion-icon name="trash-bin-outline"></ion-icon>
-              </ion-button>
-            </span>
-          </ion-col>
-        </ion-row>
 
-        <ion-list>
-          <ion-item-group
-            *ngFor="let usergroup1 of result_selected_group1 ; let i=index"
+        <div [hidden]="true">
+          <ionic-selectable
+            #addUsersToGroup
+            [(ngModel)]="usersSelectedForGroup"
+            [items]="users"
+            itemValueField="id"
+            itemTextField="name"
+            [canSearch]="true"
+            [isMultiple]="true"
+            searchFailText="{{ 'NO_PEOPLE_FOUND' | translate }}"
+            [canClear]="true"
           >
-            <ion-item-divider sticky>
-              <div class="ion-padding speaker-detail">
-                <ion-chip color="instagram" button (click)="tagclick()">
-                  <ion-label>{{i}}</ion-label>
-                </ion-chip>
-              </div>
-              <ion-label>
-                <h3>{{usergroup1.name}}</h3>
-                <p>{{usergroup1.departement}}</p>
-              </ion-label>
-            </ion-item-divider>
-          </ion-item-group>
-        </ion-list>
-      </ion-col>
-      <ion-col>
-        <ion-row>
-          <ion-col size="8">
-            <ion-item>
-              <ion-label>Users Group 2</ion-label>
-              <ionic-selectable
-                headerColor="primary"
-                [disabled]="disabledGroup2"
-                #selectComponentGroup2
-                [(ngModel)]="users_selected_group2"
-                [items]="users_toselect_group2"
-                itemValueField="id"
-                itemTextField="name"
-                [canSearch]="true"
-                [isMultiple]="true"
-                searchFailText="no user found"
-                [canClear]="true"
-                groupValueField="departement"
-                groupTextField="departement"
-                (onOpen)="onOpenGroup2($event)"
-              >
-                <ng-template ionicSelectableCloseButtonTemplate>
-                  <ion-icon name="close-circle"></ion-icon>
-                </ng-template>
-                <ng-template ionicSelectableFooterTemplate>
-                  <ion-footer>
-                    <ion-row text-center>
-                      <ion-col size="4">
-                        <ion-button fill="clear" (click)="clearGroup(2)"
-                          >Clear</ion-button
-                        >
-                      </ion-col>
-                      <ion-col size="4">
-                        <ion-button fill="clear" (click)="tooglAllUsers(2)"
-                          >Check All</ion-button
-                        >
-                      </ion-col>
-                      <ion-col size="4">
-                        <ion-button fill="clear" (click)="addUsersGroup2()"
-                          >Add</ion-button
-                        >
-                      </ion-col>
-                    </ion-row>
-                  </ion-footer>
-                </ng-template>
-              </ionic-selectable>
-            </ion-item>
-          </ion-col>
-          <ion-col size="4">
-            <span>
-              <ion-button fill="clear" color="danger" (click)="resetGroup2()">
-                <ion-icon name="trash-bin-outline"></ion-icon>
-              </ion-button>
-            </span>
-          </ion-col>
-        </ion-row>
-        <ion-list>
-          <ion-item-group
-            *ngFor="let usergroup2 of result_selected_group2 ; let i=index"
+            <ng-template ionicSelectableHeaderTemplate>
+              <ion-toolbar color="primary">
+                <ion-buttons slot="end">
+                  <ion-button fill="clear" (click)="addUsersToGroup.close()">
+                    <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-title>{{ "SELECT_PEOPLE" | translate}}</ion-title>
+              </ion-toolbar>
+            </ng-template>
+
+            <ng-template ionicSelectableFooterTemplate>
+              <ion-footer>
+                <ion-grid>
+                  <ion-row class="ion-justify-content-between">
+                    <ion-col size="5" size-md="4">
+                      <ion-button
+                        color="primary"
+                        fill="outline"
+                        (click)="toggleAll()"
+                      >
+                        {{ (this.addUsersToGroup.itemsToConfirm.length === 0)?
+                        ("CHECK_ALL" | translate) : ("UNCHECK_ALL" | translate)
+                        }}
+                      </ion-button>
+                    </ion-col>
+                    <ion-col size="5" size-md="4">
+                      <ion-button
+                        color="primary"
+                        (click)="addNewUsersToGroup()"
+                      >
+                        {{ "ADD_TO_GROUP" | translate }}
+                      </ion-button>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-footer>
+            </ng-template>
+          </ionic-selectable>
+        </div>
+
+        <ion-accordion-group [multiple]="true" #groupsAccordion>
+          <ion-accordion
+            class="ion-margin-bottom"
+            [value]="i"
+            *ngFor="let group of groups; let i=index"
           >
-            <ion-item-divider sticky>
-              <div class="ion-padding speaker-detail">
-                <ion-chip color="twitter" button (click)="tagclick()">
-                  <ion-label>{{i}}</ion-label>
-                </ion-chip>
-              </div>
-              <ion-label>
-                <h3>{{usergroup2.name}}</h3>
-                <p>{{usergroup2.departement}}</p>
-              </ion-label>
-            </ion-item-divider>
-          </ion-item-group>
-        </ion-list>
-      </ion-col>
-      <ion-col>
-        <ion-row>
-          <ion-col size="10">
-            <ion-item>
-              <ion-label>Forbidden matches</ion-label>
-              <ionic-selectable
-                #selectComponent
-                headerColor="primary"
-                [(ngModel)]="selected_forbidden_connexion"
-                [items]="userstoforbidden"
-                itemValueField="id"
-                itemTextField="name"
-                [canSearch]="true"
-                [isMultiple]="true"
-                (onChange)="userChange($event)"
-                searchFailText="No user found! Please select the users before"
-                [canClear]="true"
-                groupValueField="departement"
-                groupTextField="departement"
-              >
-                <ng-template ionicSelectableCloseButtonTemplate>
-                  <ion-icon name="close-circle"></ion-icon>
-                </ng-template>
-              </ionic-selectable>
-            </ion-item>
-          </ion-col>
-          <ion-col size="2">
-            <span>
+            <ion-item slot="header" color="light">
               <ion-button
+                (click)="removeGroup($event, i)"
+                shape="round"
                 fill="clear"
                 color="danger"
-                (click)="clearAllconnection()"
+                slot="start"
+                ><ion-icon slot="icon-only" name="close-outline"></ion-icon
+              ></ion-button>
+              <ion-label class="flex-label"
+                >{{ "GROUP" | translate}} {{i+1}} &mdash;<ion-badge
+                  >{{group.length}}</ion-badge
+                ></ion-label
               >
-                <ion-icon name="trash-bin-outline"></ion-icon>
-              </ion-button>
-            </span>
-          </ion-col>
-        </ion-row>
 
+              <ion-button
+                fill="clear"
+                shape="round"
+                size="small"
+                color="primary"
+                (click)="editGroup($event, i)"
+                ><ion-icon slot="icon-only" name="pencil-outline"></ion-icon
+              ></ion-button>
+            </ion-item>
+            <div slot="content" class="ion-padding">
+              <ion-item
+                *ngFor="let user of group; let j=index"
+                class="ion-padding-xs"
+              >
+                <ion-avatar slot="start">
+                  <div [innerHTML]="user.avatar"></div>
+                </ion-avatar>
+                <div class="user-tags">
+                  <ion-label class="no-overflow"> {{user.name}} </ion-label>
+                  <div>
+                    <ion-chip
+                      *ngFor="let tag of user.groups"
+                      [color]="ColorsTags[j%2]"
+                      >{{tag}}
+                    </ion-chip>
+                  </div>
+                </div>
+                <ion-button
+                  (click)="removeUserFromGroup($event, i, j)"
+                  shape="round"
+                  fill="clear"
+                  color="danger"
+                  ><ion-icon slot="icon-only" name="close-outline"></ion-icon
+                ></ion-button>
+              </ion-item>
+            </div>
+          </ion-accordion>
+        </ion-accordion-group>
+      </div>
+    </ng-template>
+    <ng-template swiperSlide>
+      <div class="slide-container">
+        <h2 class="slide-title">
+          {{"QUESTION_RESTRICTED_CONNECTION" | translate }}
+        </h2>
+        <ion-button
+          class="ion-margin-top match-btn"
+          color="secondary"
+          fill="clear"
+          (click)="prevSlide()"
+        >
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          {{ "PREVIOUS" | translate}}
+        </ion-button>
+        <ion-button
+          class="ion-margin-top match-btn"
+          color="primary"
+          (click)="randommatch()"
+        >
+          {{ "MATCH" | translate}}
+          <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
+        </ion-button>
         <ion-grid>
+          <ion-row class="ion-justify-content-center">
+            <ion-col class="scroll-button-parent">
+              <ion-button (click)="forbid()" color="danger" fill="clear">
+                {{ "FORBID" | translate}}
+                <ion-icon slot="end" name="thumbs-down-outline"></ion-icon>
+              </ion-button>
+              <ion-button (click)="prefer()" color="success" fill="clear">
+                {{ "PREFER" | translate}}
+                <ion-icon slot="end" name="thumbs-up-outline"></ion-icon>
+              </ion-button>
+              <ion-button
+                *ngIf="forbiddenConnections.length>0 || preferredConnections.length>0 "
+                class="scroll-button"
+                (click)="scroll(forbidden)"
+                shape="round"
+                fill="clear"
+                color="primary"
+              >
+                <ion-icon slot="start" name="arrow-down-outline"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
           <ion-row>
-            <ion-col>
-              <ion-list *ngIf="usersconnexionforbidden.length">
-                <ion-item-group
-                  *ngFor="let connexionforbidden of usersconnexionforbidden; let i=index"
+            <ion-col size="12" size-md="6" class="vhheight">
+              <ion-accordion-group [multiple]="true" #restrictedGroupsAccordion>
+                <ion-accordion
+                  class="ion-margin-bottom"
+                  [value]="i"
+                  *ngFor="let group of groups; let i=index"
                 >
-                  <ion-item-divider sticky>
-                    <ion-label> Forbidden {{i}} </ion-label>
-                  </ion-item-divider>
-
-                  <ion-item-sliding>
-                    <ion-item button>
-                      <ion-grid>
-                        <ion-row>
-                          <ion-col
-                            *ngFor="let user of connexionforbidden; let j=index"
-                          >
-                            <ion-label>
-                              <h3>{{user.name}}</h3>
-                              <p>{{user.departement}}</p>
-                            </ion-label>
-                          </ion-col>
-                        </ion-row>
-                      </ion-grid>
-
-                      <ion-badge color="primary"
-                        >{{connexionforbidden.length}}</ion-badge
-                      >
+                  <ion-item slot="header" color="light">
+                    <ion-label>{{ "GROUP" | translate}} {{i+1}}</ion-label>
+                  </ion-item>
+                  <div slot="content" class="ion-padding-vertical">
+                    <ion-item
+                      *ngFor="let user of group; let j=index"
+                      class="ion-padding-xs"
+                    >
+                      <ion-checkbox
+                        [(ngModel)]="user.isChecked"
+                        (click)="selectToRestrict($event,user)"
+                        color="primary"
+                        slot="start"
+                      ></ion-checkbox>
+                      <ion-avatar slot="start">
+                        <div [innerHTML]="user.avatar"></div>
+                      </ion-avatar>
+                      <div class="user-tags">
+                        <ion-label class="no-overflow">
+                          {{user.name}}
+                        </ion-label>
+                        <div>
+                          <ion-chip
+                            *ngFor="let tag of user.groups"
+                            [color]="ColorsTags[j%2]"
+                            >{{tag}}
+                          </ion-chip>
+                        </div>
+                      </div>
                     </ion-item>
-                    <ion-item-options>
-                      <ion-item-option
-                        color="danger"
-                        (click)="removeConnection(i)"
+                  </div>
+                </ion-accordion>
+              </ion-accordion-group>
+            </ion-col>
+            <ion-col size-md="6">
+              <ion-grid class="grid-connections">
+                <ion-row class="border-bottom halfvh">
+                  <ion-col>
+                    <h3 #forbidden>{{"FORBIDDEN_CONNECTIONS" | translate}}</h3>
+                    <ion-list *ngIf="forbiddenConnections.length">
+                      <ion-item
+                        *ngFor="let forbiddenConnection of forbiddenConnections; let i=index"
                       >
-                        Remove
-                      </ion-item-option>
-                    </ion-item-options>
-                  </ion-item-sliding>
-                </ion-item-group>
-              </ion-list>
+                        <ion-grid>
+                          <ion-row>
+                            <ion-col *ngFor="let user of forbiddenConnection">
+                              <ion-label> {{user.name}} </ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                        <ion-button
+                          fill="clear"
+                          shape="round"
+                          color="danger"
+                          (click)="removeForbiddenConnection(i)"
+                        >
+                          <ion-icon
+                            slot="icon-only"
+                            name="close-outline"
+                          ></ion-icon>
+                        </ion-button>
+                      </ion-item>
+                    </ion-list>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="halfvh">
+                  <ion-col>
+                    <h3>{{"PREFERRED_CONNECTIONS" | translate}}</h3>
+                    <ion-list *ngIf="preferredConnections.length">
+                      <ion-item
+                        *ngFor="let preferredConnection of preferredConnections; let i=index"
+                      >
+                        <ion-grid>
+                          <ion-row>
+                            <ion-col *ngFor="let user of preferredConnection">
+                              <ion-label> {{user.name}} </ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+
+                        <ion-button
+                          fill="clear"
+                          color="danger"
+                          shape="round"
+                          (click)="removePreferredConnection(i)"
+                        >
+                          <ion-icon
+                            slot="icon-only"
+                            name="close-outline"
+                          ></ion-icon>
+                        </ion-button>
+                      </ion-item>
+                    </ion-list>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
             </ion-col>
           </ion-row>
         </ion-grid>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+      </div>
+    </ng-template>
+  </swiper>
 </ion-content>
