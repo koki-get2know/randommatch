@@ -58,7 +58,11 @@ const routes: Routes = [
   {
     path: 'matching-group',
     loadChildren: () => import('./pages/matching-group/matching-group.module').then( m => m.MatchingGroupPageModule)
+  },  {
+    path: 'statistics',
+    loadChildren: () => import('./pages/statistics/statistics.module').then( m => m.StatisticsPageModule)
   },
+
 
 ];
 
