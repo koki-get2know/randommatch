@@ -15,7 +15,7 @@ var err error
 
 func Driver() (*neo4j.Driver, error) {
 	if driver == nil {
-	//once.Do(func() {
+		//once.Do(func() {
 
 		creds := strings.Split(os.Getenv("NEO4J_AUTH"), "/")
 		if len(creds) < 2 {
@@ -41,7 +41,7 @@ func Driver() (*neo4j.Driver, error) {
 			return nil, err
 		}
 		driver = &dr
-	//})
+		//})
 	}
 	return driver, err
 }
