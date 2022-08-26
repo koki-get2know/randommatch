@@ -49,5 +49,6 @@
   "CHECK_ALL": "Tout cocher",
   "UNCHECK_ALL": "Tout décocher",
   "GROUP_MATCH_INSTR": "Créer vos groupes",
-  "CREATE_GROUP": "Créer groupe"
+  "CREATE_GROUP": "Créer groupe",
+  "SEARCH_BY_NAME_OR_TAG": "Recherche par nom ou par tag"
 }

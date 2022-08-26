@@ -139,30 +139,49 @@ export class MatchingGroupPage implements OnInit {
     }
   }
 
+  searchByTags(event: { component: IonicSelectableComponent; text: string }) {
+    event.component.startSearch();
+    const text = event.text.trim().toLocaleLowerCase();
+    if (text) {
+      event.component.items = this.users.filter(
+        (user) =>
+          user.name.toLocaleLowerCase().includes(text) ||
+          user.groups.some((tag) => tag.toLocaleLowerCase().includes(text))
+      );
+    } else {
+      event.component.items = this.users;
+    }
+    event.component.endSearch();
+  }
+
   addNewUsersToGroup() {
     this.addUsersToGroup.confirm();
-    if (this.activeGroupToEdit === -1) {
-      this.groups = this.groups
-        .map((group: User[]) => {
-          return group.filter(
-            (user) => !this.usersSelectedForGroup.some((u) => u.id === user.id)
-          );
-        })
-        .filter((group) => group.length > 0);
-      this.groups.push([...this.usersSelectedForGroup]);
-      this.groupsAccordion.value = (this.groups.length - 1).toString();
-    } else {
-      this.groups = this.groups
-        .map((group: User[], index: number) => {
-          if (index === this.activeGroupToEdit) {
-            this.groupsAccordion.value = index.toString();
-            return [...this.usersSelectedForGroup];
-          }
-          return group.filter(
-            (user) => !this.usersSelectedForGroup.some((u) => u.id === user.id)
-          );
-        })
-        .filter((group) => group.length > 0);
+    if (this.usersSelectedForGroup.length > 0) {
+      if (this.activeGroupToEdit === -1) {
+        this.groups = this.groups
+          .map((group: User[]) => {
+            return group.filter(
+              (user) =>
+                !this.usersSelectedForGroup.some((u) => u.id === user.id)
+            );
+          })
+          .filter((group) => group.length > 0);
+        this.groups.push([...this.usersSelectedForGroup]);
+        this.groupsAccordion.value = (this.groups.length - 1).toString();
+      } else {
+        this.groups = this.groups
+          .map((group: User[], index: number) => {
+            if (index === this.activeGroupToEdit) {
+              this.groupsAccordion.value = index.toString();
+              return [...this.usersSelectedForGroup];
+            }
+            return group.filter(
+              (user) =>
+                !this.usersSelectedForGroup.some((u) => u.id === user.id)
+            );
+          })
+          .filter((group) => group.length > 0);
+      }
     }
     this.addUsersToGroup.clear();
     this.addUsersToGroup.close();

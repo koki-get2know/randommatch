@@ -98,6 +98,8 @@
             [isMultiple]="true"
             searchFailText="{{ 'NO_PEOPLE_FOUND' | translate }}"
             [canClear]="true"
+            (onSearch)="searchByTags($event)"
+            searchPlaceholder="{{ 'SEARCH_BY_NAME_OR_TAG' | translate }}"
           >
             <ng-template ionicSelectableHeaderTemplate>
               <ion-toolbar color="primary">
@@ -109,7 +111,16 @@
                 <ion-title>{{ "SELECT_PEOPLE" | translate}}</ion-title>
               </ion-toolbar>
             </ng-template>
-
+            <ng-template ionicSelectableItemTemplate let-user="item">
+              <div class="user-tags">
+                <ion-label class="no-overflow"> {{user.name}} </ion-label>
+                <div>
+                  <ion-chip *ngFor="let tag of user.groups" color="primary"
+                    >{{tag}}
+                  </ion-chip>
+                </div>
+              </div>
+            </ng-template>
             <ng-template ionicSelectableFooterTemplate>
               <ion-footer>
                 <ion-grid>
@@ -129,6 +140,7 @@
                       <ion-button
                         color="primary"
                         (click)="addNewUsersToGroup()"
+                        [disabled]="addUsersToGroup.itemsToConfirm.length === 0"
                       >
                         {{ "ADD_TO_GROUP" | translate }}
                       </ion-button>
