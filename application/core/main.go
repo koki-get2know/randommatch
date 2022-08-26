@@ -28,6 +28,14 @@ type groupMatchingReq struct {
 	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
 }
 
+type tagMatchingReq struct {
+	Size                 uint            `json:"size"`
+	Tags                 []string        `json:"tags"`
+	ForbiddenConnections [][]entity.User `json:"forbiddenConnections"`
+	Exclude              []entity.User   `json:"excludeUsers"`
+	Organization         string          `json:"organization"`
+}
+
 type EmailReq struct {
 	Matches []matcher.Match `json:"matches"`
 }
@@ -91,10 +99,48 @@ func generateGroupMatchings(c *gin.Context) {
 
 }
 
+func generateMatchingByTag(c *gin.Context) {
+	defer helper.Duration(helper.Track("generateGroupMatchings"))
+	var req tagMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
+		return
+	}
+	if len(req.Tags) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 tags"})
+		return
+	}
+	tag1, err := database.GetUsersByTag(req.Organization, req.Tags[0])
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	tag2, err := database.GetUsersByTag(req.Organization, req.Tags[1])
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	for _, u := range req.Exclude {
+		tag1 = u.RmUser(tag1)
+	}
+	for _, u := range req.Exclude {
+		tag2 = u.RmUser(tag2)
+	}
+
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+
+		req.ForbiddenConnections, req.Size, tag1, tag2)
+
+	c.JSON(http.StatusCreated, gin.H{"data": tuples})
+}
+
 func getTags(c *gin.Context) {
 	defer helper.Duration(helper.Track("getTags"))
 	tags, err := database.GetTags()
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -162,17 +208,21 @@ func main() {
 	protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
+	protected.POST("/tag-matchings", generateMatchingByTag)
 	protected.POST("/upload-users", handler.UploadUsers)
+	protected.POST("/organizations", handler.CreateOrganization)
+	protected.POST("/email-matches", emailMatches)
+
 	protected.GET("/users-creation-job/:id", handler.GetJobStatus)
 	protected.GET("/matching-email-job/:id", handler.GetJobStatus)
-	protected.POST("/organizations", handler.CreateOrganization)
 	protected.GET("/organizations/:id", handler.GetOrganization)
 	protected.GET("/users", handler.GetUsers)
+
 	protected.DELETE("/users", handler.DeleteUsers)
 	protected.DELETE("/users/:id", handler.DeleteUser)
 	protected.GET("/tags", getTags)
-	protected.POST("/email-matches", emailMatches)
 	protected.GET("/matchings-stats", handler.GetMatchingStats)
 	protected.GET("/links", getLinks)
+
 	router.Run()
 }
