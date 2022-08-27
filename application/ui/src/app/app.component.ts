@@ -46,13 +46,8 @@ export class AppComponent implements OnInit, OnDestroy {
       icon: "people",
     },
     {
-      title: "NEW_MATCH",
+      title: "MATCHING",
       url: "matching",
-      icon: "calendar",
-    },
-    {
-      title: "NEW_GROUP_MATCH",
-      url: "matching-group",
       icon: "calendar",
     },
   ];

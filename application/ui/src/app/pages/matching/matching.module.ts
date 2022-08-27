@@ -1,25 +1,24 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { FormsModule } from "@angular/forms";
 
 import { IonicModule } from "@ionic/angular";
 
-import { MatchingPageRoutingModule } from "./matching-routing.module";
+import { MatchPageRoutingModule } from "./matching-routing.module";
 
 import { MatchingPage } from "./matching.page";
-import { IonicSelectableModule } from "ionic-selectable";
-import { SwiperModule } from "swiper/angular";
 import { SharedModule } from "../../shared/shared.module";
+import { MatchingSimplePageModule } from "../matching-simple/matching-simple.module";
+import { MatchingGroupPageModule } from "../matching-group/matching-group.module";
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    ReactiveFormsModule,
-    MatchingPageRoutingModule,
-    IonicSelectableModule,
-    SwiperModule,
+    MatchPageRoutingModule,
+    MatchingSimplePageModule,
+    MatchingGroupPageModule,
     SharedModule,
   ],
   declarations: [MatchingPage],
