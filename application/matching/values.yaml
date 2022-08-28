@@ -1,5 +1,5 @@
 global:
-  registry: "randommatch2akscr.azurecr.io"
+  registry: "randommatch3akscr.azurecr.io"
 
 ingress:
   labels: {}
