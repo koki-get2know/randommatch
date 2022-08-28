@@ -54,4 +54,4 @@ cert-manager:
 ingress-nginx:
   controller:
     service:
-      loadBalancerIP: "20.49.128.134"
+      loadBalancerIP: "20.49.143.20"
