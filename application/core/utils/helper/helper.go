@@ -41,3 +41,23 @@ func ItemsWithPrefixInRole(s []any, prefix string) []string {
 	}
 	return orgs
 }
+
+func Remove[T comparable](l []T, item T) []T {
+	for i, elem := range l {
+		if elem == item {
+			return append(l[:i], l[i+1:]...)
+		}
+	}
+	return l
+}
+
+func RemoveByIndex[T any](l []T, i int) []T {
+	return append(l[:i], l[i+1:]...)
+}
+
+func Minimum(a uint, b uint) uint {
+	if a < b {
+		return a
+	}
+	return b
+}

@@ -14,7 +14,7 @@
   "SAME_GROUP_MATCHING": "Same group matching",
   "CROSS_GROUP_MATCHING": "Cross-group matching",
   "SIMPLE_MATCHING_CARD_DESC": "Generate random connections among two or more people from the same group. Adjust the matching criteria by preventing some people from connecting together or by suggesting preferred connections in advance.",
-  "GROUP_MATCHING_CARD_DESC": "Generate random connections among two or more people from the different groups. Adjust the matching criteria by preventing some people from connecting together or by suggesting preferred connections in advance.",
+  "GROUP_MATCHING_CARD_DESC": "Generate random connections among two or more people from different groups. Adjust the matching criteria by preventing some people from connecting together or by suggesting preferred connections in advance.",
   "SURNAME": "Surname",
   "EMAIL": "Email",
   "ID": "Id",
