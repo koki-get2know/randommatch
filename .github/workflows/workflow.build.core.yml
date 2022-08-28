@@ -34,7 +34,7 @@ jobs:
           cd ./application/core
           docker build -t testing .
           docker run --name go_container -d -p8080:8080 testing
-          curl localhost:8080/albums
+          curl localhost:8080/health-check
           docker stop go_container && docker rm -f go_container
 
       - name: Use Node.js
