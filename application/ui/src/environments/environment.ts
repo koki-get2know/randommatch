@@ -4,14 +4,12 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 export const environment = {
   production: false,
-  redirectUri: 'http://localhost:4200',
-  clientId: '2d929579-7af0-4041-bae1-a18f49858903',
-  authority: 'https://login.microsoftonline.com/25d2a676-d0f3-438e-be7b-f55baaf9c7a1',
-  serverBaseUrl: 'http://localhost:8080',
-
+  redirectUri: "http://localhost:4200",
+  clientId: "60ed6919-1d88-4ced-8ce9-66f5dd5a540e",
+  authority:
+    "https://login.microsoftonline.com/5806938e-ea7d-4345-85fb-6239156b78d6",
+  serverBaseUrl: "http://localhost:8080",
 };
-
-
 
 /*
  * In development mode, to ignore zone related error stack frames such as
