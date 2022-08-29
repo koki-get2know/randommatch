@@ -14,12 +14,12 @@
       <ion-icon name="chevron-down"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="bottom">
-      <ion-fab-button (click)="sendMail()"
-        ><ion-icon name="mail" aria-label="mail the selection"></ion-icon
-      ></ion-fab-button>
-      <ion-fab-button (click)="reloadSelectedMatches()"
-        ><ion-icon name="reload" aria-label="rematch the selection"></ion-icon
-      ></ion-fab-button>
+      <ion-fab-button (click)="sendMail()">
+        <ion-icon name="mail" aria-label="mail the selection"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="reloadSelectedMatches()">
+        <ion-icon name="reload" aria-label="rematch the selection"></ion-icon>
+      </ion-fab-button>
     </ion-fab-list>
   </ion-fab>
 
@@ -32,11 +32,7 @@
               <ion-label> Match {{i}} </ion-label>
             </ion-item-divider>
             <ion-item>
-              <ion-checkbox
-                color="primary"
-                (click)="selectTuple($event, match)"
-                slot="start"
-              ></ion-checkbox>
+              <ion-checkbox color="primary" (click)="selectTuple($event, match)" slot="start"></ion-checkbox>
               <ion-grid>
                 <ion-row>
                   <ion-col *ngFor="let user of match.users">
@@ -56,4 +52,57 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+</ion-content>
+
+<ion-header>
+  <ion-toolbar>
+    <ion-title>App</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-button id="open-modal" expand="block">Open Modal</ion-button>
+
+  <ion-modal #modal trigger="open-modal">
+    <ng-template>
+      <ion-content>
+        <ion-toolbar>
+          <ion-title>Modal</ion-title>
+          <ion-buttons slot="end">
+            <ion-button color="light" (click)="modal.dismiss()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        <ion-row>
+          <ion-col>
+            <ion-list>
+             
+              <ion-item>
+                <ion-avatar slot="start">
+                  <ion-img src="https://i.pravatar.cc/300?u=a"></ion-img>
+                </ion-avatar>
+                <ion-label>
+                  <h2>Daniel Smith</h2>
+                  <p>Product Designer</p>
+                </ion-label>
+              </ion-item>
+
+            </ion-list>
+          </ion-col>
+          <ion-col>
+            <ion-list>
+              <ion-item>
+                <ion-avatar slot="start">
+                  <ion-img src="https://i.pravatar.cc/300?u=a"></ion-img>
+                </ion-avatar>
+                <ion-label>
+                  <h2>Daniel Smith</h2>
+                  <p>Product Designer</p>
+                </ion-label>
+              </ion-item>
+
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
