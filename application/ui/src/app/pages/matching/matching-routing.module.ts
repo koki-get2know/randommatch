@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
+import { MsalGuard } from "@azure/msal-angular";
 
 import { MatchingPage } from "./matching.page";
 
@@ -16,6 +17,7 @@ const routes: Routes = [
               import("../matching-simple/matching-simple.module").then(
                 (m) => m.MatchingSimplePageModule
               ),
+            canActivate: [MsalGuard],
           },
         ],
       },
@@ -28,6 +30,7 @@ const routes: Routes = [
               import("../matching-group/matching-group.module").then(
                 (m) => m.MatchingGroupPageModule
               ),
+            canActivate: [MsalGuard],
           },
         ],
       },

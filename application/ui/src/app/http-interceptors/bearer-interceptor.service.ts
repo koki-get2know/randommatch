@@ -20,7 +20,10 @@ export class BearerInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    if (req.url.startsWith(appConstants.microsoftGraph)) {
+    if (
+      req.url.startsWith(appConstants.microsoftGraph) ||
+      req.url.includes("/assets/")
+    ) {
       return next.handle(req);
     }
     return this.getAuthorizationHeader().pipe(
