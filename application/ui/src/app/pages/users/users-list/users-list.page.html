@@ -50,7 +50,7 @@
 
           <p><strong>{{ "FILE_SAMPLE" | translate}}</strong></p>
           <code>
-            Name,Email,Groups<br />
+            Name,Email,Tags<br />
             John Kuf,john@mail.fr,Mgt-Fce<br />
             Bob Len,bo@gmail.com,Newcomer<br />
             Richard,rich@company.com,<br />
@@ -66,7 +66,7 @@
     <div class="user-tags">
       <ion-label class="no-overflow"> {{user.name}} </ion-label>
       <div class="tags">
-        <ion-chip *ngFor="let tag of user.groups" [color]="ColorsTags[i%2]"
+        <ion-chip *ngFor="let tag of user.tags" [color]="ColorsTags[i%2]"
           >{{tag}}
         </ion-chip>
       </div>

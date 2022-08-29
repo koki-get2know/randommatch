@@ -116,7 +116,7 @@
               <div class="user-tags">
                 <ion-label class="no-overflow"> {{user.name}} </ion-label>
                 <div>
-                  <ion-chip *ngFor="let tag of user.groups" color="primary"
+                  <ion-chip *ngFor="let tag of user.tags" color="primary"
                     >{{tag}}
                   </ion-chip>
                 </div>
@@ -195,7 +195,7 @@
                   <ion-label class="no-overflow"> {{user.name}} </ion-label>
                   <div>
                     <ion-chip
-                      *ngFor="let tag of user.groups"
+                      *ngFor="let tag of user.tags"
                       [color]="ColorsTags[j%2]"
                       >{{tag}}
                     </ion-chip>
@@ -290,7 +290,7 @@
                         </ion-label>
                         <div>
                           <ion-chip
-                            *ngFor="let tag of user.groups"
+                            *ngFor="let tag of user.tags"
                             [color]="ColorsTags[j%2]"
                             >{{tag}}
                           </ion-chip>

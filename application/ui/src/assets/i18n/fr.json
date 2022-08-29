@@ -21,7 +21,7 @@
   "UPLOAD": "charger",
   "INSTRUCTION_FILE_TYPE": "Le fichier à charger doit être un CSV.",
   "INSTRUCTION_FILE_MANDATORY_PARAMETERS": "Le nom et l'email sont obligatoires.",
-  "INSTRUCTION_FILE_MULTI_TAGS": "Separer les étiquettes (groups) par un tiret (-)",
+  "INSTRUCTION_FILE_MULTI_TAGS": "Separer les étiquettes (tags) par un tiret (-)",
   "FILE_SAMPLE": "Échantillon du fichier",
   "MATCHING": "Matching",
   "QUESTION_GROUP_SIZE": "Combien de personnes par connexion voulez-vous ?",

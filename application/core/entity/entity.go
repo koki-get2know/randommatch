@@ -32,7 +32,7 @@ type User struct {
 	Id                     string   `json:"id"`
 	Name                   string   `json:"name"`
 	Email                  string   `json:"email"`
-	Groups                 []string `json:"groups"`
+	Tags                 	 []string `json:"tags"`
 	Gender                 string   `json:"gender"`
 	Birthday               string   `json:"birthday"`
 	Hobbies                []string `json:"hobbies"`
