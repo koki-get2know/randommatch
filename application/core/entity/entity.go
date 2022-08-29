@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/koki/randommatch/utils/helper"
+)
 
 type Tag struct {
 	Name string `json:"name"`
@@ -48,6 +52,27 @@ type User struct {
 	//SubjectOfInterest    []string
 }
 
-func (n *User) String() string {
-	return n.Id
+func (u *User) String() string {
+	return u.Id
+}
+
+func (u *User) UserIn(users []User) (bool, int) {
+	index := -1
+	find := false
+	for i, user := range users {
+		if user.Id == u.Id {
+			find = true
+			index = i
+			break
+		}
+	}
+
+	return find, index
+}
+
+func (u *User) RmUser(users []User) []User {
+	if f, i := u.UserIn(users); f {
+		users = helper.RemoveByIndex(users, i)
+	}
+	return users
 }

@@ -3,19 +3,19 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Account</ion-title>
+    <ion-title>{{"ACCOUNT" | translate}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <div *ngIf="profile" class="ion-padding-top ion-text-center">
-    <img src="https://www.gravatar.com/avatar?d=mm&s=140" alt="avatar">
+    <img src="https://www.gravatar.com/avatar?d=mm&s=140" alt="avatar" />
     <h2>{{profile?.givenName}}</h2>
 
     <ion-list inset>
-      <ion-item>Surname: {{profile?.surname}}</ion-item>
-      <ion-item>Email: {{profile?.userPrincipalName}}</ion-item>
-      <ion-item>Id: {{profile?.id}}</ion-item>
+      <ion-item>{{ "SURNAME" | translate}}: {{profile?.surname}}</ion-item>
+      <ion-item> {{ "EMAIL" | translate}}: {{profile?.mail}} </ion-item>
+      <ion-item>{{ "ID" | translate}}: {{profile?.id}}</ion-item>
     </ion-list>
   </div>
 </ion-content>

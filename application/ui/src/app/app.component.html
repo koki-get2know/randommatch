@@ -3,7 +3,7 @@
     <ion-menu contentId="main-content">
       <ion-content>
         <ion-list lines="none">
-          <ion-list-header> KOKI </ion-list-header>
+          <ion-list-header>KOKI</ion-list-header>
           <ion-menu-toggle autoHide="false" *ngFor="let p of appPages">
             <ion-item
               *ngIf="loggedIn"
@@ -12,16 +12,20 @@
               routerDirection="root"
               detail="false"
             >
-              <ion-icon slot="start" [name]="p.icon + '-outline'"></ion-icon>
+              <ion-icon
+                slot="start"
+                [name]="p.icon + '-outline'"
+                color="primary"
+              ></ion-icon>
               <ion-label>
-                {{ p.title }}
+                {{ p.title | translate }}
               </ion-label>
             </ion-item>
           </ion-menu-toggle>
         </ion-list>
 
         <ion-list *ngIf="loggedIn" lines="none">
-          <ion-list-header> Account </ion-list-header>
+          <ion-list-header>{{ "ACCOUNT" | translate }} </ion-list-header>
 
           <ion-menu-toggle autoHide="false">
             <ion-item
@@ -30,8 +34,12 @@
               routerDirection="root"
               detail="false"
             >
-              <ion-icon slot="start" name="person"></ion-icon>
-              <ion-label> Account </ion-label>
+              <ion-icon
+                slot="start"
+                name="person-outline"
+                color="primary"
+              ></ion-icon>
+              <ion-label> {{ "ACCOUNT" | translate }} </ion-label>
             </ion-item>
           </ion-menu-toggle>
 
@@ -42,21 +50,50 @@
               routerDirection="root"
               detail="false"
             >
-              <ion-icon slot="start" name="help"></ion-icon>
-              <ion-label> Support </ion-label>
+              <ion-icon
+                slot="start"
+                name="help-outline"
+                color="primary"
+              ></ion-icon>
+              <ion-label> {{ "SUPPORT" | translate }} </ion-label>
             </ion-item>
           </ion-menu-toggle>
 
           <ion-menu-toggle autoHide="false">
             <ion-item button (click)="logout()" detail="false">
-              <ion-icon slot="start" name="log-out"></ion-icon>
-              <ion-label> Logout </ion-label>
+              <ion-icon
+                slot="start"
+                name="log-out-outline"
+                color="primary"
+              ></ion-icon>
+              <ion-label> {{ "LOGOUT" | translate }} </ion-label>
             </ion-item>
           </ion-menu-toggle>
+          <ion-item>
+            <ion-icon
+              slot="start"
+              name="moon-outline"
+              color="primary"
+            ></ion-icon>
+            <ion-label> {{ "DARK_MODE" | translate }} </ion-label>
+            <ion-toggle [(ngModel)]="dark"></ion-toggle>
+          </ion-item>
+          <ion-item>
+            <ion-icon
+              slot="start"
+              name="language-outline"
+              color="primary"
+            ></ion-icon>
+            <ion-label> {{ "LANG_SWITCH" | translate }} </ion-label>
+            <ion-toggle
+              (ionChange)="changeLanguage($event)"
+              [(ngModel)]="isFrench"
+            ></ion-toggle>
+          </ion-item>
         </ion-list>
 
         <ion-list *ngIf="!loggedIn" lines="none">
-          <ion-list-header> Account </ion-list-header>
+          <ion-list-header> {{ "ACCOUNT" | translate }} </ion-list-header>
 
           <ion-menu-toggle autoHide="false">
             <ion-item
@@ -66,8 +103,12 @@
               routerDirection="root"
               detail="false"
             >
-              <ion-icon slot="start" name="log-in"></ion-icon>
-              <ion-label> Login </ion-label>
+              <ion-icon
+                slot="start"
+                name="log-in-outline"
+                color="primary"
+              ></ion-icon>
+              <ion-label> {{ "LOGIN" | translate }} </ion-label>
             </ion-item>
           </ion-menu-toggle>
 
@@ -78,36 +119,32 @@
               routerDirection="root"
               detail="false"
             >
-              <ion-icon slot="start" name="help"></ion-icon>
-              <ion-label> Support </ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-
-          <ion-menu-toggle autoHide="false">
-            <ion-item
-              routerLink="/signup"
-              routerLinkActive="active"
-              routerDirection="root"
-              detail="false"
-            >
-              <ion-icon slot="start" name="person-add"></ion-icon>
-              <ion-label> Signup </ion-label>
+              <ion-icon slot="start" name="help-outline"></ion-icon>
+              <ion-label> {{ "SUPPORT" | translate }} </ion-label>
             </ion-item>
           </ion-menu-toggle>
 
           <ion-item>
-            <ion-icon slot="start" name="moon-outline"></ion-icon>
+            <ion-icon
+              slot="start"
+              name="moon-outline"
+              color="primary"
+            ></ion-icon>
             <ion-label> Dark Mode </ion-label>
             <ion-toggle [(ngModel)]="dark"></ion-toggle>
           </ion-item>
         </ion-list>
 
         <ion-list lines="none">
-          <ion-list-header> Tutorial </ion-list-header>
+          <ion-list-header> {{ "TUTOTRIAL" | translate }} </ion-list-header>
           <ion-menu-toggle autoHide="false">
             <ion-item button (click)="openTutorial()" detail="false">
-              <ion-icon slot="start" name="hammer"></ion-icon>
-              <ion-label>Show Tutorial</ion-label>
+              <ion-icon
+                slot="start"
+                name="hammer-outline"
+                color="primary"
+              ></ion-icon>
+              <ion-label>{{ "SHOW_TUTORIAL" | translate }}</ion-label>
             </ion-item>
           </ion-menu-toggle>
         </ion-list>

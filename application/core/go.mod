@@ -14,6 +14,8 @@ require (
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
+require github.com/dimchansky/utfbom v1.1.1 // indirect
+
 require (
 	github.com/arran4/golang-ical v0.0.0-20220517104411-fd89fefb0182
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -1,223 +1,261 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { UsersService, User, Matching, MatchingGroupReq } from '../../services/users.service';
-import { NavController, ToastController } from '@ionic/angular';
-import { NavigationExtras, Router } from '@angular/router';
-import { IonicSelectableComponent } from 'ionic-selectable';
-import { ColorsTags } from '../../constants';
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { FormBuilder, Validators, FormGroup } from "@angular/forms";
+import {
+  UsersService,
+  User,
+  Matching,
+  MatchingGroupReq,
+} from "../../services/users.service";
+import { IonAccordionGroup, ToastController } from "@ionic/angular";
+import { IonicSelectableComponent } from "ionic-selectable";
+import { ColorsTags } from "../../constants";
+import SwiperCore, { Pagination, Swiper } from "swiper";
+import { NavigationExtras, Router } from "@angular/router";
+import { TranslateService } from "@ngx-translate/core";
+
+SwiperCore.use([Pagination]);
+
 @Component({
-  selector: 'app-matching-group',
-  templateUrl: './matching-group.page.html',
-  styleUrls: ['./matching-group.page.scss'],
+  selector: "app-matching-group",
+  templateUrl: "./matching-group.page.html",
+  styleUrls: ["./matching-group.page.scss"],
 })
 export class MatchingGroupPage implements OnInit {
-
   matchingForm: FormGroup;
-  checked: any;
-  usersSelected: User[] = [];
   ColorsTags = ColorsTags;
-  
-  isLoading = false;
-  isError = false;
-  isSuccess = false;
-  isSubmitted = false;
-  selected_forbidden_connexion: User[];
-  userstoforbidden: User[] =[];
-  usersconnexionforbidden: User[][] = [];
+
+  private slides: Swiper;
+
   groups: User[][] = [];
+  users: User[] = [];
+  usersSelectedForGroup: User[] = [];
+  activeGroupToEdit = -1;
 
-  usersdata: User[];
-  users_toselect_group1: User[] = [];
-  users_toselect_group2: User[] = [];
-  users_selected_group1: User[] = [];
-  users_selected_group2: User[] = [];
-  result_selected_group1: User[] = [];
-  result_selected_group2: User[] = [];
+  @ViewChild("addUsersToGroup", { static: false })
+  addUsersToGroup: IonicSelectableComponent;
+  @ViewChild("groupsAccordion", { static: false })
+  groupsAccordion: IonAccordionGroup;
 
-  // disabled component selectable
-  disabledGroup1 = false;
-  disabledGroup2 = false;
-  
-  // we use it in order to toggle all item
-  toogleGroup1 = true
-  toogleGroup2 = true
+  forbiddenConnections: User[][] = [];
+  preferredConnections: User[][] = [];
+  usersToRestrictSelected: User[] = [];
 
+  constructor(
+    private formBuilder: FormBuilder,
+    private matchService: UsersService,
+    private router: Router,
+    private translate: TranslateService,
+    private toastController: ToastController
+  ) {}
 
-  @ViewChild( 'selectComponent' ) selectComponent: IonicSelectableComponent
-  @ViewChild( 'selectComponentGroup1' ) selectComponentGroup1: IonicSelectableComponent
-  @ViewChild( 'selectComponentGroup2') selectComponentGroup2:IonicSelectableComponent
-  constructor(private formBuilder: FormBuilder,private matchService:UsersService,
-    public navCtrl: NavController, private router: Router,public toastController: ToastController ) { 
-    
-  }
-
-  ngOnInit () {
-    this.matchService.getUsersdata().subscribe(users => {
-      this.users_toselect_group1 = users;
-      this.users_toselect_group2 = users;
-      this.usersdata = users;
+  ngOnInit() {
+    this.matchService.getUsersdata().subscribe((users) => {
+      this.users = users;
     });
+
     this.initForm();
   }
 
   initForm() {
     this.matchingForm = this.formBuilder.group({
-      matchingsize: ['', Validators.required],
+      matchingSize: [
+        "",
+        Validators.compose([Validators.required, Validators.min(2)]),
+      ],
     });
   }
 
- 
-    userChange(event: {
-    component: IonicSelectableComponent,
-    value: any} ) {
-    // just add if the list in not empty
-    if ( this.selected_forbidden_connexion.length > 1 ) {
-      if ( this.usersconnexionforbidden.length == 0 ) {
-        this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
-      }
-      else {
-        if ( !this.forbiddenConnectionAlreadyExist( this.selected_forbidden_connexion ) ) {
-          this.usersconnexionforbidden.push( this.selected_forbidden_connexion );
-        }
-        else {
-          this.presentToast("this connection already exists!");
-        }
-      }
+  get form() {
+    return this.matchingForm.controls;
+  }
+
+  setSwiperInstance(swiper: Swiper) {
+    this.slides = swiper;
+  }
+
+  prevSlide() {
+    this.slides.allowSlideNext = true;
+    this.slides.slidePrev();
+    this.slides.allowSlideNext = false;
+  }
+
+  nextSlide() {
+    let total = 0;
+    this.groups.forEach((group) => (total += group.length));
+    if (
+      this.slides.activeIndex === 1 &&
+      total < Number(this.form.matchingSize.value)
+    ) {
+      this.presentToast("SELECTION_SIZE_CONSISTENCY_INSTR", {
+        value: this.form.matchingSize.value,
+      });
+    } else if (total === Number(this.form.matchingSize.value)) {
+      this.forbiddenConnections = [];
+      this.preferredConnections = [];
+      this.randommatch();
     } else {
-      this.presentToast("Please select more than one user!");
-    }
-    this.clear();
-    }
-  
-  onOpenGroup1 ( event: { component: IonicSelectableComponent } ) {
-    const istoogle = this.result_selected_group1.length > 0;
-    this.selectComponentGroup1.toggleItems(istoogle,this.result_selected_group1);
-  }
-
-  onOpenGroup2 ( event: { component: IonicSelectableComponent } ) {
-    const istoogle = this.result_selected_group2.length > 0;
-    this.selectComponentGroup2.toggleItems(istoogle,this.result_selected_group2);
-  }
-
-  addUsersGroup1 () {
-    this.selectComponentGroup1.confirm();
-    console.log( this.users_selected_group1 );
-    if ( this.users_selected_group1.length !== 0 ) {
-      if ( this.result_selected_group2.length === 0 ) {
-        this.result_selected_group1 = [...this.users_selected_group1];
-        // in the second group, just keep all the users who have not been selected in the group 1
-        this.users_toselect_group2 = this.matchService.compareconnection( this.users_toselect_group1, this.result_selected_group1 );
-      }
-      else {
-        this.result_selected_group1 = [...this.users_selected_group1];
-        // Users intersection of two arrays
-        const moveuser = this.result_selected_group2.filter(value => this.result_selected_group1.includes(value));
-        moveuser.forEach( element => {
-          console.log( element );
-          const index = this.result_selected_group2.indexOf(element);
-          if (index > -1) { // only splice array when item is found
-            this.result_selected_group2.splice(index, 1); // 2nd parameter means remove one item only
+      //remove connections that are not part of the selected users
+      this.forbiddenConnections = this.forbiddenConnections.filter((users) => {
+        for (const user of users) {
+          if (
+            !this.groups.find((group) => group.some((u) => u.id === user.id))
+          ) {
+            return false;
           }
-          this.presentToast(moveuser.length+ " users have been moved from Group 2 to Group 1!");
-        });
-      }
-           
-    }
-
-    // users to forbid must be selected among the group 1 and 2
-    this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
-    this.users_toselect_group1 = this.usersdata;
-    this.clearGroup(1);    
-  }
-
-  addUsersGroup2 () {
-   this.selectComponentGroup2.confirm();
-    console.log( this.users_selected_group2 );
-    if ( this.users_selected_group2.length !== 0 ) {
-      if ( this.result_selected_group1.length === 0 ) {
-        this.result_selected_group2 = [...this.users_selected_group2];
-        // in the second group, just keep all the users who have not been selected in the group 1
-        this.users_toselect_group1 = this.matchService.compareconnection( this.users_toselect_group2, this.result_selected_group2 );
-      }
-      else {
-        this.result_selected_group2 = [...this.users_selected_group2];
-        // Users intersection of two arrays
-        const moveuser = this.result_selected_group1.filter(value => this.result_selected_group2.includes(value));
-        moveuser.forEach( element => {
-          console.log( element );
-          const index = this.result_selected_group1.indexOf(element);
-          if (index > -1) { // only splice array when item is found
-            this.result_selected_group1.splice(index, 1); // 2nd parameter means remove one item only
+        }
+        return true;
+      });
+      this.preferredConnections = this.preferredConnections.filter((users) => {
+        for (const user of users) {
+          if (
+            !this.groups.find((group) => group.some((u) => u.id === user.id))
+          ) {
+            return false;
           }
-          this.presentToast(moveuser.length+ " users have been moved from Group 1 to Group 2!");
-        });
+        }
+        return true;
+      });
+      this.slides.allowSlideNext = true;
+      this.slides.slideNext();
+      this.slides.allowSlideNext = false;
+    }
+  }
+
+  addGroup() {
+    this.activeGroupToEdit = -1;
+    this.addUsersToGroup.open();
+  }
+
+  removeGroup(event: PointerEvent, index: number) {
+    event.stopPropagation();
+    this.groups.splice(index, 1);
+  }
+
+  removeUserFromGroup(event: PointerEvent, groupIndex: number, index: number) {
+    event.stopPropagation();
+    this.groups[groupIndex].splice(index, 1);
+    if (this.groups[groupIndex].length === 0) {
+      this.groups.splice(groupIndex, 1);
+    }
+  }
+
+  searchByTags(event: { component: IonicSelectableComponent; text: string }) {
+    event.component.startSearch();
+    const text = event.text.trim().toLocaleLowerCase();
+    if (text) {
+      event.component.items = this.users.filter(
+        (user) =>
+          user.name.toLocaleLowerCase().includes(text) ||
+          user.groups.some((tag) => tag.toLocaleLowerCase().includes(text))
+      );
+    } else {
+      event.component.items = this.users;
+    }
+    event.component.endSearch();
+  }
+
+  addNewUsersToGroup() {
+    this.addUsersToGroup.confirm();
+    if (this.usersSelectedForGroup.length > 0) {
+      if (this.activeGroupToEdit === -1) {
+        this.groups = this.groups
+          .map((group: User[]) => {
+            return group.filter(
+              (user) =>
+                !this.usersSelectedForGroup.some((u) => u.id === user.id)
+            );
+          })
+          .filter((group) => group.length > 0);
+        this.groups.push([...this.usersSelectedForGroup]);
+        this.groupsAccordion.value = (this.groups.length - 1).toString();
+      } else {
+        this.groups = this.groups
+          .map((group: User[], index: number) => {
+            if (index === this.activeGroupToEdit) {
+              this.groupsAccordion.value = index.toString();
+              return [...this.usersSelectedForGroup];
+            }
+            return group.filter(
+              (user) =>
+                !this.usersSelectedForGroup.some((u) => u.id === user.id)
+            );
+          })
+          .filter((group) => group.length > 0);
       }
-           
     }
-    // users to forbid must be selected among the group 1 and 2
-    this.userstoforbidden = [...this.result_selected_group1 , ...this.result_selected_group2];
-    this.users_toselect_group2 = this.usersdata;
-    this.clearGroup(2);
+    this.addUsersToGroup.clear();
+    this.addUsersToGroup.close();
   }
 
-  resetGroup1 () {
-    this.userstoforbidden = [];
-    this.result_selected_group1 = [];
-    this.users_toselect_group1 = this.usersdata;
-    this.selectComponentGroup1.clear()
-  }
-  resetGroup2 () {
-    this.userstoforbidden = [];
-    this.result_selected_group2 = [];
-    this.users_toselect_group2 = this.usersdata;
-    this.selectComponentGroup2.clear()
+  editGroup(event: PointerEvent, index: number) {
+    event.stopPropagation();
+    this.activeGroupToEdit = index;
+    this.usersSelectedForGroup = [...this.groups[index]];
+    this.addUsersToGroup.open();
   }
 
-
-  clearAllconnection () {
-    this.selected_forbidden_connexion = [];
-    this.usersconnexionforbidden = [];
-  }
- 
-
-  tooglAllUsers ( group_index) {
-    if ( group_index === 1 ) {
-      this.selectComponentGroup1.toggleItems(this.toogleGroup1);
-      this.toogleGroup1 = !this.toogleGroup1;
-    }
-    else {
-      this.selectComponentGroup2.toggleItems(this.toogleGroup2);
-      this.toogleGroup2 = !this.toogleGroup2;
-    }
+  toggleAll() {
+    this.addUsersToGroup.toggleItems(
+      this.addUsersToGroup.itemsToConfirm.length === 0
+    );
   }
 
-  clear() {
-    this.selectComponent.clear();
-    this.selected_forbidden_connexion = [];
+  async presentToast(
+    message: string,
+    params?: Object,
+    durationInMs: number = 2000
+  ) {
+    const translatedMessage: string = await this.translate
+      .get(message, params)
+      .toPromise();
+    const toast = await this.toastController.create({
+      message: translatedMessage,
+      duration: durationInMs,
+    });
+    toast.present();
   }
 
-  clearGroup (group_index) {
-    if ( group_index === 1 ) {
-      this.selectComponentGroup1.clear();
-      this.selectComponentGroup1.close();
-    }
-    else {
-      this.selectComponentGroup2.clear();
-      this.selectComponentGroup2.close();
+  private addCopyInarray(users: User[], user: User) {
+    const copy = { ...user };
+    copy.isChecked = false;
+    users.push(copy);
+  }
+
+  private markUserAsRestricted(user: User) {
+    this.addCopyInarray(this.usersToRestrictSelected, user);
+  }
+
+  private removeUserIdFromArray(collection: User[], id: string) {
+    const index = collection.findIndex((d) => d.id === id);
+    if (index >= 0) {
+      collection.splice(index, 1);
     }
   }
-  addforbiddenUsersItem() {
-    this.selectComponent.confirm ();
+
+  private removeUserRestriction(id: string) {
+    this.removeUserIdFromArray(this.usersToRestrictSelected, id);
   }
 
-  forbiddenConnectionAlreadyExist ( newconnection: User[] ): boolean {
+  selectToRestrict(event: PointerEvent, user: User) {
+    if ((event.target as HTMLInputElement).checked === false) {
+      this.markUserAsRestricted(user);
+    } else {
+      this.removeUserRestriction(user.id);
+    }
+  }
+  private connectionAlreadyExists(
+    connection: User[],
+    connections: User[][]
+  ): boolean {
     let i = 0;
-    while ( i < this.usersconnexionforbidden.length ) {
-      let element = this.usersconnexionforbidden[i];
-      if ( element.length === newconnection.length ) {
-        const diffUser = this.matchService.compareconnection( element, newconnection );
-        if ( diffUser.length === 0 ) {
-          console.log( diffUser.length);
+    while (i < connections.length) {
+      let element = connections[i];
+      if (element.length === connection.length) {
+        const diffUser = this.matchService.compareconnection(
+          element,
+          connection
+        );
+        if (diffUser.length === 0) {
           return true;
         }
       }
@@ -226,99 +264,111 @@ export class MatchingGroupPage implements OnInit {
     return false;
   }
 
-
-  get form() {
-    return this.matchingForm.controls;
-  }
-
-  selectUsers(event,user: User) {
-  
-    if (!!event.target.checked === false ) {
-      this.usersSelected.push( user );
+  private addRestrictedConnection(connections: User[][]) {
+    if (this.usersToRestrictSelected.length > 1) {
+      if (
+        !this.connectionAlreadyExists(
+          this.usersToRestrictSelected,
+          this.preferredConnections
+        ) &&
+        !this.connectionAlreadyExists(
+          this.usersToRestrictSelected,
+          this.forbiddenConnections
+        )
+      ) {
+        connections.push(this.usersToRestrictSelected);
+        this.groups.forEach((group) =>
+          group.forEach((user) => {
+            user.isChecked = false;
+          })
+        );
+        this.usersToRestrictSelected = [];
+        this.presentToast("CONNECTION_ADDED", {}, 1000);
+      } else {
+        this.presentToast("CONNECTION_ALREADY_EXISTS");
+      }
+    } else {
+      this.presentToast("SELECT_MORE_THAN_ONE_USER");
     }
-    else {
-      this.onRemoveusersSelected( user.id );
+  }
+
+  forbid() {
+    this.addRestrictedConnection(this.forbiddenConnections);
+  }
+
+  prefer() {
+    if (
+      this.usersToRestrictSelected.length ===
+      Number(this.form.matchingSize.value)
+    ) {
+      this.addRestrictedConnection(this.preferredConnections);
+    } else {
+      this.presentToast("MINIMUM_NUM_IN_PREFERRED_CONNECTION", {
+        value: this.form.matchingSize.value,
+      });
     }
-
-  }
- 
-
-  // delete a forbiddenconnection
-  removeConnection ( index ) {
-    this.matchService.removeConnection( this.usersconnexionforbidden, index );
   }
 
-
-  // when user is unchecked, it should be remove
-  onRemoveusersSelected(id: string) {
-    let index = this.usersSelected.findIndex(d => d.id === id); //find index in your array
-    this.usersSelected.splice(index, 1);
+  scroll(el: HTMLElement) {
+    el.scrollIntoView({ behavior: "smooth" });
   }
-  
-  onSubmit() {
-    this.ramdommatch();
+  removeForbiddenConnection(index) {
+    this.matchService.removeConnection(this.forbiddenConnections, index);
   }
 
-  ramdommatch () {
-    if (this.result_selected_group1.length === 0 || this.result_selected_group2.length ===0) {
+  removePreferredConnection(index: number) {
+    this.matchService.removeConnection(this.preferredConnections, index);
+  }
+
+  randommatch() {
+    if (Number(this.form.matchingSize.value) < 2) {
+      this.presentToast("QUESTION_GROUP_MIN_INSTR");
       return;
     }
-    this.isSubmitted = true;
-    this.isError = false;
-    this.isSuccess = false;
-    this.isLoading = false;
-    if ( this.form.invalid ) {
-      alert( "Fill all the fields" );
+    let total = 0;
+    this.groups.forEach((group) => (total += group.length));
+    if (total < Number(this.form.matchingSize.value)) {
+      this.presentToast("SELECTION_INCONSISTENT_WITH_SIZE");
+      return;
     }
-    this.isLoading = true;
 
-    this.groups.push( this.result_selected_group1 );
-    this.groups.push( this.result_selected_group2 );
     const matchingRequest: MatchingGroupReq = {
-      size: Number(this.form.matchingsize.value),
-      groups:this.groups,
-      forbiddenConnections: this.usersconnexionforbidden
-
+      size: Number(this.form.matchingSize.value),
+      groups: this.groups,
+      forbiddenConnections: this.forbiddenConnections,
     };
-    console.log( this.result_selected_group1 );
-    console.log( this.result_selected_group2 );
 
-    this.matchService.makematchgroup(matchingRequest)
-      .subscribe( ( matchings: Matching[] ) => {
-        if ( matchings !== null ) {
-          matchings.forEach(match => match.users.forEach(user => {
-            for (const users of matchingRequest.groups) {
-              for (const usr of users) {
-                if (user.id === usr.id ) {
-                  user.avatar = usr.avatar;
-                  break;
+    this.matchService
+      .makematchgroup(matchingRequest)
+      .subscribe((matchings: Matching[]) => {
+        if (matchings !== null) {
+          matchings.forEach((match) =>
+            match.users.forEach((user) => {
+              for (const users of matchingRequest.groups) {
+                for (const usr of users) {
+                  if (user.id === usr.id) {
+                    user.avatar = usr.avatar;
+                    break;
+                  }
                 }
               }
-            }
-          }));
-          this.matchingresult(matchings);
-        }
-        else {
-          this.presentToast("No match generated!");
+            })
+          );
+          this.matchingresult(matchings, matchingRequest);
+        } else {
+          this.presentToast("NO_MATCHING_GENERATED");
         }
       });
   }
 
   // matching result
-  matchingresult(matchings: Matching[]) {
+  matchingresult(matchings: Matching[], matchingRequest: MatchingGroupReq) {
     const navigationExtras: NavigationExtras = {
       state: {
-        matchings
-      }
+        matchings,
+        matchingRequest,
+      },
     };
-    this.router.navigate(['/matching-result'],navigationExtras);
-  }
-
-   async presentToast(message) {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 2000
-    });
-    toast.present();
+    this.router.navigate(["/matching-result"], navigationExtras);
   }
 }

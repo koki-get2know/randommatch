@@ -3,11 +3,11 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Users</ion-title>
+    <ion-title>{{"USERS" | translate}}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="csvFileUpload.click()">
         <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
-        upload
+        {{"UPLOAD" | translate}}
         <ion-spinner *ngIf="isloading" name="circles"></ion-spinner>
       </ion-button>
       <ion-button
@@ -43,12 +43,12 @@
       <ng-template>
         <ion-content class="ion-padding">
           <ul class="information">
-            <li>File to upload must be a CSV.</li>
-            <li>Name and Email are mandatory.</li>
-            <li>Separate tags (groups) by a dash (-)</li>
+            <li>{{"INSTRUCTION_FILE_TYPE" | translate}}</li>
+            <li>{{"INSTRUCTION_FILE_MANDATORY_PARAMETERS" | translate}}</li>
+            <li>{{"INSTRUCTION_FILE_MULTI_TAGS" | translate}}</li>
           </ul>
 
-          <p><strong>File sample</strong></p>
+          <p><strong>{{ "FILE_SAMPLE" | translate}}</strong></p>
           <code>
             Name,Email,Groups<br />
             John Kuf,john@mail.fr,Mgt-Fce<br />
@@ -59,28 +59,17 @@
       </ng-template>
     </ion-popover>
   </div>
-  <ion-list>
-    <ion-item-group>
-      <ion-item-sliding
-        *ngFor="let user of userslist; let i=index"
-        #slidingItem
-      >
-        <ion-item class="ion-padding-xs">
-          <ion-avatar slot="start">
-            <div [innerHTML]="user.avatar"></div>
-          </ion-avatar>
-          <div class="user-tags">
-            <ion-label class="no-overflow"> {{user.name}} </ion-label>
-            <div class="tags">
-              <ion-chip
-                *ngFor="let tag of user.groups"
-                [color]="ColorsTags[i%2]"
-                >{{tag}}
-              </ion-chip>
-            </div>
-          </div>
-        </ion-item>
-      </ion-item-sliding>
-    </ion-item-group>
-  </ion-list>
+  <ion-item *ngFor="let user of userslist; let i=index" class="ion-padding-xs">
+    <ion-avatar slot="start">
+      <div [innerHTML]="user.avatar"></div>
+    </ion-avatar>
+    <div class="user-tags">
+      <ion-label class="no-overflow"> {{user.name}} </ion-label>
+      <div class="tags">
+        <ion-chip *ngFor="let tag of user.groups" [color]="ColorsTags[i%2]"
+          >{{tag}}
+        </ion-chip>
+      </div>
+    </div>
+  </ion-item>
 </ion-content>

@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -9,6 +8,7 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/koki/randommatch/entity"
+	"github.com/koki/randommatch/utils/helper"
 )
 
 var randomChoices = randomChoicesSeed()
@@ -41,20 +41,6 @@ type ConstraintParams[T any] struct { // Type parameters for constraint
 //TODO integrate the selector structure in code
 type SelectorParams[T any] struct { // Type parameters for constraint
 	Params map[Constraint][]T
-}
-
-func search(users []entity.User, n entity.User) (bool, int) {
-	index := -1
-	find := false
-	for i, user := range users {
-		if user.Id == n.Id {
-			find = true
-			index = i
-			break
-		}
-	}
-
-	return find, index
 }
 
 func Filter(g *UserGraph, matched []entity.User, n *entity.User,
@@ -90,8 +76,8 @@ constraintloop:
 			case ForbiddenConnections:
 				for _, usersNotToMatch := range forbiddenConnections {
 					if len(usersNotToMatch) > 0 {
-						if find1, _ := search(usersNotToMatch, *n); find1 {
-							if find2, _ := search(usersNotToMatch, user); find2 {
+						if find1, _ := n.UserIn(usersNotToMatch); find1 {
+							if find2, _ := user.UserIn(usersNotToMatch); find2 {
 								ok = false
 								break constraintloop
 							}
@@ -108,21 +94,7 @@ constraintloop:
 	return ok
 }
 
-func minimum(a uint, b uint) uint {
-	if a < b {
-		return a
-	}
-	return b
-}
 
-func remove[T comparable](l []T, item T) []T {
-	for i, elem := range l {
-		if elem == item {
-			return append(l[:i], l[i+1:]...)
-		}
-	}
-	return l
-}
 
 func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, forbiddenConnections [][]entity.User) *Match {
 	rand.Seed(time.Now().UnixNano()) // initialize the seed to get
@@ -154,7 +126,7 @@ func randomChoicesSeed() func(g *UserGraph, k uint, constraints []Constraint, fo
 
 				matchedUsers = append(matchedUsers, *g.users[index])
 			}
-			indices = remove(indices, index)
+			indices = helper.Remove(indices, index)
 
 		}
 
@@ -191,17 +163,18 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 		users := []entity.User{}
 		gb := &UserGraph{}
 		copier.Copy(&users, &matchA.Users)
-		copier.Copy(gb, groupeB)
+		copier.Copy(&gb.users, groupeB.users)
+		copier.Copy(&gb.edges, groupeB.edges)
+
 		match := false
 		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
 			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
-
 			match = true
 
 			for _, u := range matchB.Users {
+
 				u := u
-				find, _ := search(users, u)
-				if !find && Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
+				if Filter(gb, users, &u, interGroupConstraints, forbiddenConnections) && Filter(gb, matchA.Users, &u, innerGroupConstraints, forbiddenConnections) {
 
 					matchA.Users = append(matchA.Users, u)
 
@@ -213,9 +186,39 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 				gb.RemoveUser(&u)
 			}
 		}
+
 	}
+
 	return matchA
 
+}
+
+/*
+ * Remove duplicates
+ * find elements of the shortest list that are present in the biggest list
+ * and remove them from that biggest list
+*/
+func removeDuplicates(A []*entity.User, B []*entity.User) ([]*entity.User, []*entity.User) {
+	var minList, maxList []*entity.User
+	if (len(A) <= len(B)) {
+		copier.Copy(&minList, A)
+		copier.Copy(&maxList, B)
+	} else {
+		copier.Copy(&minList, B)
+		copier.Copy(&maxList, A)
+	}
+	
+	for _, u1 := range minList {
+		u1 := u1
+		if find, index := Search(maxList, u1); find {
+			maxList = helper.RemoveByIndex(maxList, index)
+		}
+	}
+	if (len(A) <= len(B)) {
+		return minList, maxList
+	} else {
+		return maxList, minList
+	}
 }
 
 func Matcher(g *UserGraph, k uint,
@@ -263,26 +266,27 @@ func Matcher(g *UserGraph, k uint,
 			   - m2 = random choice  users dans B
 			   - check if m1 + m2 can be match
 		*/
-
+		A, B = removeDuplicates(A, B)
 		if k < 2 {
 			break
 		}
 		var matchSizeA uint
 		var matchSizeB uint
-		maxMatchSizeA := minimum(uint(len(A)), k-1)
-		maxMatchSizeB := minimum(uint(len(B)), k-1)
+		maxMatchSizeA := helper.Minimum(uint(len(A)), k-1)
+		maxMatchSizeB := helper.Minimum(uint(len(B)), k-1)
 		if maxMatchSizeA < maxMatchSizeB {
-			matchSizeA = minimum(maxMatchSizeA, k/2)
-			matchSizeB = minimum(k-matchSizeA, maxMatchSizeB)
+			matchSizeA = helper.Minimum(maxMatchSizeA, k/2)
+			matchSizeB = helper.Minimum(k-matchSizeA, maxMatchSizeB)
 		} else {
-			matchSizeB = minimum(maxMatchSizeB, k/2)
-			matchSizeA = minimum(k-matchSizeB, maxMatchSizeA)
+			matchSizeB = helper.Minimum(maxMatchSizeB, k/2)
+			matchSizeA = helper.Minimum(k-matchSizeB, maxMatchSizeA)
 		}
 
 		if matchSizeB == 0 || matchSizeA == 0 || matchSizeB+matchSizeA != k {
 			break
 		}
 		i := 0
+
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
 
@@ -290,13 +294,11 @@ func Matcher(g *UserGraph, k uint,
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)
-			log.Println(groupB.users)
 			if matched != nil {
 				for _, match := range matched.Users {
 					match := match
 					groupA.RemoveUser(&match)
 					groupB.RemoveUser(&match)
-
 				}
 
 			}
@@ -335,7 +337,7 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 	case Basic:
 		graph := UsersToGraph(users, connections)
 		graph.String()
-		tuples = Matcher(graph, size, []Constraint{Unique}, Basic,
+		tuples = Matcher(graph, size, []Constraint{Unique, ForbiddenConnections}, Basic,
 			forbiddenConnections, []*entity.User{}, []*entity.User{},
 			[]Constraint{}, []Constraint{})
 	case Group:
