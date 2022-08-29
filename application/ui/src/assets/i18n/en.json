@@ -21,7 +21,7 @@
   "UPLOAD": "upload",
   "INSTRUCTION_FILE_TYPE": "File to upload must be a CSV.",
   "INSTRUCTION_FILE_MANDATORY_PARAMETERS": "Name and Email are mandatory.",
-  "INSTRUCTION_FILE_MULTI_TAGS": "Separate tags (groups) by a dash (-)",
+  "INSTRUCTION_FILE_MULTI_TAGS": "Separate tags by a dash (-)",
   "FILE_SAMPLE": "File Sample",
   "MATCHING": "Matching",
   "QUESTION_GROUP_SIZE": "How many people per connection do you want?",
