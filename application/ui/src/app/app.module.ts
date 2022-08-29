@@ -55,13 +55,8 @@ export function appInitializerFactory(
         Promise.resolve(null)
       );
       locationInitialized.then(() => {
-        let langToSet = "en";
-
-        if (window.Intl && typeof window.Intl === "object") {
-          const lang = navigator.language.substring(0, 2);
-          langToSet = lang;
-        }
-        translate.setDefaultLang("en");
+        const langToSet = "en";
+        translate.setDefaultLang(langToSet);
         translate.use(langToSet).subscribe(
           () => {
             console.info(`Successfully initialized '${langToSet}' language.'`);
