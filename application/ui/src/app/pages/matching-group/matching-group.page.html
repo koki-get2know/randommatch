@@ -13,7 +13,7 @@
     [slidesPerView]="1"
     [pagination]="true"
     [initialSlide]="0"
-    [allowSlideNext]="false"
+    [allowTouchMove]="false"
     (swiper)="setSwiperInstance($event)"
   >
     <ng-template swiperSlide>
@@ -126,7 +126,7 @@
               <ion-footer>
                 <ion-grid>
                   <ion-row class="ion-justify-content-between">
-                    <ion-col size="5" size-md="4">
+                    <ion-col size="6" size-md="5">
                       <ion-button
                         color="primary"
                         fill="outline"
@@ -137,7 +137,7 @@
                         }}
                       </ion-button>
                     </ion-col>
-                    <ion-col size="5" size-md="4">
+                    <ion-col size="6" size-md="5" class="ion-text-end">
                       <ion-button
                         color="primary"
                         (click)="addNewUsersToGroup()"
@@ -235,6 +235,7 @@
         >
           {{ "MATCH" | translate}}
           <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
+          <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
         </ion-button>
         <ion-grid>
           <ion-row class="ion-justify-content-center">

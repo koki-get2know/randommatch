@@ -12,7 +12,7 @@
     [slidesPerView]="1"
     [pagination]="true"
     [initialSlide]="0"
-    [allowSlideNext]="false"
+    [allowTouchMove]="false"
     (swiper)="setSwiperInstance($event)"
   >
     <ng-template swiperSlide>
@@ -136,6 +136,7 @@
         >
           {{ "MATCH" | translate}}
           <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
+          <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
         </ion-button>
         <ion-grid>
           <ion-row class="ion-justify-content-center">

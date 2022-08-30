@@ -47,12 +47,13 @@
   "MINIMUM_NUM_IN_PREFERRED_CONNECTION": "Les connexions préférentielles doivent avoir {{value}} personnes",
   "SELECT_PEOPLE": "Sélectionner les personnes",
   "NO_PEOPLE_FOUND": "Aucune personne trouvée",
-  "ADD_TO_GROUP": "Ajouter au groupe",
+  "ADD_TO_GROUP": "Ajouter",
   "EDIT": "Éditer",
   "GROUP": "Groupe",
   "CHECK_ALL": "Tout cocher",
   "UNCHECK_ALL": "Tout décocher",
   "GROUP_MATCH_INSTR": "Créer vos groupes",
   "CREATE_GROUP": "Créer groupe",
-  "SEARCH_BY_NAME_OR_TAG": "Recherche par nom ou par tag"
+  "SEARCH_BY_NAME_OR_TAG": "Recherche par nom ou par tag",
+  "MATCH_POSSIBILITY_EXHAUSTED": "Vous avez épuisé l'ensemble des possibilités de connections entre les personnes sélectionnées. Ils ont été enlevé du résultat final. Pour les refaire apparaître, aller à la page précédente et simuler un nouveau match global"
 }
