@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/koki/randommatch/entity"
+	"github.com/koki/randommatch/utils/helper"
 )
 
 // UserGraph the Items graph
@@ -67,23 +68,12 @@ func (g *UserGraph) IsUserIn(n *entity.User) (bool, int) {
 
 // remove a user in a list of users
 
-// func Remove(s []*entity.User, i int) []*entity.User {
-// 	if i != len(s)-1 {
-// 		s[i] = s[len(s)-1]
-// 	}
-
-// 	return s[:len(s)-1]
-// }
-func Remove(s []*entity.User, i int) []*entity.User {
-	return append(s[:i], s[i+1:]...)
-}
-
 // RemoveEdge remove an edge from the graph
 func (g *UserGraph) RemoveEdge(n *entity.User) {
 	for _, user := range g.users {
 		find, index := Search(g.edges[(*user).Id], n)
 		if find {
-			g.edges[(*user).Id] = Remove(g.edges[(*user).Id], index)
+			g.edges[(*user).Id] = helper.RemoveByIndex(g.edges[(*user).Id], index)
 		}
 		delete(g.edges, (*n).Id)
 	}
@@ -91,14 +81,11 @@ func (g *UserGraph) RemoveEdge(n *entity.User) {
 
 // RemoveUser remove a user from the graph
 func (g *UserGraph) RemoveUser(n *entity.User) {
-
 	g.RemoveEdge(n)
 	find, index := g.IsUserIn(n) // find out the index of this node
 	if find {
-		g.users = Remove(g.users, index)
-
+		g.users = helper.RemoveByIndex(g.users, index)
 	}
-
 }
 
 // print the graph

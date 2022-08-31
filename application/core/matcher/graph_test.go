@@ -43,6 +43,8 @@ func TestAdd(t *testing.T) {
 
 	sub := g.Subgraph(A)
 	fmt.Println(sub.users)
-	sub.RemoveUser(&n3)
+
+	sub.RemoveUser(&n2)
+
 	fmt.Println(sub.users)
 }

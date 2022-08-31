@@ -8,6 +8,7 @@ import (
 	"github.com/koki/randommatch/entity"
 )
 
+
 func TestRandomChoices(t *testing.T) {
 	//id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
 	g.String()
@@ -129,15 +130,25 @@ func TestGenTuple(t *testing.T) {
 
 	A := []entity.User{{Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}, {Id: "4", Name: "tete"}, {Id: "19", Name: "paul"}}
 
+<<<<<<< HEAD
 	D := []entity.User{{Id: "3", Name: "tutu"}, {Id: "1", Name: "tata"}}
 
 	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, D, A)
+=======
+	D := []entity.User{{Id: "1", Name: "tata"}, {Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}}
+
+	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, D)
+>>>>>>> 857aea92d8416055a310b2f2a450ac0bd4ef0b0f
 
 	for _, match := range matching {
 		fmt.Printf("Match : [")
 		for _, user := range match.Users {
 
+<<<<<<< HEAD
 			fmt.Println(user.Name)
+=======
+			log.Printf("%s,", user.Name)
+>>>>>>> 857aea92d8416055a310b2f2a450ac0bd4ef0b0f
 
 		}
 

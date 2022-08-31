@@ -12,7 +12,7 @@ import { appConstants } from "../constants";
 export class User {
   id: string;
   name?: string;
-  groups?: string[];
+  tags?: string[];
   //angular only param
   avatar?: SafeHtml;
   isChecked?: boolean = false;

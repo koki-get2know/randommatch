@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { ToastController } from "@ionic/angular";
 
@@ -62,7 +62,6 @@ export class UsersListPage implements OnInit {
           ) {
             this.isloading = false;
             clearInterval(limitedInterval);
-            console.log(`responsestatus ${responsestatus} interval cleared!`);
           }
         });
     }, 500);
