@@ -3,8 +3,6 @@ package matcher
 import (
 	"fmt"
 
-	"log"
-
 	"math/rand"
 	"strconv"
 	"time"
@@ -44,20 +42,6 @@ type ConstraintParams[T any] struct { // Type parameters for constraint
 //TODO integrate the selector structure in code
 type SelectorParams[T any] struct { // Type parameters for constraint
 	Params map[Constraint][]T
-}
-
-func search(users []entity.User, n entity.User) (bool, int) {
-	index := -1
-	find := false
-	for i, user := range users {
-		if user.Id == n.Id {
-			find = true
-			index = i
-			break
-		}
-	}
-
-	return find, index
 }
 
 func Filter(g *UserGraph, matched []entity.User, n *entity.User,
@@ -193,10 +177,11 @@ func RandSubGroup(groupeA *UserGraph, groupeB *UserGraph, matchSizeA uint, match
 
 		users := []entity.User{}
 		gb := &UserGraph{}
-		copier.Copy(&users, &matchA.Users)
-		copier.Copy(gb, groupeB)
+		copier.Copy(&users, matchA.Users)
+		copier.Copy(&gb.edges, groupeB.edges)
+		copier.Copy(&gb.users, groupeB.users)
 		match := false
-		fmt.Println(gb.users)
+
 		for !match && uint(len(matchA.Users)) < (matchSizeA+matchSizeB) && uint(len(gb.users)) >= matchSizeB {
 			matchB := randomChoices(gb, matchSizeB, innerGroupConstraints, forbiddenConnections)
 
@@ -279,7 +264,11 @@ func Matcher(g *UserGraph, k uint,
 			   - m2 = random choice  users dans B
 			   - check if m1 + m2 can be match
 		*/
-		A, B = doubleCheck(A, B)
+		if uint(len(A)) > uint(len(B)) {
+			A, B = doubleCheck(A, B)
+		} else {
+			B, A = doubleCheck(B, A)
+		}
 		if k < 2 {
 			break
 		}
@@ -302,25 +291,29 @@ func Matcher(g *UserGraph, k uint,
 
 		groupA := g.Subgraph(A)
 		groupB := g.Subgraph(B)
-
+		fmt.Println(groupA.users)
+		fmt.Println(groupB.users)
+		fmt.Println("")
 		for uint(len(groupA.users))/matchSizeA > 0 && uint(len(groupB.users))/matchSizeB > 0 {
-			fmt.Println(groupB.users)
+
 			matched := RandSubGroup(groupA, groupB, matchSizeA, matchSizeB,
 				interGroupConstraints, innerGroupConstraints,
 				forbidenconections)
-
-			log.Println(groupB.users)
-
+			fmt.Println(groupA.users)
+			fmt.Println(groupB.users)
+			fmt.Println("")
 			if matched != nil {
 				for _, match := range matched.Users {
 					match := match
-					groupA.RemoveUser(&match)
 					groupB.RemoveUser(&match)
+					groupA.RemoveUser(&match)
 
 				}
 
 			}
-
+			fmt.Println(groupA.users)
+			fmt.Println(groupB.users)
+			fmt.Println("")
 			matching[i] = matched
 			i++
 

@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"log"
 	"testing"
 
@@ -128,19 +129,19 @@ func TestGenTuple(t *testing.T) {
 
 	A := []entity.User{{Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}, {Id: "4", Name: "tete"}, {Id: "19", Name: "paul"}}
 
-	D := []entity.User{{Id: "1", Name: "tata"}, {Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}}
+	D := []entity.User{{Id: "3", Name: "tutu"}, {Id: "1", Name: "tata"}}
 
-	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, D)
+	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, D, A)
 
 	for _, match := range matching {
-		log.Printf("Match : [")
+		fmt.Printf("Match : [")
 		for _, user := range match.Users {
 
-			log.Printf("%s,", user.Name)
+			fmt.Println(user.Name)
 
 		}
 
-		log.Printf("]")
-		log.Println("")
+		fmt.Printf("]")
+		fmt.Println("")
 	}
 }

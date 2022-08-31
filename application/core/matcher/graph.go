@@ -54,7 +54,7 @@ func Search(users []*entity.User, n *entity.User) (bool, int) {
 
 // SearchNode findout a specifique node in a graph
 
-func (g *UserGraph) SearchUser(n *entity.User) (bool, int) {
+func (g *UserGraph) IsUserIn(n *entity.User) (bool, int) {
 	index := -1
 	find := false
 	if g.users != nil {
@@ -67,12 +67,15 @@ func (g *UserGraph) SearchUser(n *entity.User) (bool, int) {
 
 // remove a user in a list of users
 
-func Remove(s []*entity.User, i int) []*entity.User {
-	if i != len(s)-1 {
-		s[i] = s[len(s)-1]
-	}
+// func Remove(s []*entity.User, i int) []*entity.User {
+// 	if i != len(s)-1 {
+// 		s[i] = s[len(s)-1]
+// 	}
 
-	return s[:len(s)-1]
+// 	return s[:len(s)-1]
+// }
+func Remove(s []*entity.User, i int) []*entity.User {
+	return append(s[:i], s[i+1:]...)
 }
 
 // RemoveEdge remove an edge from the graph
@@ -90,7 +93,7 @@ func (g *UserGraph) RemoveEdge(n *entity.User) {
 func (g *UserGraph) RemoveUser(n *entity.User) {
 
 	g.RemoveEdge(n)
-	find, index := g.SearchUser(n) // find out the index of this node
+	find, index := g.IsUserIn(n) // find out the index of this node
 	if find {
 		g.users = Remove(g.users, index)
 
@@ -149,6 +152,7 @@ func (g *UserGraph) Subgraph(users []*entity.User) *UserGraph {
 	subG.users = users
 
 	for _, user := range users {
+		user := user
 		subG.edges[(*user).Id] = g.edges[(*user).Id]
 
 	}
