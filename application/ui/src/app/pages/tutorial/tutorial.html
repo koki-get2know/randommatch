@@ -1,57 +1,258 @@
-<ion-header no-border>
-  <ion-toolbar>
-    <ion-buttons slot="end">
-      <ion-button color='primary' (click)="startApp()" [hidden]="!showSkip">Skip</ion-button>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-back-button></ion-back-button>
     </ion-buttons>
+    <ion-title>Application Guide</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content fullscreen="true">
-  <swiper [slidesPerView]="1" (swiper)="setSwiperInstance($event)" (slideChangeTransitionStart)="onSlideChangeStart()">
-    <ng-template swiperSlide>
-      <div class="slide-container">
-      <img src="assets/img/ica-slidebox-img-1.png" class="slide-image" />
-      <h2 class="slide-title">
-        Welcome to
-        <b>ICA</b>
-      </h2>
-      <p>
-        The
-        <b>ionic conference app</b> is a practical preview of the ionic framework in action, and a demonstration of proper code
-        use.
-      </p>
-    </div>
-    </ng-template>
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <section>
+          <h2>Table of Contents</h2>
+          <ul>
+            <li>Introduction - Description of Koki App</li>
+            <li>Koki: How setup a matching</li>
+            <li>Account & Display</li>
+            <li>Tutorial</li>
+          </ul>
+        </section>
 
-    <ng-template swiperSlide>
-      <div class="slide-container">
-      <img src="assets/img/ica-slidebox-img-2.png" class="slide-image" />
-      <h2 class="slide-title">What is Ionic?</h2>
-      <p>
-        <b>Ionic Framework</b> is an open source SDK that enables developers to build high quality mobile apps with web technologies
-        like HTML, CSS, and JavaScript.</p>
-        </div>
-    </ng-template>
+        <section>
+          <h2>Introduction - Description Koki App</h2>
+          <p>
+            The Koki app provides an easy way for users to create and automate
+            matching and conversation generation for an organization (company,
+            class, not-for-profit, etc.)
+          </p>
+          <p>List of personas used this guide:</p>
+          <ul>
+            <li>
+              End user - a client's team member registered to use the platform
+            </li>
+            <li>
+              Superuser - is the application admin at client side. They have max
+              access to the make allowed configuration system management
+              including tuples periodic generation, tracking and reporting. A
+              superuser is not necessarily a user<br />
+            </li>
+            <li>
+              Lead Superuser - the who the contact with the application
+              provider. They approve, validate, and change Client requests.
+            </li>
+            <li>
+              Server Administrator - an agent at the app provider side who has
+              reasonable access the platform
+            </li>
+            <li>
+              Super Administrator - an administrator with full access and grant
+              or restrict access
+            </li>
+          </ul>
+          <p>
+            The guide is meant to provide superuser (or someone with similar
+            authority) simple instructions to use the application. It is
+            organized by section highlighted at the left of the welcome page
+            (see fig. 1)
+          </p>
+          <figure>
+            <img
+              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-1.png"
+              width="624"
+              height="268"
+              alt=""
+            />
+            <figcaption>Figure 1: Koki Home Page</figcaption>
+          </figure>
+        </section>
+        <section>
+          <h2>Koki: How to setup a matching</h2>
+          <p>An end-to- matching setup can be the following steps:</p>
+          <h3>Step 1: Uploading a user file</h3>
+          <p>
+            To upload a user list, select the Users section at the left of the
+            home page, on Upload at the top right (fig 2) and upload the file.
+            To be accepted by the system, a user file should follow the CSV
+            formatting structure . The structure of the file is given by the
+            information tag just next to the upload button of the file is given
+            by the tag just next to the upload button [ need shot for this]
+          </p>
+          <figure>
+            <img
+              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-2.png"
+              width="627"
+              height="269"
+              alt=""
+            />
+            <figcaption>Figure 2: Uploading Users File</figcaption>
+          </figure>
 
-    <ng-template swiperSlide>
-      <div class="slide-container">
-      <img src="assets/img/ica-slidebox-img-3.png" class="slide-image" />
-      <h2 class="slide-title">What is Ionic Appflow?</h2>
-      <p>
-        <b>Ionic Appflow</b> is a powerful set of services and features built on top of Ionic Framework that brings a totally new
-        level of app development agility to mobile dev teams.</p>
-        </div>
-    </ng-template>
+          <h3>Step 2a: Create a Matching</h3>
+          <p>To create a matching:</p>
+          <ul>
+            <li>select the New Match section at the left of the home page,</li>
+            <li>define the size of that will connect click Next (fig 3)</li>
+          </ul>
+          <figure>
+            <img
+              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-3.png"
+              width="624"
+              height="228"
+              alt=""
+            />
+            <figcaption>Figure 3: Selecting Tuple Size</figcaption>
+          </figure>
+          <ul>
+            <li>
+              select the users to match in the cycle. This sub list might from
+              the comprehensive list of users in case some members temporarily
+              unavailable for instance. Select all if applicable. Click Next
+              (fig 4).
+            </li>
+            <li>
+              the next screen, select preferred or forbidden tuples. Tip: select
+              tuple at a time and click Forbid or Prefer button. Validated the
+              selections properly displayed under the Forbidden Connections or
+              Preferred Connections categories the right . Once done Click Match
+              (fig 5)
+            </li>
+          </ul>
+          <h3>Step 2b: Create a Group</h3>
+          <p>
+            The organization might choose match members of a specific group A
+            with those of another group B. instance, conversations between
+            members of project A comity and those of the Project B can be
+            desired. Note that, the
+          </p>
+          <p>create a group-based matching:</p>
+          <ul>
+            <li>the New Group Match section at the left of home page,</li>
+            <li>
+              define the size of tuple that will connect by clicking oMatching
+              Size
+            </li>
+            <li>
+              each group, members to be matched by on grey arrow beside Users
+              Group X (fig)
+            </li>
+            <li>
+              the Users Group X selection window will then appear to allow group
+              users selection. Click Add once the selection is completed (fig ).
+              Repeat at least as many as the tuple size.
+            </li>
+            <li>
+              tuples can also selected from screen (like group members
+              selection) (fig 5)
+            </li>
+          </ul>
+          <figure>Insert figure here</figure>
+          <p>
+            Note that for a group-based matching, group members are selected,
+            and list is static. For a more group -based selection, a tag-based
+            matching might be more appropriate.
+          </p>
+          <h3>Step 2c: Matching by Tag</h3>
+          <p>
+            An organization might desire to match members based on a tag
+            attached to their profile e.g. background, location, function. For
+            instance, generate conversation between members of the Marketing and
+            those of the department. Compared to group-based, a tag-based
+            matching is it adapts to changes happening within the tagged
+            populations (member and arrival) additional administrative effort.
+          </p>
+          <p>To create a tag-based matching:</p>
+          <ul>
+            <li>
+              select the New Tag Match section at the left of the home page,
+            </li>
+            <li>
+              define the size of tuple that will connect by clicking on Matching
+              Size
+            </li>
+            <li>
+              for each group, define or select members be matched by clicking on
+              grey arrow beside Users Group X (fig)
+            </li>
+            <li>
+              the Users Group X selection window then appear to allow group
+              users selection. Click Add once the selection is completed (fig ).
+              Repeat at least as many groups as the size.
+            </li>
+            <li>
+              forbidden tuples also be selected from screen (like selection)
+              (fig 6)
+            </li>
+          </ul>
+          <figure>Insert figure here</figure>
+          <h3>Step 3: Validating/Modifying Matches</h3>
+          <p>
+            2 matching is completed, tuples can be validated, and quick edits
+            can necessary.
+          </p>
+          <ul>
+            <li>
+              From the Matching Results screen, perform a sanity over the tuples
+              generated
+            </li>
+            <li>
+              If necessary, the tuples that need to be adjusted (there should be
+              minimum 2 tuples selected)
+            </li>
+            <li>
+              Select the circle button with a white at top right of screen, then
+              click the circled arrow icon to reshuffle the users into different
+              tuples. (fig)
+            </li>
+          </ul>
+          <figure>
+            <img
+              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-4.png"
+              width="624"
+              height="256"
+              alt=""
+            />
+            <figcaption>
+              Figure 4: Notifying Tuples and Sending Invites
+            </figcaption>
+          </figure>
+          <h3>Step 4: Notifying Tuples and Sending Invites</h3>
 
-    <ng-template swiperSlide>
-      <div class="slide-container">
-      <img src="assets/img/ica-slidebox-img-4.png" class="slide-image" />
-      <h2 class="slide-title">Ready to Play?</h2>
-      <ion-button fill="clear" (click)="startApp()">
-        Continue
-        <ion-icon slot="end" name="arrow-forward"></ion-icon>
-      </ion-button>
-      </div>
-    </ng-template>
-  </swiper>
+          <p>
+            satisfied with the matching, select the circle button with a white
+            down arrow the to right Matching Results screen, click on the
+            envelope icon to notify and send meeting invites to matched users
+            (fig)
+          </p>
+          <figure>Insert figure here</figure>
+        </section>
+        <section>
+          <h2>Account & Display</h2>
+          <p>
+            Under the Account section, account and displayed information can be
+            managed by the superuser.
+          </p>
+          <h3>Account</h3>
+          <p>User's account information is available in this sub-section</p>
+          <h3>Support</h3>
+          <p>
+            Koki's support information, process and are available in subsection
+          </p>
+          <h3>Log out</h3>
+          <p>log out by clicking Logout</p>
+          <h3>Display - Dark Mode</h3>
+          <p>User can turn on/off the Dark Mode</p>
+          <h3>Language Selection</h3>
+          <p>Users can choose display language here.</p>
+        </section>
+        <section>
+          <h2>Tutorial</h2>
+          <p>This user guide can be accessed under Tutorial</p>
+        </section>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

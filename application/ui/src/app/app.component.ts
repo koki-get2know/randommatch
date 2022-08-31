@@ -166,7 +166,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   openTutorial() {
-    this.menu.enable(false);
+    //this.menu.enable(false);
     this.storage.set("ion_did_tutorial", false);
     this.router.navigateByUrl("/tutorial");
   }
