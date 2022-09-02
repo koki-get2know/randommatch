@@ -31,7 +31,6 @@ import { filter, takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { environment } from "../environments/environment";
 import { TranslateService } from "@ngx-translate/core";
-
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",

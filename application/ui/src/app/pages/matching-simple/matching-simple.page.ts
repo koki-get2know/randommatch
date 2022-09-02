@@ -35,6 +35,7 @@ export class MatchingSimplePage implements OnInit {
   masterCheck: boolean;
   checkBoxList: any;
   isLoading = false;
+  noUsersToShow = false;
 
   private slides: Swiper;
 
@@ -50,6 +51,7 @@ export class MatchingSimplePage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
+      this.noUsersToShow = this.users.length === 0;
     });
     this.initForm();
   }

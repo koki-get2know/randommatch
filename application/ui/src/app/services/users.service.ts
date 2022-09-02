@@ -3,18 +3,17 @@ import { HttpClient } from "@angular/common/http";
 import { map, shareReplay, switchMap } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { environment } from "../../environments/environment";
-import { LoremIpsum } from "lorem-ipsum";
-import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
-import avatar from "animal-avatar-generator";
+import { DomSanitizer } from "@angular/platform-browser";
 import { MsalService } from "@azure/msal-angular";
 import { appConstants } from "../constants";
+import { AvatarGenerator } from "random-avatar-generator";
 
 export class User {
   id: string;
   name?: string;
   tags?: string[];
   //angular only param
-  avatar?: SafeHtml;
+  avatar?: string; //SafeHtml;
   isChecked?: boolean = false;
 }
 
@@ -185,13 +184,17 @@ export class UsersService {
     };
   }
 
-  generateAvatarSvg(): SafeHtml {
-    const lorem = new LoremIpsum();
+  generateAvatarSvg(): string /*SafeHtml*/ {
+    /*const lorem = new LoremIpsum();
     const seed = this.cyrb128(lorem.generateWords(2));
     const rand = this.mulberry32(seed[0]);
     return this.sanitizer.bypassSecurityTrustHtml(
       avatar(`${rand()}`, { size: 40 })
-    );
+    );*/
+
+    const generator = new AvatarGenerator();
+    const avatar_url = generator.generateRandomAvatar();
+    return avatar_url;
   }
 
   compareconnection(forbconnec1: User[], forbconnec2: User[]) {

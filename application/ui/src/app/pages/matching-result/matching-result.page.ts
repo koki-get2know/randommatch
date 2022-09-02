@@ -31,7 +31,7 @@ export class MatchingResultPage implements OnInit {
   ngOnInit() {
     this.matchings = history.state.matchings;
 
-    this.matchings?.forEach((match) =>
+    /*this.matchings?.forEach((match) =>
       match.users.forEach((user) => {
         if (user.avatar) {
           user.avatar = this.sanitizer.bypassSecurityTrustHtml(
@@ -39,7 +39,7 @@ export class MatchingResultPage implements OnInit {
           );
         }
       })
-    );
+    );*/
     this.matchingRequest = history.state.matchingRequest;
     this.matchingGroupRequest = history.state.matchingGroupRequest;
   }
@@ -116,6 +116,9 @@ export class MatchingResultPage implements OnInit {
   }
 
   reloadSelectedMatches() {
+    if (this.matchesSelected.length === 0) {
+      this.matchesSelected = [...this.matchings];
+    }
     if (this.matchingRequest) {
       this.reloadSimpleSelectedMatches();
       this.matchesSelected = [];

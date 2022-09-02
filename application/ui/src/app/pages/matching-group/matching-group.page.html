@@ -59,7 +59,7 @@
             ></ion-icon
           ></ion-button>
         </form>
-        <ion-grid *ngIf="users?.length === 0" routerLink="/users-list">
+        <ion-grid *ngIf="this.noUsersToShow" routerLink="/users-list">
           <ion-row>
             <ion-col class="ion-text-center">
               <ion-icon
@@ -216,7 +216,8 @@
                 class="ion-padding-xs"
               >
                 <ion-avatar slot="start">
-                  <div [innerHTML]="user.avatar"></div>
+                  <!-- <div [innerHTML]="user.avatar"></div> -->
+                  <img [src]="user.avatar" />
                 </ion-avatar>
                 <div class="user-tags">
                   <ion-label class="no-overflow"> {{user.name}} </ion-label>
@@ -310,7 +311,8 @@
                         slot="start"
                       ></ion-checkbox>
                       <ion-avatar slot="start">
-                        <div [innerHTML]="user.avatar"></div>
+                        <!-- <div [innerHTML]="user.avatar"></div> -->
+                        <img [src]="user.avatar" />
                       </ion-avatar>
                       <div class="user-tags">
                         <ion-label class="no-overflow">

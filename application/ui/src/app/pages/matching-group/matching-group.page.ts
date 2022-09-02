@@ -32,6 +32,7 @@ export class MatchingGroupPage implements OnInit {
   usersSelectedForGroup: User[] = [];
   activeGroupToEdit = -1;
   isLoading = false;
+  noUsersToShow = false;
 
   @ViewChild("addUsersToGroup", { static: false })
   addUsersToGroup: IonicSelectableComponent;
@@ -53,6 +54,7 @@ export class MatchingGroupPage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
+      this.noUsersToShow = users.length === 0;
     });
 
     this.initForm();

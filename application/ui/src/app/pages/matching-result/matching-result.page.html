@@ -41,7 +41,8 @@
                 <ion-row>
                   <ion-col *ngFor="let user of match.users">
                     <ion-avatar>
-                      <div [innerHTML]="user.avatar"></div>
+                      <!-- <div [innerHTML]="user.avatar"></div> -->
+                      <img [src]="user.avatar" />
                     </ion-avatar>
                     <ion-label>
                       <h3>{{user.name}}</h3>

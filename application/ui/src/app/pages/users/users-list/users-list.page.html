@@ -61,7 +61,8 @@
   </div>
   <ion-item *ngFor="let user of userslist; let i=index" class="ion-padding-xs">
     <ion-avatar slot="start">
-      <div [innerHTML]="user.avatar"></div>
+      <!-- <div [innerHTML]="user.avatar"></div> -->
+      <img [src]="user.avatar" />
     </ion-avatar>
     <div class="user-tags">
       <ion-label class="no-overflow"> {{user.name}} </ion-label>
