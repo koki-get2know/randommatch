@@ -18,13 +18,6 @@ export class User {
   isChecked?: boolean = false;
 }
 
-export class MatchingStat {
-  id: string;
-  numGroups: number;
-  numConversation: number;
-  numFailed: number;
-}
-
 interface UsersRes {
   data: User[];
 }
@@ -50,11 +43,6 @@ interface JobResponse {
   status: string;
 }
 
-interface MatchingStats {
-  id: string,
-  matchingstats: MatchingStat[];
-}
-
 @Injectable({
   providedIn: "root",
 })
@@ -77,12 +65,6 @@ export class UsersService {
     return this.http
       .post<MatchingResponse>(`${this.urlApi}/group-matchings`, matchingReq)
       .pipe(map((res) => res.data));
-  }
-
-  getMathingStats(): Observable<MatchingStat[]> {
-    return this.http
-      .get<any>(`${this.urlApi}/matching/`)
-      .pipe(map((data) => data));
   }
 
   getOrganizations(): Observable<string[]> {

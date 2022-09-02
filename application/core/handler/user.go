@@ -15,8 +15,8 @@ import (
 )
 
 type UsersFile struct {
-	Organization string `form:"organization"`
-	File *multipart.FileHeader `form:"file" binding:"required"`
+	Organization string                `form:"organization"`
+	File         *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 func UploadUsers(c *gin.Context) {
@@ -24,7 +24,6 @@ func UploadUsers(c *gin.Context) {
 	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
 	roles := claims["roles"].([]interface{})
 	orgs := helper.ItemsWithPrefixInRole(roles, "Org.")
-
 
 	var usersFile UsersFile
 
@@ -50,18 +49,17 @@ func UploadUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid file content " + err.Error()})
 		return
 	}
-	
+
 	orgaUid, err := database.GetOrganizationByName(usersFile.Organization)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	if len(orgaUid) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Organization " + usersFile.Organization + " not found"})
-		return		
+		return
 	}
-
 
 	jobId, err := database.CreateUsers(users, orgaUid)
 
@@ -77,14 +75,14 @@ func GetUsers(c *gin.Context) {
 	defer helper.Duration(helper.Track("getUsers"))
 	var err error
 	var users []entity.User
-	org, ok := c.GetQuery("organization");
+	org, ok := c.GetQuery("organization")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "organization is mandatory"})
 		return
 	}
 	if tag, ok := c.GetQuery("tag"); !ok {
 		users, err = database.GetUsers(org)
-	}	else {
+	} else {
 		//Get users having the tag specified in the query
 		users, err = database.GetUsersByTag(org, tag)
 	}

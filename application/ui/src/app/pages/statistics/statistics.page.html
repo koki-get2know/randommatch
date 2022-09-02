@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>MATCHING STATISTICS</ion-title>
+    <ion-title>{{"MATCHING_STAT" | translate}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -8,26 +8,26 @@
   <ion-grid>
     <ion-row>
       <ion-col>
-        <ion-card>
+        <ion-card class="scolor">
           <ion-card-header>
-            <ion-card-subtitle color="primary">NUMBER OF USERS</ion-card-subtitle>
-            <ion-card-title>500</ion-card-title>
+            <ion-card-subtitle class="text-white">{{"NUM_SESSION_MATCHING" | translate}}</ion-card-subtitle>
+            <ion-card-title class="text-white">{{ numMatchingSection }}</ion-card-title>
           </ion-card-header>
         </ion-card>
       </ion-col>
       <ion-col>
-        <ion-card>
+        <ion-card class="convcolor">
           <ion-card-header>
-            <ion-card-subtitle color="primary">NUMBER OF CONVERSATION</ion-card-subtitle>
-            <ion-card-title>300</ion-card-title>
+            <ion-card-subtitle class="text-white">{{"NUM_CONVERSATION" | translate}}</ion-card-subtitle>
+            <ion-card-title class="text-white">{{ numconves }}</ion-card-title>
           </ion-card-header>
         </ion-card>
       </ion-col>
       <ion-col>
-        <ion-card>
+        <ion-card class="failedcolor">
           <ion-card-header>
-            <ion-card-subtitle color="primary">NUMBER OF FAILED</ion-card-subtitle>
-            <ion-card-title>26</ion-card-title>
+            <ion-card-subtitle class="text-white">{{"NUM_FAILED" | translate}}</ion-card-subtitle>
+            <ion-card-title  class="text-white">{{ numfailed }}</ion-card-title>
           </ion-card-header>
         </ion-card>
       </ion-col>
@@ -36,4 +36,27 @@
       
     </ion-row>
   </ion-grid>
+  <ion-list class="cus-card">
+    <ion-list-header>
+      <ion-label class="title-size">
+        Statistics chart
+      </ion-label>
+    </ion-list-header>
+  
+    <ion-item class="ion-padding-horizontal" lines="none">
+      <ion-label> Charts </ion-label>
+      <ion-select value="bar" okText="Create" cancelText="Cancel" mode="ios" (ionChange)="changeChart($event)" color="danger">
+        <ion-select-option value="bar">Bar</ion-select-option>
+        <ion-select-option value="line">Lines</ion-select-option>
+      </ion-select>
+    </ion-item>
+  
+  </ion-list>  
+  <ion-card>
+    <ion-card-content>
+      <div class="bg-white cus-card">
+        <canvas #chartCanvas></canvas>
+      </div>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

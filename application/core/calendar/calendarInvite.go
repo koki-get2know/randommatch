@@ -137,8 +137,7 @@ func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
 		NumFailed:        numFailed,
 	}
 
-	return database.CreateMatchingStat(matchingStat)
-
+	return database.CreateMatchingStat(matchingStat, "dummy")
 }
 
 func sendInvite(match *matcher.Match) error {

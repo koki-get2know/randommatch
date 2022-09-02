@@ -39,5 +39,13 @@
   "SELECTION_INCONSISTENT_WITH_SIZE": "Users selected not consistent with matching size",
   "SELECTION_SIZE_CONSISTENCY_INSTR": "Choose at least {{value}} to be consistent with the size chosen previously",
   "NO_MATCHING_GENERATED": "No matchings generated!",
-  "MINIMUM_NUM_IN_PREFERRED_CONNECTION": "The number of users in preferred connection must be {{value}}"
+  "MINIMUM_NUM_IN_PREFERRED_CONNECTION": "The number of users in preferred connection must be {{value}}",
+  "STATISTICS": "Statistics",
+  "NUM_SESSION_MATCHING": "NUMBER OF SESSIONS",
+  "NUM_CONVERSATION": "NUMBER OF CONVERSATIONS",
+  "NUM_FAILED": "NUMBER OF FAILED",
+  "MATCHING_STAT": "STATISTIQUES DE MATCHINGS",
+  "NUM_CONNEXIONS": "Created connexion",
+  "EMAIL_SENT": "Email Invite Sent",
+  "EMAIL_FAILED": "Email Invite Failed"
 }

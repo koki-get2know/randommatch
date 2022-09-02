@@ -9,8 +9,15 @@ import (
 )
 
 func GetMatchingStats(c *gin.Context) {
-	defer helper.Duration(helper.Track("getMatchings"))
-	matchings, err := database.GetMatchingStats()
+	defer helper.Duration(helper.Track("getMatchings2"))
+
+	org, ok := c.GetQuery("organization")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "organization is mandatory"})
+		return
+	}
+
+	matchings, err := database.GetMatchingStats(org)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
