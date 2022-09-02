@@ -94,10 +94,15 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     this.swUpdate.versionUpdates.subscribe(async (res) => {
-      console.log("swbUpdate being called");
-      const [text, message]: string[] = await this.translate
+      const translation: { [key: string]: string } = await this.translate
         .get(["RELOAD", "UPDATE_AVAILABLE"])
         .toPromise();
+      let message = "";
+      let text = "";
+      if (translation) {
+        message = translation["UPDATE_AVAILABLE"] || "New version available";
+        text = translation["RELOAD"] || "reload";
+      }
       const toast = await this.toastCtrl.create({
         message: message,
         position: "bottom",
@@ -115,7 +120,6 @@ export class AppComponent implements OnInit, OnDestroy {
         .onDidDismiss()
         .then(() => this.swUpdate.activateUpdate())
         .then(() => window.location.reload());
-      console.log("swbUpdate done");
     });
   }
 
