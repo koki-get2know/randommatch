@@ -48,7 +48,7 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "allowedCommonJsDependencies": ["lorem-ipsum"]
+            "allowedCommonJsDependencies": ["random-avatar-generator"]
           },
           "configurations": {
             "production": {

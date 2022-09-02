@@ -129,7 +129,7 @@ export class UsersService {
             map((res) => {
               if (res.data) {
                 for (const user of res.data) {
-                  user.avatar = this.generateAvatarSvg();
+                  user.avatar = this.generateAvatarSvg(user.id);
                 }
               }
               return res.data;
@@ -184,7 +184,7 @@ export class UsersService {
     };
   }
 
-  generateAvatarSvg(): string /*SafeHtml*/ {
+  generateAvatarSvg(seed: string): string /*SafeHtml*/ {
     /*const lorem = new LoremIpsum();
     const seed = this.cyrb128(lorem.generateWords(2));
     const rand = this.mulberry32(seed[0]);
@@ -193,7 +193,7 @@ export class UsersService {
     );*/
 
     const generator = new AvatarGenerator();
-    const avatar_url = generator.generateRandomAvatar();
+    const avatar_url = generator.generateRandomAvatar(seed);
     return avatar_url;
   }
 
