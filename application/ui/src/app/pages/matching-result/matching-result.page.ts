@@ -118,8 +118,10 @@ export class MatchingResultPage implements OnInit {
   reloadSelectedMatches() {
     if (this.matchingRequest) {
       this.reloadSimpleSelectedMatches();
+      this.matchesSelected = [];
     } else {
       this.groupReloadSelectedMatches();
+      this.matchesSelected = [];
     }
   }
 

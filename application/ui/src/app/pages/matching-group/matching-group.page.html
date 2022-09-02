@@ -18,8 +18,14 @@
   >
     <ng-template swiperSlide>
       <div class="slide-container vertical-center">
-        <h2 class="slide-title">{{"QUESTION_GROUP_SIZE" | translate}}</h2>
-        <form [formGroup]="matchingForm" (submit)="nextSlide()">
+        <h2 *ngIf="users?.length > 0" class="slide-title">
+          {{"QUESTION_GROUP_SIZE" | translate}}
+        </h2>
+        <form
+          [formGroup]="matchingForm"
+          (submit)="nextSlide()"
+          *ngIf="users?.length > 0"
+        >
           <ion-item class="ion-text-center matching-size-item">
             <ion-input
               class="matching-size-input"
@@ -53,6 +59,27 @@
             ></ion-icon
           ></ion-button>
         </form>
+        <ion-grid *ngIf="users?.length === 0" routerLink="/users-list">
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-icon
+                class="no-people-icon"
+                name="cloud-upload-outline"
+              ></ion-icon
+            ></ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-label lines="none">
+                <p>
+                  <ion-text color="primary">
+                    {{ "NO_ONE_UPLOAD_TO_START" | translate }}
+                  </ion-text>
+                </p>
+              </ion-label>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </div>
     </ng-template>
     <ng-template swiperSlide>
@@ -82,7 +109,7 @@
           <ion-button
             color="primary"
             (click)="addGroup()"
-            [disabled]="groups.length>=2"
+            [disabled]="groups.length>=2 || users?.length===0"
           >
             {{"CREATE_GROUP" | translate }}
           </ion-button>

@@ -24,6 +24,8 @@
   "INSTRUCTION_FILE_MULTI_TAGS": "Separate tags by a dash (-)",
   "FILE_SAMPLE": "File Sample",
   "MATCHING": "Matching",
+  "NO_ONE_UPLOAD_TO_START": "No one in here, upload a few people to start",
+  "NO_ONE_UPLOAD_INSTR": "No one in here, upload people using the option at the top right  corner of the navigation bar",
   "QUESTION_GROUP_SIZE": "How many people per connection do you want?",
   "QUESTION_GROUP_MIN_INSTR": "You must have at least 2 people per connection",
   "PREVIOUS": "BACK",

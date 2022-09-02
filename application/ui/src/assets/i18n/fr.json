@@ -24,6 +24,8 @@
   "INSTRUCTION_FILE_MULTI_TAGS": "Separer les étiquettes (tags) par un tiret (-)",
   "FILE_SAMPLE": "Échantillon du fichier",
   "MATCHING": "Matching",
+  "NO_ONE_UPLOAD_TO_START": "Il n'y a personne, chargez quelques personnes pour commencer",
+  "NO_ONE_UPLOAD_INSTR": "Il n'y a personne, chargez quelques personnes via le bouton situé en haut à droite de la barre de navigation",
   "QUESTION_GROUP_SIZE": "Combien de personnes par connexion voulez-vous ?",
   "QUESTION_GROUP_MIN_INSTR": "Vous devez avoir au moins 2 personnes par connexion",
   "PREVIOUS": "RETOUR",

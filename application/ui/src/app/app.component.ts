@@ -94,6 +94,7 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     this.swUpdate.versionUpdates.subscribe(async (res) => {
+      console.log("swbUpdate being called");
       const [text, message]: string[] = await this.translate
         .get(["RELOAD", "UPDATE_AVAILABLE"])
         .toPromise();
@@ -114,6 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
         .onDidDismiss()
         .then(() => this.swUpdate.activateUpdate())
         .then(() => window.location.reload());
+      console.log("swbUpdate done");
     });
   }
 
