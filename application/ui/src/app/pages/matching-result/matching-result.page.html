@@ -1,8 +1,8 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
       <ion-menu-button></ion-menu-button>
+      <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>{{ "MATCHING_RESULTS" | translate}}</ion-title>
   </ion-toolbar>
@@ -29,7 +29,7 @@
         <ion-list>
           <ion-item-group *ngFor="let match of matchings; let i=index">
             <ion-item-divider sticky>
-              <ion-label> Match {{i}} </ion-label>
+              <ion-label> Match {{i+1}} </ion-label>
             </ion-item-divider>
             <ion-item>
               <ion-checkbox
@@ -41,7 +41,8 @@
                 <ion-row>
                   <ion-col *ngFor="let user of match.users">
                     <ion-avatar>
-                      <div [innerHTML]="user.avatar"></div>
+                      <!-- <div [innerHTML]="user.avatar"></div> -->
+                      <img [src]="user.avatar" />
                     </ion-avatar>
                     <ion-label>
                       <h3>{{user.name}}</h3>

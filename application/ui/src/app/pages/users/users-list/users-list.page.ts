@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { ToastController } from "@ionic/angular";
 
@@ -11,8 +11,9 @@ import { ColorsTags } from "../../../constants";
   styleUrls: ["./users-list.page.scss"],
 })
 export class UsersListPage implements OnInit {
-  userslist: User[] = [];
+  users: User[] = [];
   isloading: boolean = false;
+  noUsersToShow = false;
   checkResponseUrl = "";
   ColorsTags = ColorsTags;
   constructor(
@@ -22,7 +23,7 @@ export class UsersListPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.getuserList();
+    this.getUsers();
   }
 
   uploadCsv(event: Event) {
@@ -52,7 +53,7 @@ export class UsersListPage implements OnInit {
         .subscribe((resp) => {
           responsestatus = resp.status;
           if (responsestatus === "Done") {
-            this.getuserList();
+            this.getUsers();
             this.isloading = false;
             clearInterval(limitedInterval);
           } else if (
@@ -62,15 +63,15 @@ export class UsersListPage implements OnInit {
           ) {
             this.isloading = false;
             clearInterval(limitedInterval);
-            console.log(`responsestatus ${responsestatus} interval cleared!`);
           }
         });
     }, 500);
   }
 
-  getuserList() {
+  getUsers() {
     this.userService.getUsersdata().subscribe((users) => {
-      this.userslist = users;
+      this.users = users;
+      this.noUsersToShow = users.length === 0;
     });
   }
 }

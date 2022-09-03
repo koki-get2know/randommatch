@@ -111,13 +111,13 @@ func generateMatchingByTag(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 tags"})
 		return
 	}
-	tag1, err := database.GetUsersByTag(req.Organization, req.Tags[0])
+	usersTag1, err := database.GetUsersByTag(req.Organization, req.Tags[0])
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	tag2, err := database.GetUsersByTag(req.Organization, req.Tags[1])
+	usersTag2, err := database.GetUsersByTag(req.Organization, req.Tags[1])
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -125,15 +125,15 @@ func generateMatchingByTag(c *gin.Context) {
 	}
 
 	for _, u := range req.Exclude {
-		tag1 = u.RmUser(tag1)
+		usersTag1 = u.RmUser(usersTag1)
 	}
 	for _, u := range req.Exclude {
-		tag2 = u.RmUser(tag2)
+		usersTag2 = u.RmUser(usersTag2)
 	}
 
 	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
 
-		req.ForbiddenConnections, req.Size, tag1, tag2)
+		req.ForbiddenConnections, req.Size, usersTag1, usersTag2)
 
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 }

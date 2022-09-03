@@ -67,9 +67,9 @@ func csvReaderToUsers(r io.Reader) ([]entity.User, error) {
 		if val, exists := headerCellIndex["Role"]; exists {
 			user.Role = strings.TrimSpace(record[val])
 		}
-		if val, exists := headerCellIndex["Groups"]; exists {
+		if val, exists := headerCellIndex["Tags"]; exists {
 			if strings.TrimSpace(record[val]) != "" {
-				user.Groups = strings.Split(strings.TrimSpace(record[val]), "-")
+				user.Tags = strings.Split(strings.TrimSpace(record[val]), "-")
 			}
 		}
 

@@ -12,6 +12,7 @@ import { ColorsTags } from "../../constants";
 import SwiperCore, { Pagination, Swiper } from "swiper";
 import { NavigationExtras, Router } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
+import { finalize } from "rxjs/operators";
 
 SwiperCore.use([Pagination]);
 
@@ -30,6 +31,8 @@ export class MatchingGroupPage implements OnInit {
   users: User[] = [];
   usersSelectedForGroup: User[] = [];
   activeGroupToEdit = -1;
+  isLoading = false;
+  noUsersToShow = false;
 
   @ViewChild("addUsersToGroup", { static: false })
   addUsersToGroup: IonicSelectableComponent;
@@ -51,6 +54,7 @@ export class MatchingGroupPage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
+      this.noUsersToShow = users.length === 0;
     });
 
     this.initForm();
@@ -74,9 +78,7 @@ export class MatchingGroupPage implements OnInit {
   }
 
   prevSlide() {
-    this.slides.allowSlideNext = true;
     this.slides.slidePrev();
-    this.slides.allowSlideNext = false;
   }
 
   nextSlide() {
@@ -115,9 +117,7 @@ export class MatchingGroupPage implements OnInit {
         }
         return true;
       });
-      this.slides.allowSlideNext = true;
       this.slides.slideNext();
-      this.slides.allowSlideNext = false;
     }
   }
 
@@ -139,30 +139,49 @@ export class MatchingGroupPage implements OnInit {
     }
   }
 
+  searchByTags(event: { component: IonicSelectableComponent; text: string }) {
+    event.component.startSearch();
+    const text = event.text.trim().toLocaleLowerCase();
+    if (text) {
+      event.component.items = this.users.filter(
+        (user) =>
+          user.name.toLocaleLowerCase().includes(text) ||
+          user.tags.some((tag) => tag.toLocaleLowerCase().includes(text))
+      );
+    } else {
+      event.component.items = this.users;
+    }
+    event.component.endSearch();
+  }
+
   addNewUsersToGroup() {
     this.addUsersToGroup.confirm();
-    if (this.activeGroupToEdit === -1) {
-      this.groups = this.groups
-        .map((group: User[]) => {
-          return group.filter(
-            (user) => !this.usersSelectedForGroup.some((u) => u.id === user.id)
-          );
-        })
-        .filter((group) => group.length > 0);
-      this.groups.push([...this.usersSelectedForGroup]);
-      this.groupsAccordion.value = (this.groups.length - 1).toString();
-    } else {
-      this.groups = this.groups
-        .map((group: User[], index: number) => {
-          if (index === this.activeGroupToEdit) {
-            this.groupsAccordion.value = index.toString();
-            return [...this.usersSelectedForGroup];
-          }
-          return group.filter(
-            (user) => !this.usersSelectedForGroup.some((u) => u.id === user.id)
-          );
-        })
-        .filter((group) => group.length > 0);
+    if (this.usersSelectedForGroup.length > 0) {
+      if (this.activeGroupToEdit === -1) {
+        this.groups = this.groups
+          .map((group: User[]) => {
+            return group.filter(
+              (user) =>
+                !this.usersSelectedForGroup.some((u) => u.id === user.id)
+            );
+          })
+          .filter((group) => group.length > 0);
+        this.groups.push([...this.usersSelectedForGroup]);
+        this.groupsAccordion.value = (this.groups.length - 1).toString();
+      } else {
+        this.groups = this.groups
+          .map((group: User[], index: number) => {
+            if (index === this.activeGroupToEdit) {
+              this.groupsAccordion.value = index.toString();
+              return [...this.usersSelectedForGroup];
+            }
+            return group.filter(
+              (user) =>
+                !this.usersSelectedForGroup.some((u) => u.id === user.id)
+            );
+          })
+          .filter((group) => group.length > 0);
+      }
     }
     this.addUsersToGroup.clear();
     this.addUsersToGroup.close();
@@ -319,8 +338,10 @@ export class MatchingGroupPage implements OnInit {
       forbiddenConnections: this.forbiddenConnections,
     };
 
+    this.isLoading = true;
     this.matchService
       .makematchgroup(matchingRequest)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe((matchings: Matching[]) => {
         if (matchings !== null) {
           matchings.forEach((match) =>
@@ -343,11 +364,14 @@ export class MatchingGroupPage implements OnInit {
   }
 
   // matching result
-  matchingresult(matchings: Matching[], matchingRequest: MatchingGroupReq) {
+  matchingresult(
+    matchings: Matching[],
+    matchingGroupRequest: MatchingGroupReq
+  ) {
     const navigationExtras: NavigationExtras = {
       state: {
         matchings,
-        matchingRequest,
+        matchingGroupRequest,
       },
     };
     this.router.navigate(["/matching-result"], navigationExtras);

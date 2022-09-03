@@ -193,7 +193,7 @@ func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error 
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
 				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
 				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
-				"WITH user.Groups AS tags, u AS u "+
+				"WITH user.Tags AS tags, u AS u "+
 				"UNWIND tags AS tag "+
 				"MERGE (t: Tag {lower_name: toLower(tag)}) "+
 				"ON CREATE SET t += {name: tag} "+
@@ -327,7 +327,7 @@ func GetUsers(organization string) ([]entity.User, error) {
 				entity.User{
 					Id:     user["uid"].(string),
 					Name:   user["name"].(string),
-					Groups: tags,
+					Tags: tags,
 				})
 		}
 

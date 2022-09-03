@@ -31,7 +31,6 @@ import { filter, takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { environment } from "../environments/environment";
 import { TranslateService } from "@ngx-translate/core";
-
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
@@ -46,13 +45,8 @@ export class AppComponent implements OnInit, OnDestroy {
       icon: "people",
     },
     {
-      title: "NEW_MATCH",
+      title: "MATCHING",
       url: "matching",
-      icon: "calendar",
-    },
-    {
-      title: "NEW_GROUP_MATCH",
-      url: "matching-group",
       icon: "calendar",
     },
   ];
@@ -99,9 +93,15 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     this.swUpdate.versionUpdates.subscribe(async (res) => {
-      const [text, message]: string[] = await this.translate
+      const translation: { [key: string]: string } = await this.translate
         .get(["RELOAD", "UPDATE_AVAILABLE"])
         .toPromise();
+      let message = "";
+      let text = "";
+      if (translation) {
+        message = translation["UPDATE_AVAILABLE"] || "New version available";
+        text = translation["RELOAD"] || "reload";
+      }
       const toast = await this.toastCtrl.create({
         message: message,
         position: "bottom",
@@ -171,7 +171,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   openTutorial() {
-    this.menu.enable(false);
+    //this.menu.enable(false);
     this.storage.set("ion_did_tutorial", false);
     this.router.navigateByUrl("/tutorial");
   }

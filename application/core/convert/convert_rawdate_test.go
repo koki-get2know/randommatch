@@ -14,7 +14,7 @@ func TestConvertRawDataToJson(t *testing.T) {
 			"id": "",
 			"name": "Pins Prestilien",
 			"email": "pinsdev24@gmail.com",
-			"groups": null,
+			"tags": null,
 			"gender": "Male",
 			"birthday": "10/01",
 			"hobbies": [
@@ -40,7 +40,7 @@ func TestConvertRawDataToJson(t *testing.T) {
 			"id": "",
 			"name": "Pins Prestilien",
 			"email": "pinsdev24@gmail.com",
-			"groups": [
+			"tags": [
 				"DS",
 				"IA",
 				"SPACE"

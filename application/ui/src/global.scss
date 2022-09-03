@@ -49,3 +49,15 @@
   -ms-user-select: text;
   user-select: text;
 }
+
+.vertical-center {
+  margin-top: calc(50vh - 3.5rem);
+  transform: translateY(-50%);
+}
+
+.no-people-icon {
+  color: var(--ion-color-primary);
+  min-width: 3rem;
+  min-height: 3rem;
+  margin: 0 5rem;
+}

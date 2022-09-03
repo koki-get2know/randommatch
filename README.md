@@ -22,3 +22,10 @@ We recommend you work with https://code.visualstudio.com/ It has various plugins
 ## Ionic
 * https://ionicframework.com/docs/developing/starting
 * https://www.youtube.com/c/SimonGrimmDev
+
+# Material
+* https://squoosh.app/editor
+* https://caniuse.com/webp
+* https://unsplash.com/
+* https://coolors.co/
+
