@@ -1,39 +1,38 @@
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'application/core/**'
-      - '.github/workflows/workflow.go.pr.yml'
+      - "application/core/**"
+      - ".github/workflows/workflow.go.pr.yml"
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+      - uses: actions/checkout@v3
 
-    - name: Build  Go Backend  
-      run: |
-        cd ./application/core
-        go get
-        go build ./...
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
 
-    - name: Test Go Backend
-      continue-on-error: false
-      run: |
-       cd ./application/core
-       GIN_MODE=release go test ./... -v
+      - name: Build  Go Backend
+        run: |
+          cd ./application/core
+          go get
+          go build ./...
 
-    - name: Test Go Docker Image
-      run: |
-        cd ./application/core
-        docker build -t testing .
-        docker run --name go_container -d -p8080:8080 testing
-        curl localhost:8080/albums
-        docker stop go_container && docker rm -f go_container
+      - name: Test Go Backend
+        continue-on-error: false
+        run: |
+          cd ./application/core
+          GIN_MODE=release go test ./... -v
+
+      - name: Test Go Docker Image
+        run: |
+          cd ./application/core
+          docker build -t testing .
+          docker run --name go_container -d -p8080:8080 testing
+          curl localhost:8080/health-check
+          docker stop go_container && docker rm -f go_container

@@ -4,10 +4,9 @@
       <ion-menu-button></ion-menu-button>
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>{{"GROUP_MATCHING" | translate}}</ion-title>
+    <ion-title>{{"SIMPLE_MATCHING" | translate}}</ion-title>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
   <swiper
     [slidesPerView]="1"
@@ -18,7 +17,7 @@
   >
     <ng-template swiperSlide>
       <div class="slide-container vertical-center">
-        <h2 *ngIf="users?.length > 0" class="slide-title">
+        <h2 class="slide-title" *ngIf="users?.length >0">
           {{"QUESTION_GROUP_SIZE" | translate}}
         </h2>
         <form
@@ -41,7 +40,7 @@
             ></ion-label>
             <ion-label
               *ngIf="!form.matchingSize.valid &&
-          form.matchingSize.dirty"
+              form.matchingSize.dirty"
               class="validator-error ion-text-wrap"
             >
               <p>{{ "QUESTION_GROUP_MIN_INSTR" | translate}}</p>
@@ -59,7 +58,7 @@
             ></ion-icon
           ></ion-button>
         </form>
-        <ion-grid *ngIf="this.noUsersToShow" routerLink="/users-list">
+        <ion-grid *ngIf="noUsersToShow" routerLink="/users-list">
           <ion-row>
             <ion-col class="ion-text-center">
               <ion-icon
@@ -84,7 +83,10 @@
     </ng-template>
     <ng-template swiperSlide>
       <div class="slide-container">
-        <h2 class="slide-title">{{"GROUP_MATCH_INSTR" | translate }} (2)</h2>
+        <h2 class="slide-title">
+          {{"USERS_SELECTION_INSTR" | translate }}<br />
+          ({{ "AT_LEAST"| translate }} {{form.matchingSize.value}})
+        </h2>
         <ion-button
           class="ion-margin-top"
           color="secondary"
@@ -98,148 +100,46 @@
           class="ion-margin-top"
           color="primary"
           fill="clear"
-          [disabled]="groups.length!==2"
           (click)="nextSlide()"
+          [disabled]="totalSelected < 2"
           >{{ "NEXT" | translate}}<ion-icon
             slot="end"
             name="arrow-forward-outline"
           ></ion-icon
         ></ion-button>
-        <div class="ion-padding-vertical">
-          <ion-button
+        <ion-item *ngIf="users.length>0">
+          <ion-label>{{ "SELECT_ALL" | translate }}</ion-label>
+          <ion-checkbox
+            slot="start"
+            [(ngModel)]="masterCheck"
+            [indeterminate]="isIndeterminate"
+            (click)="checkMaster()"
+          ></ion-checkbox>
+        </ion-item>
+
+        <ion-item
+          *ngFor="let user of users; let i=index"
+          class="ion-padding-xs"
+        >
+          <ion-checkbox
+            [(ngModel)]="user.isChecked"
+            (click)="checkEvent($event,user)"
             color="primary"
-            (click)="addGroup()"
-            [disabled]="groups.length>=2 || users?.length===0"
-          >
-            {{"CREATE_GROUP" | translate }}
-          </ion-button>
-        </div>
-
-        <div [hidden]="true">
-          <ionic-selectable
-            #addUsersToGroup
-            [(ngModel)]="usersSelectedForGroup"
-            [items]="users"
-            itemValueField="id"
-            itemTextField="name"
-            [canSearch]="true"
-            [isMultiple]="true"
-            searchFailText="{{ 'NO_PEOPLE_FOUND' | translate }}"
-            [canClear]="true"
-            (onSearch)="searchByTags($event)"
-            searchPlaceholder="{{ 'SEARCH_BY_NAME_OR_TAG' | translate }}"
-          >
-            <ng-template ionicSelectableHeaderTemplate>
-              <ion-toolbar color="primary">
-                <ion-buttons slot="end">
-                  <ion-button fill="clear" (click)="addUsersToGroup.close()">
-                    <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-                  </ion-button>
-                </ion-buttons>
-                <ion-title>{{ "SELECT_PEOPLE" | translate}}</ion-title>
-              </ion-toolbar>
-            </ng-template>
-            <ng-template ionicSelectableItemTemplate let-user="item">
-              <div class="user-tags">
-                <ion-label class="no-overflow"> {{user.name}} </ion-label>
-                <div>
-                  <ion-chip *ngFor="let tag of user.tags" color="primary"
-                    >{{tag}}
-                  </ion-chip>
-                </div>
-              </div>
-            </ng-template>
-            <ng-template ionicSelectableFooterTemplate>
-              <ion-footer>
-                <ion-grid>
-                  <ion-row class="ion-justify-content-between">
-                    <ion-col size="6" size-md="5">
-                      <ion-button
-                        color="primary"
-                        fill="outline"
-                        (click)="toggleAll()"
-                      >
-                        {{ (this.addUsersToGroup.itemsToConfirm.length === 0)?
-                        ("CHECK_ALL" | translate) : ("UNCHECK_ALL" | translate)
-                        }}
-                      </ion-button>
-                    </ion-col>
-                    <ion-col size="6" size-md="5" class="ion-text-end">
-                      <ion-button
-                        color="primary"
-                        (click)="addNewUsersToGroup()"
-                        [disabled]="addUsersToGroup.itemsToConfirm.length === 0"
-                      >
-                        {{ "ADD_TO_GROUP" | translate }}
-                      </ion-button>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-footer>
-            </ng-template>
-          </ionic-selectable>
-        </div>
-
-        <ion-accordion-group [multiple]="true" #groupsAccordion>
-          <ion-accordion
-            class="ion-margin-bottom"
-            [value]="i"
-            *ngFor="let group of groups; let i=index"
-          >
-            <ion-item slot="header" color="light">
-              <ion-button
-                (click)="removeGroup($event, i)"
-                shape="round"
-                fill="clear"
-                color="danger"
-                slot="start"
-                ><ion-icon slot="icon-only" name="close-outline"></ion-icon
-              ></ion-button>
-              <ion-label class="flex-label"
-                >{{ "GROUP" | translate}} {{i+1}} &mdash;<ion-badge
-                  >{{group.length}}</ion-badge
-                ></ion-label
-              >
-
-              <ion-button
-                fill="clear"
-                shape="round"
-                size="small"
-                color="primary"
-                (click)="editGroup($event, i)"
-                ><ion-icon slot="icon-only" name="pencil-outline"></ion-icon
-              ></ion-button>
-            </ion-item>
-            <div slot="content" class="ion-padding">
-              <ion-item
-                *ngFor="let user of group; let j=index"
-                class="ion-padding-xs"
-              >
-                <ion-avatar slot="start">
-                  <!-- <div [innerHTML]="user.avatar"></div> -->
-                  <img [src]="user.avatar" />
-                </ion-avatar>
-                <div class="user-tags">
-                  <ion-label class="no-overflow"> {{user.name}} </ion-label>
-                  <div>
-                    <ion-chip
-                      *ngFor="let tag of user.tags"
-                      [color]="ColorsTags[j%2]"
-                      >{{tag}}
-                    </ion-chip>
-                  </div>
-                </div>
-                <ion-button
-                  (click)="removeUserFromGroup($event, i, j)"
-                  shape="round"
-                  fill="clear"
-                  color="danger"
-                  ><ion-icon slot="icon-only" name="close-outline"></ion-icon
-                ></ion-button>
-              </ion-item>
+            slot="start"
+          ></ion-checkbox>
+          <ion-avatar slot="start">
+            <!-- <div [innerHTML]="user.avatar"></div> -->
+            <img [src]="user.avatar" />
+          </ion-avatar>
+          <div class="user-tags">
+            <ion-label class="no-overflow"> {{user.name}} </ion-label>
+            <div>
+              <ion-chip *ngFor="let tag of user.tags" [color]="ColorsTags[i%2]"
+                >{{tag}}
+              </ion-chip>
             </div>
-          </ion-accordion>
-        </ion-accordion-group>
+          </div>
+        </ion-item>
       </div>
     </ng-template>
     <ng-template swiperSlide>
@@ -260,6 +160,7 @@
           class="ion-margin-top match-btn"
           color="primary"
           (click)="randommatch()"
+          [disabled]="usersSelected.length < 2"
         >
           {{ "MATCH" | translate}}
           <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
@@ -290,46 +191,31 @@
           </ion-row>
           <ion-row>
             <ion-col size="12" size-md="6" class="vhheight">
-              <ion-accordion-group [multiple]="true" #restrictedGroupsAccordion>
-                <ion-accordion
-                  class="ion-margin-bottom"
-                  [value]="i"
-                  *ngFor="let group of groups; let i=index"
-                >
-                  <ion-item slot="header" color="light">
-                    <ion-label>{{ "GROUP" | translate}} {{i+1}}</ion-label>
-                  </ion-item>
-                  <div slot="content" class="ion-padding-vertical">
-                    <ion-item
-                      *ngFor="let user of group; let j=index"
-                      class="ion-padding-xs"
-                    >
-                      <ion-checkbox
-                        [(ngModel)]="user.isChecked"
-                        (click)="selectToRestrict($event,user)"
-                        color="primary"
-                        slot="start"
-                      ></ion-checkbox>
-                      <ion-avatar slot="start">
-                        <!-- <div [innerHTML]="user.avatar"></div> -->
-                        <img [src]="user.avatar" />
-                      </ion-avatar>
-                      <div class="user-tags">
-                        <ion-label class="no-overflow">
-                          {{user.name}}
-                        </ion-label>
-                        <div>
-                          <ion-chip
-                            *ngFor="let tag of user.tags"
-                            [color]="ColorsTags[j%2]"
-                            >{{tag}}
-                          </ion-chip>
-                        </div>
-                      </div>
-                    </ion-item>
+              <ion-item
+                *ngFor="let user of usersSelected; let i=index"
+                class="ion-padding-xs"
+              >
+                <ion-checkbox
+                  [(ngModel)]="user.isChecked"
+                  (click)="selectToRestrict($event,user)"
+                  color="primary"
+                  slot="start"
+                ></ion-checkbox>
+                <ion-avatar slot="start">
+                  <!-- <div [innerHTML]="user.avatar"></div> -->
+                  <img [src]="user.avatar" />
+                </ion-avatar>
+                <div class="user-tags">
+                  <ion-label class="no-overflow"> {{user.name}} </ion-label>
+                  <div class="tags">
+                    <ion-chip
+                      *ngFor="let tag of user.tags"
+                      [color]="ColorsTags[i%2]"
+                      >{{tag}}
+                    </ion-chip>
                   </div>
-                </ion-accordion>
-              </ion-accordion-group>
+                </div>
+              </ion-item>
             </ion-col>
             <ion-col size-md="6">
               <ion-grid class="grid-connections">

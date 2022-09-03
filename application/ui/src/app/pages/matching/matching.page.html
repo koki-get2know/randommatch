@@ -1,3 +1,4 @@
+<ion-router-outlet id="matching"></ion-router-outlet>
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
@@ -6,228 +7,47 @@
     <ion-title>{{"MATCHING" | translate}}</ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content>
-  <swiper
-    [slidesPerView]="1"
-    [pagination]="true"
-    [initialSlide]="0"
-    [allowSlideNext]="false"
-    (swiper)="setSwiperInstance($event)"
-  >
-    <ng-template swiperSlide>
-      <div class="slide-container vertical-center">
-        <h2 class="slide-title">{{"QUESTION_GROUP_SIZE" | translate}}</h2>
-        <form [formGroup]="matchingForm" (submit)="nextSlide()">
-          <ion-item class="ion-text-center matching-size-item">
-            <ion-input
-              class="matching-size-input"
-              id="matching-size"
-              formControlName="matchingSize"
-              type="number"
-              [autofocus]="true"
-              clearInput
-            ></ion-input>
-            <ion-label
-              for="matching-size"
-              aria-label="&nbsp;users per group"
-            ></ion-label>
-            <ion-label
-              *ngIf="!form.matchingSize.valid &&
-              form.matchingSize.dirty"
-              class="validator-error ion-text-wrap"
+  <ion-grid class="mt-3-desktop">
+    <ion-row class="ion-justify-content-evenly">
+      <ion-col size="12" size-md="5">
+        <ion-card class="card-hover" routerLink="simple">
+          <img
+            class="simple-img"
+            src="../../../assets/img/coworkersinoffice.webp"
+            alt="multi ethnic coworker discussing in office"
+          />
+          <ion-card-header>
+            <ion-card-title
+              >{{ "SIMPLE_MATCHING" | translate }}
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            {{ "SIMPLE_MATCHING_CARD_DESC" | translate }}
+            <ion-button expand="block" class="mt-3" routerLink="simple"
+              >{{ "SAME_GROUP_MATCHING" | translate }}</ion-button
             >
-              <p>{{ "QUESTION_GROUP_MIN_INSTR" | translate}}</p>
-            </ion-label>
-          </ion-item>
-          <ion-button
-            class="ion-margin-top"
-            type="submit"
-            color="primary"
-            fill="clear"
-            [disabled]="!matchingForm.valid"
-            >{{ "NEXT" | translate}}<ion-icon
-              slot="end"
-              name="arrow-forward-outline"
-            ></ion-icon
-          ></ion-button>
-        </form>
-      </div>
-    </ng-template>
-    <ng-template swiperSlide>
-      <div class="slide-container">
-        <h2 class="slide-title">
-          {{"USERS_SELECTION_INSTR" | translate }}<br />
-          ({{ "AT_LEAST"| translate }} {{form.matchingSize.value}})
-        </h2>
-        <ion-button
-          class="ion-margin-top"
-          color="primary"
-          fill="clear"
-          (click)="nextSlide()"
-          [disabled]="totalSelected < 2"
-          >{{ "NEXT" | translate}}<ion-icon
-            slot="end"
-            name="arrow-forward-outline"
-          ></ion-icon
-        ></ion-button>
-        <ion-item *ngIf="users.length>0">
-          <ion-label>{{ "SELECT_ALL" | translate }}</ion-label>
-          <ion-checkbox
-            slot="start"
-            [(ngModel)]="masterCheck"
-            [indeterminate]="isIndeterminate"
-            (click)="checkMaster()"
-          ></ion-checkbox>
-        </ion-item>
-
-        <ion-item
-          *ngFor="let user of users; let i=index"
-          class="ion-padding-xs"
-        >
-          <ion-checkbox
-            [(ngModel)]="user.isChecked"
-            (click)="checkEvent($event,user)"
-            color="primary"
-            slot="start"
-          ></ion-checkbox>
-          <ion-avatar slot="start">
-            <div [innerHTML]="user.avatar"></div>
-          </ion-avatar>
-          <div class="user-tags">
-            <ion-label class="no-overflow"> {{user.name}} </ion-label>
-            <div>
-              <ion-chip
-                *ngFor="let tag of user.groups"
-                [color]="ColorsTags[i%2]"
-                >{{tag}}
-              </ion-chip>
-            </div>
-          </div>
-        </ion-item>
-      </div>
-    </ng-template>
-    <ng-template swiperSlide>
-      <div class="slide-container">
-        <h2 class="slide-title">
-          {{"QUESTION_RESTRICTED_CONNECTION" | translate }}
-        </h2>
-        <ion-button
-          class="ion-margin-top match-btn"
-          color="primary"
-          (click)="randommatch()"
-          [disabled]="usersSelected.length < 2"
-        >
-          {{ "MATCH" | translate}}
-          <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
-        </ion-button>
-        <ion-grid>
-          <ion-row class="ion-justify-content-center">
-            <ion-col class="scroll-button-parent">
-              <ion-button (click)="forbid()" color="danger" fill="clear">
-                {{ "FORBID" | translate}}
-                <ion-icon slot="end" name="thumbs-down-outline"></ion-icon>
-              </ion-button>
-              <ion-button (click)="prefer()" color="success" fill="clear">
-                {{ "PREFER" | translate}}
-                <ion-icon slot="end" name="thumbs-up-outline"></ion-icon>
-              </ion-button>
-              <ion-button
-                *ngIf="forbiddenConnections.length>0 || preferredConnections.length>0 "
-                class="scroll-button"
-                (click)="scroll(forbidden)"
-                shape="round"
-                fill="clear"
-                color="primary"
-              >
-                <ion-icon slot="start" name="arrow-down-outline"></ion-icon>
-              </ion-button>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="6" class="vhheight">
-              <ion-item
-                *ngFor="let user of usersSelected; let i=index"
-                class="ion-padding-xs"
-              >
-                <ion-checkbox
-                  [(ngModel)]="user.isChecked"
-                  (click)="selectToRestrict($event,user)"
-                  color="primary"
-                  slot="start"
-                ></ion-checkbox>
-                <ion-avatar slot="start">
-                  <div [innerHTML]="user.avatar"></div>
-                </ion-avatar>
-                <div class="user-tags">
-                  <ion-label class="no-overflow"> {{user.name}} </ion-label>
-                  <div class="tags">
-                    <ion-chip
-                      *ngFor="let tag of user.groups"
-                      [color]="ColorsTags[i%2]"
-                      >{{tag}}
-                    </ion-chip>
-                  </div>
-                </div>
-              </ion-item>
-            </ion-col>
-            <ion-col size-md="6">
-              <ion-grid class="grid-connections">
-                <ion-row class="border-bottom halfvh">
-                  <ion-col>
-                    <h3 #forbidden>{{"FORBIDDEN_CONNECTIONS" | translate}}</h3>
-                    <ion-list *ngIf="forbiddenConnections.length">
-                      <ion-item
-                        *ngFor="let forbiddenConnection of forbiddenConnections; let i=index"
-                      >
-                        <ion-grid>
-                          <ion-row>
-                            <ion-col *ngFor="let user of forbiddenConnection">
-                              <ion-label> {{user.name}} </ion-label>
-                            </ion-col>
-                          </ion-row>
-                        </ion-grid>
-                        <ion-button
-                          fill="clear"
-                          color="danger"
-                          (click)="removeForbiddenConnection(i)"
-                        >
-                          <ion-icon name="close-outline"></ion-icon>
-                        </ion-button>
-                      </ion-item>
-                    </ion-list>
-                  </ion-col>
-                </ion-row>
-                <ion-row class="halfvh">
-                  <ion-col>
-                    <h3>{{"PREFERRED_CONNECTIONS" | translate}}</h3>
-                    <ion-list *ngIf="preferredConnections.length">
-                      <ion-item
-                        *ngFor="let preferredConnection of preferredConnections; let i=index"
-                      >
-                        <ion-grid>
-                          <ion-row>
-                            <ion-col *ngFor="let user of preferredConnection">
-                              <ion-label> {{user.name}} </ion-label>
-                            </ion-col>
-                          </ion-row>
-                        </ion-grid>
-
-                        <ion-button
-                          fill="clear"
-                          color="danger"
-                          (click)="removePreferredConnection(i)"
-                        >
-                          <ion-icon name="close-outline"></ion-icon>
-                        </ion-button>
-                      </ion-item>
-                    </ion-list>
-                  </ion-col>
-                </ion-row>
-              </ion-grid>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </div>
-    </ng-template>
-  </swiper>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size-md="5">
+        <ion-card class="card-hover" routerLink="group">
+          <img
+            src="../../../assets/img/threegirlsonamac-unsplash.webp"
+            alt="three girls sitting around a computer"
+          />
+          <ion-card-header>
+            <ion-card-title>{{"GROUP_MATCHING" | translate}}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            {{ "GROUP_MATCHING_CARD_DESC" | translate }}
+            <ion-button expand="block" class="mt-3" routerLink="group"
+              >{{"CROSS_GROUP_MATCHING" | translate}}</ion-button
+            >
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

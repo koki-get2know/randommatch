@@ -1,24 +1,23 @@
 global:
-    registry: 'randommatch2akscr.azurecr.io'
-
+  registry: "randommatch3akscr.azurecr.io"
 
 ingress:
-    annotations:
-        kubernetes.io/ingress.class: nginx
-    labels: {}
-    host: ''
-    tlsSecretName: ''
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  labels: {}
+  host: ""
+  tlsSecretName: ""
 
 backend:
-    replicas: 1
-    port: 8080
-    image:
-        repo: randommatch/api-core
-        tag: 93d5faa270eb4bcc177c2a86d749ffd06c719cb2-2606436253
-    resources:
-        limits:
-            cpu: 300m
-            memory: 1000Mi
-        requests:
-            cpu: 100m
-            memory: 300Mi
+  replicas: 1
+  port: 8080
+  image:
+    repo: randommatch/api-core
+    tag: 93d5faa270eb4bcc177c2a86d749ffd06c719cb2-2606436253
+  resources:
+    limits:
+      cpu: 300m
+      memory: 1000Mi
+    requests:
+      cpu: 100m
+      memory: 300Mi

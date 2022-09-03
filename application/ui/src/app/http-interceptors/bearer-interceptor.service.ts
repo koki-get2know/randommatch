@@ -20,7 +20,10 @@ export class BearerInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    if (req.url.startsWith(appConstants.microsoftGraph)) {
+    if (
+      req.url.startsWith(appConstants.microsoftGraph) ||
+      req.url.includes("/assets/")
+    ) {
       return next.handle(req);
     }
     return this.getAuthorizationHeader().pipe(
@@ -45,7 +48,7 @@ export class BearerInterceptor implements HttpInterceptor {
       .pipe(
         switchMap((authResult) => {
           if (
-            new Date().getTime() - (authResult.idTokenClaims["exp"] as number) <
+            authResult.idTokenClaims["exp"] * 1000 - new Date().getTime() >=
             10000
           ) {
             return of(authResult.idToken);

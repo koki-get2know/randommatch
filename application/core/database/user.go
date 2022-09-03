@@ -65,7 +65,7 @@ func chunkSlice(slice []entity.User, chunkSize int) [][]entity.User {
 	return chunks
 }
 
-func DeleteUser(id string) error{
+func DeleteUser(id string) error {
 	driver, err := Driver()
 	if err != nil {
 		return err
@@ -132,7 +132,9 @@ func mapMatches(tuples [][]entity.User) [][]map[string]interface{} {
 		}
 		result[index] = users
 	}
+
 	log.Println(result)
+
 	return result
 }
 func CreateUsers(users []entity.User, orgaUid string) (string, error) {
@@ -191,10 +193,10 @@ func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error 
 				"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})} "+
 				"MERGE (u)-[ruo:WORKS_FOR]->(o) "+
 				"ON CREATE SET ruo.since = datetime({timezone: 'Z'}) "+
-				"WITH user.Groups AS tags, u AS u "+
+				"WITH user.Tags AS tags, u AS u "+
 				"UNWIND tags AS tag "+
 				"MERGE (t: Tag {lower_name: toLower(tag)}) "+
-				"ON CREATE SET t += {name: tag} " +
+				"ON CREATE SET t += {name: tag} "+
 				"MERGE (u)-[rut:HAS_TAG]->(t) "+
 				"RETURN u.uid",
 				map[string]interface{}{"users": mapUsers(chunk), "orguid": orgaUid})
@@ -296,6 +298,7 @@ func CreateLink(tuples [][]entity.User) error {
 }
 
 func GetUsers(organization string) ([]entity.User, error) {
+
 	driver, err := Driver()
 	if err != nil {
 		return []entity.User{}, err
@@ -305,8 +308,8 @@ func GetUsers(organization string) ([]entity.User, error) {
 
 	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run("MATCH (n: User) OPTIONAL MATCH (n)-[r:HAS_TAG]->(t: Tag) "+
-		"MATCH (n)-[WORKS_FOR]->(o:Organization{lower_name: $lower_orga}) "+
-		 "RETURN  n, COLLECT(t.name)",
+			"MATCH (n)-[WORKS_FOR]->(o:Organization{lower_name: $lower_orga}) "+
+			"RETURN  n, COLLECT(t.name)",
 			map[string]interface{}{"lower_orga": strings.ToLower(organization)})
 		var users []entity.User
 
@@ -324,7 +327,7 @@ func GetUsers(organization string) ([]entity.User, error) {
 				entity.User{
 					Id:     user["uid"].(string),
 					Name:   user["name"].(string),
-					Groups: tags,
+					Tags: tags,
 				})
 		}
 
@@ -341,7 +344,7 @@ func GetUsers(organization string) ([]entity.User, error) {
 	return users.([]entity.User), nil
 }
 
-func GetUsersByTag(organization string, tag string,) ([]entity.User, error) {
+func GetUsersByTag(organization string, tag string) ([]entity.User, error) {
 	driver, err := Driver()
 	if err != nil {
 		return []entity.User{}, err
@@ -350,8 +353,8 @@ func GetUsersByTag(organization string, tag string,) ([]entity.User, error) {
 	defer session.Close()
 
 	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n: User)-[r:HAS_TAG]->(t: Tag{lower_name:$lower_tag_name}) " + 
-		"MATCH (n)-[WORKS_FOR]->(o: Organization{lower_name: $lower_org_name})RETURN  n",
+		result, err := tx.Run("MATCH (n: User)-[r:HAS_TAG]->(t: Tag{lower_name:$lower_tag_name}) "+
+			"MATCH (n)-[WORKS_FOR]->(o: Organization{lower_name: $lower_org_name})RETURN  n",
 			map[string]interface{}{"lower_tag_name": strings.ToLower(tag), "lower_org_name": strings.ToLower(organization)})
 		var users []entity.User
 
@@ -363,8 +366,8 @@ func GetUsersByTag(organization string, tag string,) ([]entity.User, error) {
 
 			users = append(users,
 				entity.User{
-					Id:     user["uid"].(string),
-					Name:   user["name"].(string),
+					Id:   user["uid"].(string),
+					Name: user["name"].(string),
 				})
 		}
 
