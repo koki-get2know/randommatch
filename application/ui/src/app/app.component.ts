@@ -49,6 +49,11 @@ export class AppComponent implements OnInit, OnDestroy {
       url: "matching",
       icon: "calendar",
     },
+    {
+      title: "STATISTICS",
+      url: "statistics",
+      icon: "bar-chart"
+    }
   ];
   loggedIn = false;
   dark = false;
