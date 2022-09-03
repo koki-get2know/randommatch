@@ -10,7 +10,7 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
-func CreateMatchingStat(MatchingStats entity.MatchingStat, orgaName string) (string, error) {
+func CreateMatchingStat(MatchingStats entity.MatchingStat, orgaUid string) (string, error) {
 	driver, err := Driver()
 	if err != nil {
 		return "", err
@@ -20,7 +20,7 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat, orgaName string) (str
 
 	uid, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		//orgId parameter
-		result, err := tx.Run("MATCH (o: Organization{lower_name: $orgname }) "+
+		result, err := tx.Run("MATCH (o: Organization{uid: $orgaUid }) "+
 			"CREATE (n:MatchingStat {uid: $id, num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
 			"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})}) "+
 			"MERGE (n)-[ruo:BELONGS_TO]->(o) "+
@@ -30,7 +30,7 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat, orgaName string) (str
 				"numgroups": MatchingStats.NumGroups,
 				"numconvs":  MatchingStats.NumConversations,
 				"numfailed": MatchingStats.NumFailed,
-				"orgname":   strings.ToLower(orgaName),
+				"orgaUid":   orgaUid,
 			})
 
 		if err != nil {
