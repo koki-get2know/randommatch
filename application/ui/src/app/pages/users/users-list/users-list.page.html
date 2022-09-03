@@ -59,7 +59,7 @@
       </ng-template>
     </ion-popover>
   </div>
-  <ion-item *ngFor="let user of userslist; let i=index" class="ion-padding-xs">
+  <ion-item *ngFor="let user of users; let i=index" class="ion-padding-xs">
     <ion-avatar slot="start">
       <!-- <div [innerHTML]="user.avatar"></div> -->
       <img [src]="user.avatar" />
@@ -73,7 +73,7 @@
       </div>
     </div>
   </ion-item>
-  <ion-grid *ngIf="userslist?.length === 0" class="vertical-center">
+  <ion-grid *ngIf="noUsersToShow" class="vertical-center">
     <ion-row>
       <ion-col class="ion-text-center">
         <ion-icon class="no-people-icon" name="cloud-upload-outline"></ion-icon
