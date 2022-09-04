@@ -141,7 +141,19 @@ export class UsersService {
   }
 
   sendEmail(matches: Matching[]) {
-    return this.http.post(`${this.urlApi}/email-matches`, { matches });
+    return this.getOrganizations().pipe(
+      map((orgs) => {
+        let organization = "";
+        if (orgs && orgs.length > 0) {
+          organization = orgs[0];
+        }
+        return organization;
+      }),
+      switchMap((organization) =>
+        this.http.post(`${this.urlApi}/email-matches`, { matches, organization })
+      ),
+      shareReplay(1)
+    );
   }
 
   get() {

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,7 +10,7 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
-func CreateMatchingStat(MatchingStats entity.MatchingStat) (string, error) {
+func CreateMatchingStat(MatchingStats entity.MatchingStat, orgaUid string) (string, error) {
 	driver, err := Driver()
 	if err != nil {
 		return "", err
@@ -18,14 +19,18 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat) (string, error) {
 	defer session.Close()
 
 	uid, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("CREATE (n:MatchingStat {uid: $id, num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
+		//orgId parameter
+		result, err := tx.Run("MATCH (o: Organization{uid: $orgaUid }) "+
+			"CREATE (n:MatchingStat {uid: $id, num_groups: $numgroups, num_conversations: $numconvs, num_failures: $numfailed, "+
 			"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'})}) "+
+			"MERGE (n)-[ruo:BELONGS_TO]->(o) "+
 			"RETURN n.uid",
 			map[string]interface{}{
 				"id":        uuid.New().String(),
 				"numgroups": MatchingStats.NumGroups,
 				"numconvs":  MatchingStats.NumConversations,
 				"numfailed": MatchingStats.NumFailed,
+				"orgaUid":   orgaUid,
 			})
 
 		if err != nil {
@@ -42,7 +47,7 @@ func CreateMatchingStat(MatchingStats entity.MatchingStat) (string, error) {
 	return uid.(string), err
 }
 
-func GetMatchingStats() ([]entity.MatchingStat, error) {
+func GetMatchingStats(organization string) ([]entity.MatchingStat, error) {
 	driver, err := Driver()
 	if err != nil {
 		return []entity.MatchingStat{}, err
@@ -51,7 +56,10 @@ func GetMatchingStats() ([]entity.MatchingStat, error) {
 	defer session.Close()
 
 	matchings, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		result, err := tx.Run("MATCH (n:MatchingStat) RETURN n", map[string]interface{}{})
+		result, err := tx.Run("MATCH (n:MatchingStat) "+
+			"MATCH (n)-[BELONGS_TO]->(o:Organization{lower_name: $lower_name}) "+
+			"RETURN n",
+			map[string]interface{}{"lower_name": strings.ToLower(organization)})
 		var matchings []entity.MatchingStat
 
 		if err != nil {
