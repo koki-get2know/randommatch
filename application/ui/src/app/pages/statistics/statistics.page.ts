@@ -40,44 +40,46 @@ export class StatisticsPage implements OnInit {
     let labels = [];
 
     this.matchingstatService.getMatchingStats().subscribe((matchingStats) => {
-      this.numMatchingSection = matchingStats.length;
-      this.matchingstatistics = matchingStats
-      for(const mathingStat of matchingStats) {
-        labels.push(formatDate(mathingStat.createdAt, "MMM d, y", "en" /**navigator.language.split("-")[0] ||  */))
-        numgroups.push(mathingStat.numGroups)
-        numemails.push(mathingStat.numConversations)
-        numfailed.push(mathingStat.numFailed)
-        this.numconves += mathingStat.numConversations
-        this.numfailed += mathingStat.numFailed 
-      }
+      if(matchingStats != null) {
+        this.numMatchingSection = matchingStats.length;
 
-      this.data = {
-        labels: labels,
-        datasets: [{
-          label: this.connexionStat,
-          data: numgroups,
-          backgroundColor: 'rgba(153, 102, 255)',
-          borderColor: 'rgb(153, 102, 255)',
-          borderWidth: 1
-        },
-        {
-          label: this.emailSentStat,
-          data: numemails,
-          backgroundColor: 'rgba(75, 192, 192)',
-          borderColor: 'rgb(75, 192, 192)',
-          borderWidth: 1
-        },
-        {
-          label: this.emailFailedStat,
-          data: numfailed,
-          backgroundColor: 'rgba(255, 99, 132)',
-          borderColor: 'rgb(255, 99, 132)',
-          borderWidth: 1
-        }]
-      };
-      this.changeChart({detail: {
-        value : 'bar'
-      }});
+        this.matchingstatistics = matchingStats
+        for(const mathingStat of matchingStats) {
+          labels.push(formatDate(mathingStat.createdAt, "MMM d, y", "en" /**navigator.language.split("-")[0] ||  */))
+          numgroups.push(mathingStat.numGroups)
+          numemails.push(mathingStat.numConversations)
+          numfailed.push(mathingStat.numFailed)
+          this.numconves += mathingStat.numConversations
+          this.numfailed += mathingStat.numFailed 
+        }
+        this.data = {
+          labels: labels,
+          datasets: [{
+            label: this.connexionStat,
+            data: numgroups,
+            backgroundColor: 'rgba(153, 102, 255)',
+            borderColor: 'rgb(153, 102, 255)',
+            borderWidth: 1
+          },
+          {
+            label: this.emailSentStat,
+            data: numemails,
+            backgroundColor: 'rgba(75, 192, 192)',
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1
+          },
+          {
+            label: this.emailFailedStat,
+            data: numfailed,
+            backgroundColor: 'rgba(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 1
+          }]
+        };
+        this.changeChart({detail: {
+          value : 'bar'
+        }});
+      }
     });
   }
 
