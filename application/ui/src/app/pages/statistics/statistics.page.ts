@@ -43,12 +43,12 @@ export class StatisticsPage implements OnInit {
       this.numMatchingSection = matchingStats.length;
       this.matchingstatistics = matchingStats
       for(const mathingStat of matchingStats) {
-        labels.push(formatDate(mathingStat.CreatedAt, "MMM d, y", "en" /**navigator.language.split("-")[0] ||  */))
-        numgroups.push(mathingStat.NumGroups)
-        numemails.push(mathingStat.NumConversations)
-        numfailed.push(mathingStat.NumFailed)
-        this.numconves += mathingStat.NumConversations
-        this.numfailed += mathingStat.NumFailed 
+        labels.push(formatDate(mathingStat.createdAt, "MMM d, y", "en" /**navigator.language.split("-")[0] ||  */))
+        numgroups.push(mathingStat.numGroups)
+        numemails.push(mathingStat.numConversations)
+        numfailed.push(mathingStat.numFailed)
+        this.numconves += mathingStat.numConversations
+        this.numfailed += mathingStat.numFailed 
       }
 
       this.data = {

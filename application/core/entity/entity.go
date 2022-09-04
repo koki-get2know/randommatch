@@ -21,18 +21,18 @@ type MatchingCycle struct {
 }
 
 type MatchingStat struct {
-	Id               string
-	NumGroups        int
-	NumConversations int
-	NumFailed        int
-	CreatedAt        time.Time
+	Id               string    `json:"id"`
+	NumGroups        int       `json:"numGroups"`
+	NumConversations int       `json:"numConversations"`
+	NumFailed        int       `json:"numFailed"`
+	CreatedAt        time.Time `json:"createdAt"`
 }
 
 type User struct {
 	Id                     string   `json:"id"`
 	Name                   string   `json:"name"`
 	Email                  string   `json:"email"`
-	Tags                 	 []string `json:"tags"`
+	Tags                   []string `json:"tags"`
 	Gender                 string   `json:"gender"`
 	Birthday               string   `json:"birthday"`
 	Hobbies                []string `json:"hobbies"`
