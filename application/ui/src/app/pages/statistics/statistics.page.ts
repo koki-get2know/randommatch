@@ -52,7 +52,6 @@ export class StatisticsPage implements OnInit {
           this.numconves += mathingStat.numConversations
           this.numfailed += mathingStat.numFailed 
         }
-
         this.data = {
           labels: labels,
           datasets: [{
