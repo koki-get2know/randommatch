@@ -7,11 +7,11 @@ import { environment } from '../../environments/environment';
 import { UsersService } from './users.service';
 
 export class MatchingStat {
-  Id: string;
-  NumGroups: number;
-  NumConversations: number;
-  NumFailed: number;
-  CreatedAt: Date;
+  id: string;
+  numGroups: number;
+  numConversations: number;
+  numFailed: number;
+  createdAt: Date;
 }
 
 interface MatchingStatResponse {
