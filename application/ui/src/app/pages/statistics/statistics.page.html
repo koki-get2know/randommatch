@@ -39,15 +39,15 @@
   <ion-list class="cus-card">
     <ion-list-header>
       <ion-label class="title-size">
-        Statistics chart
+        {{ "STATS_CHART" | translate}}
       </ion-label>
     </ion-list-header>
   
     <ion-item class="ion-padding-horizontal" lines="none">
-      <ion-label> Charts </ion-label>
-      <ion-select value="bar" okText="Create" cancelText="Cancel" mode="ios" (ionChange)="changeChart($event)" color="danger">
-        <ion-select-option value="bar">Bar</ion-select-option>
-        <ion-select-option value="line">Lines</ion-select-option>
+      <ion-label> {{ "CHARTS" | translate }} </ion-label>
+      <ion-select value="bar" okText="{{ 'OK' | translate }}" cancelText="{{ 'CANCEL' | translate }}" (ionChange)="changeChart($event)" color="danger">
+        <ion-select-option value="bar">{{ "BAR"| translate }}</ion-select-option>
+        <ion-select-option value="line">{{ "LINES" | translate }}</ion-select-option>
       </ion-select>
     </ion-item>
   

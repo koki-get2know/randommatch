@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import Chart from 'chart.js/auto';
 import { formatDate } from '@angular/common';
 import { MatchingStat, MatchingStatService } from '../../services/matching-stat.service';
@@ -17,7 +17,7 @@ export class StatisticsPage implements OnInit {
   canvasChart : Chart;
 
   matchingstatistics: MatchingStat[] = [];
-  label1: string; label2: string; label3: string;
+  connexionStat: string; emailSentStat: string; emailFailedStat: string;
   numUsers: boolean = false;
   numgroups = 0;
   numconves = 0;
@@ -27,9 +27,9 @@ export class StatisticsPage implements OnInit {
   constructor(private matchingstatService: MatchingStatService, public translate: TranslateService) { }
 
   ngOnInit() {
-    this.label1 = this.translate.instant('NUM_CONNEXIONS');
-    this.label2 = this.translate.instant('EMAIL_SENT');
-    this.label3 = this.translate.instant('EMAIL_FAILED');
+    this.connexionStat = this.translate.instant('NUM_CONNEXIONS');
+    this.emailSentStat = this.translate.instant('EMAIL_SENT');
+    this.emailFailedStat = this.translate.instant('EMAIL_FAILED');
     this.getMathingStats();
   }
 
@@ -39,36 +39,36 @@ export class StatisticsPage implements OnInit {
     let numfailed = [];
     let labels = [];
 
-    this.matchingstatService.getMatchingStats().subscribe((matchingstats) => {
-      this.numMatchingSection = matchingstats.length;
-      this.matchingstatistics = matchingstats
-      for(let mathingstat of matchingstats) {
-        labels.push(formatDate(mathingstat.CreatedAt, "MMM d, y", "en" /**navigator.language.split("-")[0] ||  */))
-        numgroups.push(mathingstat.NumGroups)
-        numemails.push(mathingstat.NumConversations)
-        numfailed.push(mathingstat.NumFailed)
-        this.numconves += mathingstat.NumConversations
-        this.numfailed += mathingstat.NumFailed 
+    this.matchingstatService.getMatchingStats().subscribe((matchingStats) => {
+      this.numMatchingSection = matchingStats.length;
+      this.matchingstatistics = matchingStats
+      for(const mathingStat of matchingStats) {
+        labels.push(formatDate(mathingStat.CreatedAt, "MMM d, y", "en" /**navigator.language.split("-")[0] ||  */))
+        numgroups.push(mathingStat.NumGroups)
+        numemails.push(mathingStat.NumConversations)
+        numfailed.push(mathingStat.NumFailed)
+        this.numconves += mathingStat.NumConversations
+        this.numfailed += mathingStat.NumFailed 
       }
 
       this.data = {
         labels: labels,
         datasets: [{
-          label: this.label1,
+          label: this.connexionStat,
           data: numgroups,
           backgroundColor: 'rgba(153, 102, 255)',
           borderColor: 'rgb(153, 102, 255)',
           borderWidth: 1
         },
         {
-          label: this.label2,
+          label: this.emailSentStat,
           data: numemails,
           backgroundColor: 'rgba(75, 192, 192)',
           borderColor: 'rgb(75, 192, 192)',
           borderWidth: 1
         },
         {
-          label: this.label3,
+          label: this.emailFailedStat,
           data: numfailed,
           backgroundColor: 'rgba(255, 99, 132)',
           borderColor: 'rgb(255, 99, 132)',

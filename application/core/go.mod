@@ -14,7 +14,7 @@ require (
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
-require github.com/dimchansky/utfbom v1.1.1 // indirect
+require github.com/dimchansky/utfbom v1.1.1
 
 require (
 	github.com/arran4/golang-ical v0.0.0-20220517104411-fd89fefb0182
@@ -25,7 +25,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

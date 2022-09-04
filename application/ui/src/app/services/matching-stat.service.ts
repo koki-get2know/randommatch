@@ -4,7 +4,7 @@ import { MsalService } from '@azure/msal-angular';
 import { Observable } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { appConstants } from '../constants';
+import { UsersService } from './users.service';
 
 export class MatchingStat {
   Id: string;
@@ -23,12 +23,12 @@ interface MatchingStatResponse {
 })
 export class MatchingStatService {
 
-  constructor(private http: HttpClient,private authService: MsalService) { }
+  constructor(private http: HttpClient,private authService: MsalService, private userService: UsersService) { }
 
   urlApi = environment.serverBaseUrl;
 
   getMatchingStats(): Observable<MatchingStat[]>{
-    return this.getOrganizations().pipe(
+    return this.userService.getOrganizations().pipe(
       map((orgs) => {
         let orga = "";
         if (orgs && orgs.length > 0) {
@@ -47,27 +47,5 @@ export class MatchingStatService {
       ),
       shareReplay(1)
     );
-  }
-
-  getOrganizations(): Observable<string[]> {
-    return this.authService
-      .acquireTokenSilent({
-        scopes: appConstants.scopes,
-        account: this.authService.instance.getAllAccounts()[0],
-        forceRefresh: false,
-      })
-      .pipe(
-        map((authResult) => {
-          let orgs: string[];
-          const roles: string[] | undefined = authResult.idTokenClaims["roles"];
-          if (roles && roles.length > 0) {
-            const prefix = "Org.";
-            orgs = roles
-              .filter((x) => x.startsWith(prefix))
-              .map((x) => x.slice(prefix.length));
-          }
-          return orgs;
-        })
-      );
   }
 }

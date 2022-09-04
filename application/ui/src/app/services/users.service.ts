@@ -143,21 +143,17 @@ export class UsersService {
   sendEmail(matches: Matching[]) {
     return this.getOrganizations().pipe(
       map((orgs) => {
-        let orga = "";
+        let organization = "";
         if (orgs && orgs.length > 0) {
-          orga = orgs[0];
+          organization = orgs[0];
         }
-        return orga;
+        return organization;
       }),
-      switchMap((orga) =>
-        this.http.post(`${this.urlApi}/email-matches`, { matches, orga })
+      switchMap((organization) =>
+        this.http.post(`${this.urlApi}/email-matches`, { matches, organization })
       ),
       shareReplay(1)
     );
-  }
-
-  sendEmails(matches: Matching[]){
-    return this.http.post(`${this.urlApi}/email-matches`, { matches });
   }
 
   get() {

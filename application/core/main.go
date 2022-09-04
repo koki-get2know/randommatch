@@ -39,8 +39,8 @@ type tagMatchingReq struct {
 }
 
 type EmailReq struct {
-	Matches []matcher.Match `json:"matches"`
-	Orga    string          `json:"orga"`
+	Matches      []matcher.Match `json:"matches"`
+	Organization string          `json:"organization"`
 }
 
 func getHealthCheck(c *gin.Context) {
@@ -175,7 +175,7 @@ func emailMatches(c *gin.Context) {
 	roles := claims["roles"].([]interface{})
 	orgs := helper.ItemsWithPrefixInRole(roles, "Org.")
 
-	orgaName := strings.ToLower(req.Orga)
+	orgaName := strings.ToLower(req.Organization)
 	if len(orgaName) > 0 && !helper.ContainsString(orgs, orgaName) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
 		return
