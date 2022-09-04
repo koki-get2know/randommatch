@@ -11,55 +11,81 @@
   <ion-grid>
     <ion-row>
       <ion-col>
-        <ion-card class="scolor">
-          <ion-card-header>
-            <ion-card-subtitle class="text-white">{{"NUM_SESSION_MATCHING" | translate}}</ion-card-subtitle>
-            <ion-card-title class="text-white">{{ numMatchingSection }}</ion-card-title>
-          </ion-card-header>
-        </ion-card>
-      </ion-col>
-      <ion-col>
-        <ion-card class="convcolor">
-          <ion-card-header>
-            <ion-card-subtitle class="text-white">{{"NUM_CONVERSATION" | translate}}</ion-card-subtitle>
-            <ion-card-title class="text-white">{{ numconves }}</ion-card-title>
-          </ion-card-header>
-        </ion-card>
-      </ion-col>
-      <ion-col>
-        <ion-card class="failedcolor">
-          <ion-card-header>
-            <ion-card-subtitle class="text-white">{{"NUM_FAILED" | translate}}</ion-card-subtitle>
-            <ion-card-title  class="text-white">{{ numfailed }}</ion-card-title>
-          </ion-card-header>
+        <ion-card color="primary" mode="md">
+          <ion-grid>
+            <ion-row>
+              <ion-col>
+                <ion-card-header>
+                  <ion-card-title>{{ numMatchingSection }}</ion-card-title>
+                  <ion-card-subtitle
+                    >{{"NUM_SESSION_MATCHING" | translate}}</ion-card-subtitle
+                  >
+                </ion-card-header>
+              </ion-col>
+              <ion-col>
+                <ion-card-header>
+                  <ion-card-title>{{ totalNumConnections }}</ion-card-title>
+                  <ion-card-subtitle
+                    >{{"NUM_CONNECTIONS_GENERATED" |
+                    translate}}</ion-card-subtitle
+                  >
+                </ion-card-header>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-card>
       </ion-col>
     </ion-row>
     <ion-row>
-      
+      <ion-col>
+        <ion-card color="success" mode="md">
+          <ion-card-header>
+            <ion-card-title>{{ numconves }}</ion-card-title>
+            <ion-card-subtitle
+              >{{"NUM_CONVERSATION" | translate}}</ion-card-subtitle
+            >
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
+      <ion-col>
+        <ion-card color="warning" mode="md">
+          <ion-card-header>
+            <ion-card-title>{{ numfailed }}</ion-card-title>
+            <ion-card-subtitle>{{"NUM_FAILED" | translate}}</ion-card-subtitle>
+          </ion-card-header>
+        </ion-card>
+      </ion-col>
     </ion-row>
+    <ion-row> </ion-row>
   </ion-grid>
-  <ion-list class="cus-card">
+  <ion-list>
     <ion-list-header>
-      <ion-label class="title-size">
-        {{ "STATS_CHART" | translate}}
-      </ion-label>
+      <ion-label class="title-size"> {{ "STATS_CHART" | translate}} </ion-label>
     </ion-list-header>
-  
+
     <ion-item class="ion-padding-horizontal" lines="none">
       <ion-label> {{ "CHARTS" | translate }} </ion-label>
-      <ion-select value="bar" okText="{{ 'OK' | translate }}" cancelText="{{ 'CANCEL' | translate }}" (ionChange)="changeChart($event)" color="danger">
-        <ion-select-option value="bar">{{ "BAR"| translate }}</ion-select-option>
-        <ion-select-option value="line">{{ "LINES" | translate }}</ion-select-option>
+      <ion-select
+        value="bar"
+        okText="{{ 'OK' | translate }}"
+        cancelText="{{ 'CANCEL' | translate }}"
+        (ionChange)="changeChart($event)"
+        color="danger"
+      >
+        <ion-select-option value="bar"
+          >{{ "BAR"| translate }}</ion-select-option
+        >
+        <ion-select-option value="line"
+          >{{ "LINES" | translate }}</ion-select-option
+        >
       </ion-select>
     </ion-item>
-  
-  </ion-list>  
-  <ion-card>
-    <ion-card-content>
-      <div class="bg-white cus-card">
+  </ion-list>
+  <ion-grid>
+    <ion-row>
+      <ion-col class="chart-container">
         <canvas #chartCanvas></canvas>
-      </div>
-    </ion-card-content>
-  </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

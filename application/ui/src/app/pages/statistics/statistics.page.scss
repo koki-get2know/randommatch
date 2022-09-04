@@ -1,22 +1,13 @@
 .title-size {
-    font-size: 35px;
-    color: rgba(0, 0, 0, 0.6);
+  font-size: 2rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+.chart-container {
+  min-height: 28rem;
 }
 
-.gcolor {
-    background-color: rgba(153, 102, 255)
+@media screen and (max-width: 74em) {
+  .chart-container {
+    min-height: 18rem;
+  }
 }
-
-.scolor {
-    background-color: rgba(1, 189, 112)
-}
-
-.convcolor {
-    background-color: rgba(75, 192, 192)
-}
-
-.failedcolor {
-    background-color: rgba(255, 99, 132);
-}
-
-.text-white {color: white; font-weight: bold;}
