@@ -20,6 +20,36 @@ type MatchingCycle struct {
 	Id string
 }
 
+type Frequency string
+
+const (
+	Monthly         Frequency = "monthly"
+	Weekly          Frequency = "weekly"
+	Daily           Frequency = "daily"
+	Hourly          Frequency = "hourly"
+	Every_half_hour Frequency = "every_half_hour"
+	Every_ten_min   Frequency = "every_ten_min"
+)
+
+type Selector uint8
+
+const (
+	Basic Selector = iota
+	Group
+)
+
+type Schedule struct {
+	Id           string    `json:"id"`
+	Name         string    `json:"name"`
+	CreateDate   time.Time `json:"create date"`
+	LastUpdate   time.Time `json:"last_update"`
+	StartDate    time.Time `json:"start_date"`
+	EndDate      time.Time `json:"end_date"`
+	Size         int64     `json:"size"`
+	MatchingType string    `json:"matching_type"`
+	Active       bool      `json:"active"`
+	Frequency    Frequency `json:"frequency"`
+}
 type MatchingStat struct {
 	Id               string
 	NumGroups        int

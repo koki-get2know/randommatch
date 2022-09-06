@@ -14,12 +14,6 @@ import (
 var randomChoices = randomChoicesSeed()
 
 // TODO the selector paramater should be a config variable
-type Selector uint8
-
-const (
-	Basic Selector = iota
-	Group
-)
 
 type Constraint uint8
 
@@ -223,7 +217,7 @@ func removeDuplicates(A []*entity.User, B []*entity.User) ([]*entity.User, []*en
 }
 
 func Matcher(g *UserGraph, k uint,
-	constraints []Constraint, SELECTOR Selector, forbidenconections [][]entity.User,
+	constraints []Constraint, SELECTOR entity.Selector, forbidenconections [][]entity.User,
 	A []*entity.User, B []*entity.User,
 	interGroupConstraints []Constraint, innerGroupConstraints []Constraint) map[int]*Match {
 
@@ -239,7 +233,7 @@ func Matcher(g *UserGraph, k uint,
 	matching := make(map[int]*Match)
 
 	switch SELECTOR {
-	case Basic:
+	case entity.Basic:
 		/*
 		   repeat
 		     1 - random choices k users
@@ -259,7 +253,7 @@ func Matcher(g *UserGraph, k uint,
 			matching[i] = matched
 			i++
 		}
-	case Group:
+	case entity.Group:
 		/*Extract the subgraph A and B
 		    m1 = random choice  users dans A
 		    repeat until good match
@@ -319,7 +313,7 @@ func Matcher(g *UserGraph, k uint,
 
 }
 
-func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
+func GenerateTuple(users []entity.User, connections [][]entity.User, s entity.Selector,
 	forbiddenConnections [][]entity.User, size uint,
 	A []entity.User, B []entity.User) []Match {
 	/*
@@ -339,13 +333,13 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 	var tuples map[int]*Match
 
 	switch s {
-	case Basic:
+	case entity.Basic:
 		graph := UsersToGraph(users, connections)
 		graph.String()
-		tuples = Matcher(graph, size, []Constraint{Unique, ForbiddenConnections}, Basic,
+		tuples = Matcher(graph, size, []Constraint{Unique, ForbiddenConnections}, entity.Basic,
 			forbiddenConnections, []*entity.User{}, []*entity.User{},
 			[]Constraint{}, []Constraint{})
-	case Group:
+	case entity.Group:
 		gA := []*entity.User{}
 		gB := []*entity.User{}
 		for _, u := range A {
@@ -358,7 +352,7 @@ func GenerateTuple(users []entity.User, connections [][]entity.User, s Selector,
 			gB = append(gB, &u)
 		}
 		graph := UsersToGraph(append(A, B...), connections)
-		tuples = Matcher(graph, size, []Constraint{}, Group,
+		tuples = Matcher(graph, size, []Constraint{}, entity.Group,
 			forbiddenConnections, gA, gB,
 
 			[]Constraint{Unique, ForbiddenConnections}, []Constraint{})

@@ -111,11 +111,13 @@ func DeleteUsers() error {
 	return err
 }
 
-func mapUsers(users []entity.User) []map[string]interface{} {
+func MapUsers(users []entity.User) []map[string]interface{} {
 	var result = make([]map[string]interface{}, len(users))
 
 	for index, item := range users {
-		item.Id = uuid.New().String()
+		if item.Id == "" {
+			item.Id = uuid.New().String()
+		}
 		result[index] = structs.Map(item)
 	}
 
@@ -199,7 +201,7 @@ func createUsers(users []entity.User, orgaUid string, out chan JobStatus) error 
 				"ON CREATE SET t += {name: tag} "+
 				"MERGE (u)-[rut:HAS_TAG]->(t) "+
 				"RETURN u.uid",
-				map[string]interface{}{"users": mapUsers(chunk), "orguid": orgaUid})
+				map[string]interface{}{"users": MapUsers(chunk), "orguid": orgaUid})
 
 			if err != nil {
 				return "", err
@@ -325,8 +327,8 @@ func GetUsers(organization string) ([]entity.User, error) {
 
 			users = append(users,
 				entity.User{
-					Id:     user["uid"].(string),
-					Name:   user["name"].(string),
+					Id:   user["uid"].(string),
+					Name: user["name"].(string),
 					Tags: tags,
 				})
 		}
@@ -341,6 +343,48 @@ func GetUsers(organization string) ([]entity.User, error) {
 	if err != nil {
 		return []entity.User{}, err
 	}
+	return users.([]entity.User), nil
+}
+func GetUsersByTechTag(scheduleCode string, organization string, tag string) ([]entity.User, error) {
+	driver, err := Driver()
+	if err != nil {
+		return []entity.User{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	log.Println(tag)
+	users, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: User)-[r:HAS_TECH_TAG]-(t: TechTag{lower_name:$lower_tag_name})"+
+			"-[:HAS_TECH_TAG]-(s:Schedule{uid:$uid})-[:SCHEDULE_FOR]->(o: Organization{lower_name: $lower_org_name})"+
+			"RETURN n",
+			map[string]interface{}{"uid": scheduleCode, "lower_tag_name": strings.ToLower(tag), "lower_org_name": strings.ToLower(organization)})
+		var users []entity.User
+
+		if err != nil {
+			return users, err
+		}
+		for result.Next() {
+
+			user := result.Record().Values[0].(dbtype.Node).Props
+
+			users = append(users,
+				entity.User{
+					Id:   user["uid"].(string),
+					Name: user["name"].(string),
+				})
+		}
+
+		if result.Err() != nil {
+			return users, result.Err()
+		}
+
+		return users, nil
+
+	})
+	if err != nil {
+		return []entity.User{}, err
+	}
+
 	return users.([]entity.User), nil
 }
 
