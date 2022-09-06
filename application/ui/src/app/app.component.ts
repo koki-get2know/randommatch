@@ -31,7 +31,6 @@ import { filter, takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { environment } from "../environments/environment";
 import { TranslateService } from "@ngx-translate/core";
-
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
@@ -50,6 +49,11 @@ export class AppComponent implements OnInit, OnDestroy {
       url: "matching",
       icon: "calendar",
     },
+    {
+      title: "STATISTICS",
+      url: "statistics",
+      icon: "bar-chart"
+    }
   ];
   loggedIn = false;
   dark = false;
@@ -94,9 +98,15 @@ export class AppComponent implements OnInit, OnDestroy {
       });
 
     this.swUpdate.versionUpdates.subscribe(async (res) => {
-      const [text, message]: string[] = await this.translate
+      const translation: { [key: string]: string } = await this.translate
         .get(["RELOAD", "UPDATE_AVAILABLE"])
         .toPromise();
+      let message = "";
+      let text = "";
+      if (translation) {
+        message = translation["UPDATE_AVAILABLE"] || "New version available";
+        text = translation["RELOAD"] || "reload";
+      }
       const toast = await this.toastCtrl.create({
         message: message,
         position: "bottom",

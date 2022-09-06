@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/database"
 	"github.com/koki/randommatch/entity"
@@ -38,7 +40,8 @@ type tagMatchingReq struct {
 }
 
 type EmailReq struct {
-	Matches []matcher.Match `json:"matches"`
+	Matches      []matcher.Match `json:"matches"`
+	Organization string          `json:"organization"`
 }
 
 func getHealthCheck(c *gin.Context) {
@@ -178,10 +181,24 @@ func emailMatches(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	orgs := helper.ItemsWithPrefixInRole(roles, "Org.")
+
+	orgaName := strings.ToLower(req.Organization)
+	if len(orgaName) > 0 && !helper.ContainsString(orgs, orgaName) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	orgaUid, err := database.GetOrganizationByName(orgaName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
 
 	// http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
 
-	jobId, err := calendar.SendInvite(req.Matches)
+	jobId, err := calendar.SendInvite(req.Matches, orgaUid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "mails sending failed " + err.Error()})
 		return

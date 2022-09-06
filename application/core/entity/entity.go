@@ -51,11 +51,11 @@ type Schedule struct {
 	Frequency    Frequency `json:"frequency"`
 }
 type MatchingStat struct {
-	Id               string
-	NumGroups        int
-	NumConversations int
-	NumFailed        int
-	CreatedAt        time.Time
+	Id               string    `json:"id"`
+	NumGroups        int       `json:"numGroups"`
+	NumConversations int       `json:"numConversations"`
+	NumFailed        int       `json:"numFailed"`
+	CreatedAt        time.Time `json:"createdAt"`
 }
 
 type User struct {
