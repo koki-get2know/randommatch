@@ -63,7 +63,7 @@ func GetMatchingStats(organization string) ([]entity.MatchingStat, error) {
 		var matchings []entity.MatchingStat
 
 		if err != nil {
-			return matchings, err
+			return []entity.MatchingStat{}, err
 		}
 		for result.Next() {
 			matching := result.Record().Values[0].(dbtype.Node).Props
@@ -78,12 +78,14 @@ func GetMatchingStats(organization string) ([]entity.MatchingStat, error) {
 				})
 		}
 		if result.Err() != nil {
-			return matchings, result.Err()
+			return []entity.MatchingStat{}, result.Err()
 		}
 
 		return matchings, nil
 
 	})
-
+	if err != nil {
+		return []entity.MatchingStat{}, err
+	}
 	return matchings.([]entity.MatchingStat), err
 }

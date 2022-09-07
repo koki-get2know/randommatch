@@ -9,7 +9,7 @@ import (
 )
 
 func GetMatchingStats(c *gin.Context) {
-	defer helper.Duration(helper.Track("getMatchings"))
+	defer helper.Duration(helper.Track("GetMatchingStats"))
 
 	org, ok := c.GetQuery("organization")
 	if !ok {
