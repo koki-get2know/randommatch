@@ -33,7 +33,7 @@
   "USERS_SELECTION_INSTR": "Select the people to match",
   "AT_LEAST": "at least",
   "SELECT_ALL": "Select all",
-  "QUESTION_RESTRICTED_CONNECTION": "Add people you prefer or do not want to connect (optional)?",
+  "QUESTION_RESTRICTED_CONNECTION": "Add people you prefer or do not want to connect (optional)",
   "FORBID": "Forbid",
   "PREFER": "Prefer",
   "MATCH": "Match",
