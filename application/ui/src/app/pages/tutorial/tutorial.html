@@ -13,17 +13,21 @@
     <ion-row>
       <ion-col>
         <section>
-          <h2>Table of Contents</h2>
+          <ion-text color="primary">
+            <h1>Table of Contents</h1>
+          </ion-text>
           <ul>
-            <li>Introduction - Description of Koki App</li>
-            <li>Koki: How setup a matching</li>
-            <li>Account & Display</li>
-            <li>Tutorial</li>
+            <li>Introduction - Description of Koki App</li><br>
+            <li>Koki: How setup a matching</li><br>
+            <li>Account & Display</li><br>
+            <li>Tutorial</li><br>
           </ul>
         </section>
 
         <section>
-          <h2>Introduction - Description Koki App</h2>
+          <ion-text color="primary">
+            <h2>Introduction - Description Koki App</h2>
+          </ion-text>
           <p>
             The Koki app provides an easy way for users to create and automate
             matching and conversation generation for an organization (company,
@@ -32,36 +36,23 @@
           <p>List of personas used this guide:</p>
           <ul>
             <li>
-              End user - a client's team member registered to use the platform
-            </li>
+              <strong>People -</strong> a the client organization’s team member registered to use the platform (end user)
+            </li><br>
             <li>
-              Superuser - is the application admin at client side. They have max
+              <strong>Superuser</strong> - is the application admin at client side. They have max
               access to the make allowed configuration system management
-              including tuples periodic generation, tracking and reporting. A
-              superuser is not necessarily a user<br />
-            </li>
-            <li>
-              Lead Superuser - the who the contact with the application
-              provider. They approve, validate, and change Client requests.
-            </li>
-            <li>
-              Server Administrator - an agent at the app provider side who has
-              reasonable access the platform
-            </li>
-            <li>
-              Super Administrator - an administrator with full access and grant
-              or restrict access
+              including tuples periodic generation, tracking and reporting.<br />
             </li>
           </ul>
           <p>
-            The guide is meant to provide superuser (or someone with similar
-            authority) simple instructions to use the application. It is
-            organized by section highlighted at the left of the welcome page
-            (see fig. 1)
+            The guide is meant to provide the superuser (or someone with similar authority) a simple 
+            guide to use the application. It is organized by sections (<strong>KOKI</strong>, <strong>ACCOUNT</strong> 
+            and <strong>TUTORIAL</strong>) and sub-sections as highlighted at the left of the homepage 
+            <strong>(see fig. 1)</strong>
           </p>
           <figure>
             <img
-              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-1.png"
+              src="../../../assets/img/tutorial/fig1.png"
               width="624"
               height="268"
               alt=""
@@ -69,188 +60,292 @@
             <figcaption>Figure 1: Koki Home Page</figcaption>
           </figure>
         </section>
-        <section>
-          <h2>Koki: How to setup a matching</h2>
-          <p>An end-to- matching setup can be the following steps:</p>
-          <h3>Step 1: Uploading a user file</h3>
+        <section class="mt-5 ion-text-justify">
+          <ion-text color="primary">
+            <h2>Koki: How to setup a matching</h2>
+          </ion-text>
+          <p>This section allows end-to-end matching setup.</p>
+          <ion-text color="primary">
+            <h3>1.1 People</h3>
+          </ion-text>
           <p>
-            To upload a user list, select the Users section at the left of the
-            home page, on Upload at the top right (fig 2) and upload the file.
-            To be accepted by the system, a user file should follow the CSV
-            formatting structure . The structure of the file is given by the
-            information tag just next to the upload button of the file is given
-            by the tag just next to the upload button [ need shot for this]
+            Under this subsection, a file containing the list of end-users (people) can be uploaded: 
+          </p>
+          <ul>
+            <li>
+              Select the <strong>People</strong>
+            </li><br>
+            <li>
+              Click on <strong>Upload</strong> (as shown on fig 2) and upload the file. 
+            </li>
+          </ul>
+          <p>
+            To be accepted by the system, a user file should follow the CSV formatting 
+            structure. The structure of the file is given by the information tag  
+            just next to the upload button.
           </p>
           <figure>
             <img
-              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-2.png"
+              src="../../../assets/img/tutorial/fig2.png"
               width="627"
               height="269"
               alt=""
             />
             <figcaption>Figure 2: Uploading Users File</figcaption>
           </figure>
-          <h3>Step 2: Generate a matching</h3>
-          <h4>a. Create a matching</h4>
-          <p>To create a matching:</p>
+          <br>
+          <ion-text color="primary mt-5">
+            <h3>1.2 Matching</h3>
+          </ion-text>
+          <p>Under this subsection, simple or cross-group matchings can be configured in three steps 
+            (once the people’s list is uploaded).
+          </p>
+          <br>
+          <ion-text color="primary">
+            <h4>Step 1: Create a matching</h4>
+          </ion-text>
+          <ion-text color="primary">
+            <h5>1. Simple Matching</h5>
+          </ion-text>
+          <p>A simple matching considers all people are selected from one single poll (there is no category or group to consider). To create a simple matching: </p>
           <ul>
-            <li>select the New Match section at the left of the home page,</li>
-            <li>define the size of that will connect click Next (fig 3)</li>
+            <li>
+              from the <strong>Matching</strong> screen, select <strong>Same Group Matching</strong> (fig 3)
+            </li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig3.png"
+                width="627"
+                height="269"
+                alt=""
+              />
+              <figcaption>Figure 3: Same Group Matching</figcaption>
+            </figure>
+            <li>
+              define the number of people desired in each connection and click <strong>Next</strong> (fig 4)
+            </li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig4.png"
+                width="627"
+                height="269"
+                alt=""
+              />
+              <figcaption>Figure 4: Selecting Connection Size</figcaption>
+            </figure>
+            <li>
+              Select people to match in the cycle. This sub list might be different from the comprehensive 
+              list of users in case some members are temporarily unavailable for instance. Select all 
+              if applicable. Click <strong>Next</strong> (fig 5).
+            </li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig5.png"
+                width="624"
+                height="228"
+                alt=""
+              />
+              <figcaption>Figure 5: Selecting People to Match in the Cycle</figcaption>
+            </figure>
+            <li>
+              On the next screen, select preferred or forbidden connections. Tip: select one connection at a 
+              time and click the <ion-text color="primary">Forbid</ion-text> or <ion-text color="primary">Prefer</ion-text> button. 
+              Validated selections are properly displayed under the 
+              <ion-text color="primary">Forbidden Connections</ion-text> or <ion-text color="primary">Preferred Connections</ion-text> categories. 
+              Once done Click <strong>“Match”</strong> (fig 6).
+            </li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig6.png"
+                width="624"
+                height="228"
+                alt=""
+              />
+              <figcaption>Figure 6: Selecting Preferred and Forbidden Connections</figcaption>
+            </figure>
           </ul>
+          <br>
+          <ion-text color="primary">
+            <h5>2. Create a Matching by Group</h5>
+          </ion-text>
+          <p>
+            The organization might choose to match members of a specific group A with those of another group B. 
+            For instance, conversations between members of project A comity and those of the Project B can be desired. 
+          </p>
+          <p>To create a group-based matching: </p>
+          <ul>
+            <li>Select the <strong>Cross-Group Matching</strong> from the Matching page (refer to fig 3) </li><br>
+            <li>Define the number of people desired in each connection and click <strong>Next</strong> (fig 7)</li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig7.png"
+                width="624"
+                height="228"
+                alt=""
+              />
+              <figcaption>Figure 7: Creating Matching Groups</figcaption>
+            </figure>
+            <li>
+              Select <strong>Create Group</strong> for your first group definition. The list of people will appear to 
+              manually select the members belonging to the first group and go ahead by clicking <strong>Add to group</strong>. 
+              You can even search by tag in the search bar. Once you have entered the tag value, the filtered users will appear. 
+              You can then select <ion-text color="primary">Check All</ion-text> then <ion-text color="primary">Add to Group</ion-text>. 
+              Repeat the same procedure to add as many groups as you desire. 
+              PS: the maximum number of groups is the size of the connections. (fig 8)
+            </li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig8.png"
+                width="624"
+                height="228"
+                alt=""
+              />
+              <figcaption>Figure 8: Adding People in a Group</figcaption>
+            </figure>
+            <li>Groups members can be edited, deleted or validated from the summary screen (fig. 9)</li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig9.png"
+                width="624"
+                height="228"
+                alt=""
+              />
+              <figcaption>Figure 9: Groups Summary</figcaption>
+            </figure>
+          </ul>
+          <p>
+            Note that cross-group matching can engage a static or dynamic list of people. 
+            By manually selecting specific people, the group will be static. 
+            However, an organization might desire to match members based on a tag attached to 
+            their profile e.g. background, location, function. For instance, generate conversation 
+            between members of the Marketing and those of the Sales department. Compared to the static group, 
+            a tag-based matching is dynamic as it adapts to changes happening within the tagged 
+            populations (member departure and arrival) without additional administrative effort.
+          </p>
+          <ul>
+            <li>
+              On the next screen, select preferred or forbidden connections. Tip: select one connection 
+              at a time and click the <ion-text color="primary">Forbid</ion-text> or <ion-text color="primary">Prefer</ion-text> button. Validated selections are properly 
+              displayed under the <ion-text color="primary">Forbidden Connections</ion-text> or <ion-text color="primary">Preferred Connections</ion-text> categories. 
+              Once done Click <ion-text color="primary">Match</ion-text>  (fig 10)
+            </li>
+            <figure>
+              <img
+                src="../../../assets/img/tutorial/fig10.png"
+                width="624"
+                height="228"
+                alt=""
+              />
+              <figcaption>Figure 10: Cross-group Matching Forbidden and Prefered Connections Summary</figcaption>
+            </figure>
+          </ul>
+          <br>
+          <ion-text color="primary">
+            <h4>Step 2: Validating/Modifying Matches</h4>
+          </ion-text>
+          <p>
+            Once Step 2 matching is completed, connections can be validated and quick edits applied if necessary. <br>
+          </p>
+          <p>
+            From the <strong>Matching Results</strong> screen, perform a sanity check over 
+            the generated connections. If necessary, select the connections that need to 
+            be adjusted (there should be minimum 2 connections selected)
+            Select the blue circle button with a white down arrow at the top right of the screen, 
+            then click the circled arrow icon to reshuffle the selected users into different 
+            connections. (fig 11)
+          </p>
           <figure>
             <img
-              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-3.png"
+              src="../../../assets/img/tutorial/fig11.png"
               width="624"
               height="228"
               alt=""
             />
-            <figcaption>Figure 3: Selecting Tuple Size</figcaption>
+            <figcaption>Figure 11: Matching Validation</figcaption>
           </figure>
-          <ul>
-            <li>
-              select the users to match in the cycle. This sub list might from
-              the comprehensive list of users in case some members temporarily
-              unavailable for instance. Select all if applicable. Click Next
-              (fig 4).
-            </li>
-            <li>
-              the next screen, select preferred or forbidden tuples. Tip: select
-              tuple at a time and click Forbid or Prefer button. Validated the
-              selections properly displayed under the Forbidden Connections or
-              Preferred Connections categories the right . Once done Click Match
-              (fig 5)
-            </li>
-          </ul>
-          <h4>b. Create a Group</h4>
+          <br>
+          <ion-text color="primary">
+            <h4>Step 3: Notifying Connections and Sending Invites</h4>
+          </ion-text>
           <p>
-            The organization might choose match members of a specific group A
-            with those of another group B. instance, conversations between
-            members of project A comity and those of the Project B can be
-            desired. Note that, the
+            Once satisfied with the matching, select the blue circle button with a white down 
+            arrow at the to right of the <strong>Matching Results</strong> screen, then click on the envelope 
+            icon to notify and send meeting invites to matched users (refer to fig 11)
           </p>
-          <p>create a group-based matching:</p>
-          <ul>
-            <li>the New Group Match section at the left of home page,</li>
-            <li>
-              define the size of tuple that will connect by clicking oMatching
-              Size
-            </li>
-            <li>
-              each group, members to be matched by on grey arrow beside Users
-              Group X (fig)
-            </li>
-            <li>
-              the Users Group X selection window will then appear to allow group
-              users selection. Click Add once the selection is completed (fig ).
-              Repeat at least as many as the tuple size.
-            </li>
-            <li>
-              tuples can also selected from screen (like group members
-              selection) (fig 5)
-            </li>
-          </ul>
-          <figure>Insert figure here</figure>
+          <br>
+          <ion-text color="primary">
+            <h3>1.3.	Statistics</h3>
+          </ion-text>
           <p>
-            Note that for a group-based matching, group members are selected,
-            and list is static. For a more group -based selection, a tag-based
-            matching might be more appropriate.
+            Koki statistics: key performance indicators, report and charts are available under this subsection (fig 12).
           </p>
-          <h4>c. Matching by Tag</h4>
-          <p>
-            An organization might desire to match members based on a tag
-            attached to their profile e.g. background, location, function. For
-            instance, generate conversation between members of the Marketing and
-            those of the department. Compared to group-based, a tag-based
-            matching is it adapts to changes happening within the tagged
-            populations (member and arrival) additional administrative effort.
-          </p>
-          <p>To create a tag-based matching:</p>
-          <ul>
-            <li>
-              select the New Tag Match section at the left of the home page,
-            </li>
-            <li>
-              define the size of tuple that will connect by clicking on Matching
-              Size
-            </li>
-            <li>
-              for each group, define or select members be matched by clicking on
-              grey arrow beside Users Group X (fig)
-            </li>
-            <li>
-              the Users Group X selection window then appear to allow group
-              users selection. Click Add once the selection is completed (fig ).
-              Repeat at least as many groups as the size.
-            </li>
-            <li>
-              forbidden tuples also be selected from screen (like selection)
-              (fig 6)
-            </li>
-          </ul>
-          <figure>Insert figure here</figure>
-          <h3>Step 3: Validating/Modifying Matches</h3>
-          <p>
-            2 matching is completed, tuples can be validated, and quick edits
-            can necessary.
-          </p>
-          <ul>
-            <li>
-              From the Matching Results screen, perform a sanity over the tuples
-              generated
-            </li>
-            <li>
-              If necessary, the tuples that need to be adjusted (there should be
-              minimum 2 tuples selected)
-            </li>
-            <li>
-              Select the circle button with a white at top right of screen, then
-              click the circled arrow icon to reshuffle the users into different
-              tuples. (fig)
-            </li>
-          </ul>
           <figure>
             <img
-              src="https://myfiles.space/user_files/128833_e323e39f294cb341/1661883278_koki-user-guide-aug-2022/1661883278_koki-user-guide-aug-2022-4.png"
+              src="../../../assets/img/tutorial/fig12.png"
               width="624"
-              height="256"
+              height="228"
               alt=""
             />
-            <figcaption>
-              Figure 4: Notifying Tuples and Sending Invites
-            </figcaption>
+            <figcaption>Figure 12: Statictics</figcaption>
           </figure>
-          <h3>Step 4: Notifying Tuples and Sending Invites</h3>
-
-          <p>
-            satisfied with the matching, select the circle button with a white
-            down arrow the to right Matching Results screen, click on the
-            envelope icon to notify and send meeting invites to matched users
-            (fig)
-          </p>
-          <figure>Insert figure here</figure>
         </section>
+        <br>
         <section>
-          <h2>Account & Display</h2>
+          <ion-text color="primary mt-5">
+            <h2>2. Account</h2>
+          </ion-text>
+          <figure>
+            <img
+              src="../../../assets/img/tutorial/fig13.png"
+              width="624"
+              height="228"
+              alt=""
+            />
+            <figcaption>Figure 13: Account Section</figcaption>
+          </figure>
+          <br>
           <p>
             Under the Account section, account and displayed information can be
             managed by the superuser.
           </p>
-          <h3>Account</h3>
+          <ion-text color="primary">
+            <h5>Account</h5>
+          </ion-text>
           <p>User's account information is available in this sub-section</p>
-          <h3>Support</h3>
+          <ion-text color="primary">
+            <h5>Support</h5>
+          </ion-text>
           <p>
             Koki's support information, process and are available in subsection
           </p>
-          <h3>Log out</h3>
+          <ion-text color="primary">
+            <h5>Log out</h5>
+          </ion-text>
           <p>log out by clicking Logout</p>
-          <h3>Display - Dark Mode</h3>
+          <ion-text color="primary">
+            <h5>Display - Dark Mode</h5>
+          </ion-text>
           <p>User can turn on/off the Dark Mode</p>
-          <h3>Language Selection</h3>
+          <ion-text color="primary">
+            <h5>Language Selection</h5>
+          </ion-text>
           <p>Users can choose display language here.</p>
         </section>
+        <br>
         <section>
-          <h2>Tutorial</h2>
+          <ion-text color="primary">
+            <h2>3. Tutorial</h2>
+          </ion-text>
           <p>This user guide can be accessed under Tutorial</p>
+          <figure>
+            <img
+              src="../../../assets/img/tutorial/fig14.png"
+              width="624"
+              height="228"
+              alt=""
+            />
+            <figcaption>Figure 14: Tutorial</figcaption>
+          </figure>
         </section>
       </ion-col>
     </ion-row>

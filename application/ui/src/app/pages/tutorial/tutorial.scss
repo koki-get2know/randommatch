@@ -1,3 +1,22 @@
+@font-face {
+  font-family: 'Kumbh_Sans';
+  src: url('../../../assets/fonts/Kumbh_Sans/KumbhSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1, h2, h3, h4, h5, p, ul, figcaption{
+  font-family: "Kumbh_Sans";
+}
+
+.mt-5{
+  margin-top: 50px;
+}
+
+.ml-2{
+  margin-left: 20px;
+}
+
 ion-grid {
   margin: 0 auto;
   max-width: 65rem;
