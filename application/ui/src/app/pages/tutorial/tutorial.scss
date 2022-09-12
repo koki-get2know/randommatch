@@ -1,3 +1,42 @@
+@font-face {
+  font-family: 'Kumbh_Sans';
+  src: url('../../../assets/fonts/Kumbh_Sans/KumbhSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (max-width: 37.5em) {
+  .img-web{
+    display: none;
+  }
+  .img-mobile{
+    display: block;
+    width: 100vh;
+    height: 40.6rem;
+  }
+}
+
+@media screen and (min-width: 37.5em) {
+  .img-web{
+    display: block;
+  }
+  .img-mobile{
+    display: none;
+  }
+}
+
+h1, h2, h3, h4, h5, p, ul, figcaption{
+  font-family: "Kumbh_Sans";
+}
+
+.mt-5{
+  margin-top: 3rem;
+}
+
+.ml-2{
+  margin-left: 1.25rem;
+}
+
 ion-grid {
   margin: 0 auto;
   max-width: 65rem;
