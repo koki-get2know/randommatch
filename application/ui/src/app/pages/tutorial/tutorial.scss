@@ -5,18 +5,18 @@
   font-style: normal;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 37.5em) {
   .img-web{
     display: none;
   }
   .img-mobile{
     display: block;
     width: 100vh;
-    height: 650px;
+    height: 40.6rem;
   }
 }
 
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 37.5em) {
   .img-web{
     display: block;
   }
@@ -30,11 +30,11 @@ h1, h2, h3, h4, h5, p, ul, figcaption{
 }
 
 .mt-5{
-  margin-top: 50px;
+  margin-top: 3rem;
 }
 
 .ml-2{
-  margin-left: 20px;
+  margin-left: 1.25rem;
 }
 
 ion-grid {
