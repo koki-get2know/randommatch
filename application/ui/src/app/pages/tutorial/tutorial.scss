@@ -16,6 +16,15 @@
   }
 }
 
+@media screen and (min-width: 600px) {
+  .img-web{
+    display: block;
+  }
+  .img-mobile{
+    display: none;
+  }
+}
+
 h1, h2, h3, h4, h5, p, ul, figcaption{
   font-family: "Kumbh_Sans";
 }
