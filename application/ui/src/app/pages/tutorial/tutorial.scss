@@ -5,6 +5,17 @@
   font-style: normal;
 }
 
+@media screen and (max-width: 600px) {
+  .img-web{
+    display: none;
+  }
+  .img-mobile{
+    display: block;
+    width: 100vh;
+    height: 650px;
+  }
+}
+
 h1, h2, h3, h4, h5, p, ul, figcaption{
   font-family: "Kumbh_Sans";
 }
