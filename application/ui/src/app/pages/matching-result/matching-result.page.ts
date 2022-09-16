@@ -23,7 +23,115 @@ export class MatchingResultPage implements OnInit {
     private matchingService: UsersService
   ) {}
 
-  ngOnInit() {
+  isrecurrence: boolean = false;
+  selectedDays: String[] = [];
+  selectedPattern: String;
+  selectedEveryPattern: String;
+  selectedWeek: String;
+  allpatterns: any[] = [
+    {
+      value: "minutly",
+      label:"Minutly"
+    },
+    {
+      value: "hourly",
+      label:"Hourly"
+    },
+    {
+      value: "daily",
+      label:"Daily"
+    },
+    {
+      value: "weekly",
+      label:"Weekly"
+    },
+    {
+      value: "monthly",
+      label:"Monthly"
+    },
+  ];
+
+  everyPattern: any[] = [
+    {
+      value: "monday",
+      label:"Monday"
+    },
+    {
+      value: "tuesdy",
+      label:"Tuesday"
+    },
+    {
+      value: "wenesday",
+      label:"Wenesday"
+    },
+    {
+      value: "thursday",
+      label:"Thursday"
+    },
+    {
+      value: "friday",
+      label:"Friday"
+    },
+    {
+      value: "saturday",
+      label:"Saturday"
+    },
+    {
+      value: "sunday",
+      label:"Sunday"
+    },
+  ];
+  
+  allDays: String[] = [
+    "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
+  ];
+  weeks: any[] = [
+    {
+      value: "monday",
+      label:"1st Week"
+    },
+    {
+      value: "tuesdy",
+      label:"2nd Week"
+    },
+    {
+      value: "wenesday",
+      label:"3rd Week"
+    },
+    {
+      value: "thursday",
+      label:"4th Week"
+    },
+    {
+      value: "friday",
+      label:"Last Week"
+    },
+    {
+      value: "saturday",
+      label:"Saturday"
+    },
+    {
+      value: "sunday",
+      label:"Sunday"
+    },
+  ];
+  selectedPeriodes: String[] = [];
+  allPeriodes: String[] = [
+    "Tous les jours","Tous les mois","Tous les ans"
+  ]
+  oneMatchselected:Matching;
+
+  noRecurentDate: String;
+  startDate: String;
+  endDate: String ="2023-05-17";
+  time = "14:00";
+
+  ngOnInit () {
+    setTimeout( () => {
+      this.noRecurentDate = new Date().toISOString();
+      this.startDate = new Date().toISOString();
+    } );
+    
     this.matchings = history.state.matchings;
 
     this.matchings?.forEach((match) =>
@@ -42,6 +150,9 @@ export class MatchingResultPage implements OnInit {
     this.matchingService
       .sendEmail(this.matchings)
       .subscribe((res) => console.log(res));
+  }
+  sendMailByMatch(match) {
+    this.oneMatchselected = match;
   }
 
   reloadSelectedMatches() {

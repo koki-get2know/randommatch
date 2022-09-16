@@ -182,7 +182,7 @@ func emailMatches(c *gin.Context) {
 }
 
 func main() {
-	os.Setenv("NEO4J_AUTH", "neo4j/ubuntu")
+	//os.Setenv("NEO4J_AUTH", "neo4j/ubuntu")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
