@@ -146,7 +146,7 @@ export class MatchingGroupPage implements OnInit {
       event.component.items = this.users.filter(
         (user) =>
           user.name.toLocaleLowerCase().includes(text) ||
-          user.tags.some((tag) => tag.toLocaleLowerCase().includes(text))
+          user.tags?.some((tag) => tag.toLocaleLowerCase().includes(text))
       );
     } else {
       event.component.items = this.users;
