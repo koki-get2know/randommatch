@@ -36,9 +36,12 @@ export class StatisticsPage implements OnInit {
     this.connectionsGenerated = this.translate.instant(
       "NUM_CONNECTIONS_GENERATED"
     );
-    this.conversationsWellTriggered =
-      this.translate.instant("NUM_CONVERSATION");
-    this.conversationsNotSent = this.translate.instant("NUM_FAILED");
+    this.conversationsWellTriggered = this.translate.instant(
+      "CONNECTIONS_INVITE_SENT"
+    );
+    this.conversationsNotSent = this.translate.instant(
+      "CONNECTIONS_INVITE_NOT_SENT"
+    );
     this.getMathingStats();
   }
 
