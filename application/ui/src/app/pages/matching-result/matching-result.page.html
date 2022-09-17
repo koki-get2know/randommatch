@@ -110,7 +110,7 @@
                 <ion-text slot="end">{{ time}}</ion-text>
                 <ion-popover id="date-input-popover" trigger="open-time" [showBackdrop]="false" side="top" alignment="end">
                   <ng-template>
-                    <ion-datetime [(ngModel)]="time" presentation="time"></ion-datetime>
+                    <ion-datetime [min]="noRecurentDate" [(ngModel)]="time" presentation="time"></ion-datetime>
                   </ng-template>
                 </ion-popover>
               </ion-item>

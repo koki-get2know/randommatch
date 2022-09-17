@@ -117,6 +117,7 @@ export class MatchingResultPage implements OnInit {
     setTimeout( () => {
       this.noRecurentDate = new Date().toISOString();
       this.startDate = new Date().toISOString();
+      this.time = new Date().getHours().toString()+":"+new Date().getMinutes().toString();
     } );
     
     this.matchings = history.state.matchings;
