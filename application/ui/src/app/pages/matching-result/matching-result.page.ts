@@ -82,42 +82,29 @@ export class MatchingResultPage implements OnInit {
     },
   ];
   
-  allDays: String[] = [
-    "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
-  ];
+
   weeks: any[] = [
     {
-      value: "monday",
-      label:"1st Week"
+      value: "1week",
+      label:"1WEEK"
     },
     {
-      value: "tuesdy",
-      label:"2nd Week"
+      value: "2week",
+      label:"2WEEK"
     },
     {
-      value: "wenesday",
-      label:"3rd Week"
+      value: "3week",
+      label:"3WEEK"
     },
     {
-      value: "thursday",
-      label:"4th Week"
+      value: "4week",
+      label:"4WEEK"
     },
-    {
-      value: "friday",
-      label:"Last Week"
-    },
-    {
-      value: "saturday",
-      label:"Saturday"
-    },
-    {
-      value: "sunday",
-      label:"Sunday"
-    },
+   
   ];
   selectedPeriodes: String[] = [];
   allPeriodes: String[] = [
-    "Tous les jours","Tous les mois","Tous les ans"
+    "ALL_DAY","ALL_MONTH","ALL_YEAR"
   ]
   oneMatchselected:Matching;
 
