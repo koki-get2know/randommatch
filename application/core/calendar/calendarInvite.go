@@ -70,7 +70,7 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	return emailRaw.Bytes(), err
 }
 
-func SendInvite(matches []matcher.Match) (string, error) {
+func SendInvite(matches []matcher.Match, orgaUid string) (string, error) {
 	jobId := uuid.New().String()
 	if err := database.CreateJobStatus(jobId); err != nil {
 		return "", err
@@ -116,7 +116,7 @@ func SendInvite(matches []matcher.Match) (string, error) {
 				if len(mailErrors) > 0 {
 					database.UpdateJobErrors(jobId, mailErrors)
 				}
-				_, err := saveMatchingInfo(len(matches), len(mailErrors))
+				_, err := saveMatchingInfo(len(matches), len(mailErrors), orgaUid)
 
 				if err != nil {
 					mailErrors = append(mailErrors, err.Error())
@@ -128,7 +128,7 @@ func SendInvite(matches []matcher.Match) (string, error) {
 	return jobId, nil
 }
 
-func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
+func saveMatchingInfo(numGroups int, numFailed int, orgaUid string) (string, error) {
 	numConversations := numGroups - numFailed
 
 	matchingStat := entity.MatchingStat{
@@ -137,8 +137,7 @@ func saveMatchingInfo(numGroups int, numFailed int) (string, error) {
 		NumFailed:        numFailed,
 	}
 
-	return database.CreateMatchingStat(matchingStat)
-
+	return database.CreateMatchingStat(matchingStat, orgaUid)
 }
 
 func sendInvite(match *matcher.Match) error {

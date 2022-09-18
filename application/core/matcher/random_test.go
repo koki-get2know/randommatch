@@ -1,12 +1,12 @@
 package matcher
 
 import (
+	"fmt"
 	"log"
 	"testing"
 
 	"github.com/koki/randommatch/entity"
 )
-
 
 func TestRandomChoices(t *testing.T) {
 	//id := []string{"2", "5", "6", "8", "10", "12", "24", "25"}
@@ -55,7 +55,7 @@ func TestMatcher1(t *testing.T) {
 	A := []entity.User{{Id: "2"}, {Id: "1"}}
 	forbiddenConnections = append(forbiddenConnections, A)
 	constraint := []Constraint{Unique}
-	SELECTOR := Basic
+	SELECTOR := entity.Basic
 	matching := Matcher(&g, 2, constraint, SELECTOR, forbiddenConnections,
 		[]*entity.User{}, []*entity.User{}, []Constraint{}, []Constraint{})
 
@@ -105,7 +105,7 @@ func TestMatcher2(t *testing.T) {
 
 	B := []*entity.User{{Id: "1", Name: "tata"}, {Id: "2", Name: "toto"}}
 	interConstraint := []Constraint{Unique}
-	SELECTOR := Group
+	SELECTOR := entity.Group
 	matching := Matcher(&G, 0, []Constraint{}, SELECTOR, forbiddenConnections, A, B, interConstraint, []Constraint{})
 
 	for _, match := range matching {
@@ -131,17 +131,17 @@ func TestGenTuple(t *testing.T) {
 
 	D := []entity.User{{Id: "1", Name: "tata"}, {Id: "3", Name: "tutu"}, {Id: "6", Name: "titi"}}
 
-	matching := GenerateTuple(users, connections, Group, forbiddenConnections, 2, A, D)
+	matching := GenerateTuple(users, connections, entity.Group, forbiddenConnections, 2, A, D)
 
 	for _, match := range matching {
-		log.Printf("Match : [")
+		fmt.Printf("Match : [")
 		for _, user := range match.Users {
 
 			log.Printf("%s,", user.Name)
 
 		}
 
-		log.Printf("]")
-		log.Println("")
+		fmt.Printf("]")
+		fmt.Println("")
 	}
 }

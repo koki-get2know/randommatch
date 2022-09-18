@@ -12,6 +12,7 @@ import { ColorsTags } from "../../constants";
 import SwiperCore, { Pagination, Swiper } from "swiper";
 import { NavigationExtras, Router } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
+import { finalize } from "rxjs/operators";
 
 SwiperCore.use([Pagination]);
 
@@ -30,6 +31,8 @@ export class MatchingGroupPage implements OnInit {
   users: User[] = [];
   usersSelectedForGroup: User[] = [];
   activeGroupToEdit = -1;
+  isLoading = false;
+  noUsersToShow = false;
 
   @ViewChild("addUsersToGroup", { static: false })
   addUsersToGroup: IonicSelectableComponent;
@@ -51,6 +54,7 @@ export class MatchingGroupPage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
+      this.noUsersToShow = users.length === 0;
     });
 
     this.initForm();
@@ -74,9 +78,7 @@ export class MatchingGroupPage implements OnInit {
   }
 
   prevSlide() {
-    this.slides.allowSlideNext = true;
     this.slides.slidePrev();
-    this.slides.allowSlideNext = false;
   }
 
   nextSlide() {
@@ -115,9 +117,7 @@ export class MatchingGroupPage implements OnInit {
         }
         return true;
       });
-      this.slides.allowSlideNext = true;
       this.slides.slideNext();
-      this.slides.allowSlideNext = false;
     }
   }
 
@@ -146,7 +146,7 @@ export class MatchingGroupPage implements OnInit {
       event.component.items = this.users.filter(
         (user) =>
           user.name.toLocaleLowerCase().includes(text) ||
-          user.groups.some((tag) => tag.toLocaleLowerCase().includes(text))
+          user.tags?.some((tag) => tag.toLocaleLowerCase().includes(text))
       );
     } else {
       event.component.items = this.users;
@@ -338,8 +338,10 @@ export class MatchingGroupPage implements OnInit {
       forbiddenConnections: this.forbiddenConnections,
     };
 
+    this.isLoading = true;
     this.matchService
       .makematchgroup(matchingRequest)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe((matchings: Matching[]) => {
         if (matchings !== null) {
           matchings.forEach((match) =>
@@ -362,11 +364,14 @@ export class MatchingGroupPage implements OnInit {
   }
 
   // matching result
-  matchingresult(matchings: Matching[], matchingRequest: MatchingGroupReq) {
+  matchingresult(
+    matchings: Matching[],
+    matchingGroupRequest: MatchingGroupReq
+  ) {
     const navigationExtras: NavigationExtras = {
       state: {
         matchings,
-        matchingRequest,
+        matchingGroupRequest,
       },
     };
     this.router.navigate(["/matching-result"], navigationExtras);

@@ -16,18 +16,18 @@ func Duration(msg string, start time.Time) {
 
 func Contains(s []any, e string) bool {
 	for _, a := range s {
-			if a.(string) == e {
-					return true
-			}
+		if a.(string) == e {
+			return true
+		}
 	}
 	return false
 }
 
 func ContainsString(s []string, e string) bool {
 	for _, a := range s {
-			if a == e {
-					return true
-			}
+		if a == e {
+			return true
+		}
 	}
 	return false
 }
@@ -35,9 +35,9 @@ func ContainsString(s []string, e string) bool {
 func ItemsWithPrefixInRole(s []any, prefix string) []string {
 	orgs := []string{}
 	for _, a := range s {
-			if strings.HasPrefix(a.(string), prefix) {
-					orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string),prefix)) )
-			}
+		if strings.HasPrefix(a.(string), prefix) {
+			orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string), prefix)))
+		}
 	}
 	return orgs
 }

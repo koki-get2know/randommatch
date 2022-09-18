@@ -1,97 +1,68 @@
 [
-    {
-        "Id": "Q2qEUybRmXkEa9KDjvuM3u!AEdaPpBYA",
-        "Name": "Pins Prestilien",
-        "Email": "pinsdev24@gmail.com",
-        "Groups": [
-            ""
-        ],
-        "Genre": "Male",
-        "Birthday": "10/01",
-        "Hobbies": [
-            "Data science",
-            "Space",
-            "Télévison"
-        ],
-        "MatchPreference": [
-            "girls"
-        ],
-        "MatchPreferenceTime": [
-            "14:00PM"
-        ],
-        "PositionHeld": "CEO",
-        "MultiMatch": false,
-        "PhoneNumber": "699999999",
-        "Departement": "Informatique",
-        "Location": "Kao",
-        "Seniority": "",
-        "Role": "super-user",
-        "NumberOfMatching": 0,
-        "NumberMatchingAccepted": 0,
-        "NumberMatchingDeclined": 0,
-        "AverageMatchingRate": 0
-    },
-    {
-        "Id": "xGeYbIyWkeMxQ7shkmFflctz5zD#@G4@",
-        "Name": "Pins Prestilien",
-        "Email": "pinsdev24@gmail.com",
-        "Groups": [
-            "DS",
-            "IA",
-            "SPACE"
-        ],
-        "Genre": "Male",
-        "Birthday": "10/01",
-        "Hobbies": [
-            "Jeux vidéos",
-            "Musique"
-        ],
-        "MatchPreference": [
-            "same groups"
-        ],
-        "MatchPreferenceTime": [
-            "14:00PM"
-        ],
-        "PositionHeld": "Admin",
-        "MultiMatch": false,
-        "PhoneNumber": "699999999",
-        "Departement": "Math",
-        "Location": "Fpol",
-        "Seniority": "",
-        "Role": "user",
-        "NumberOfMatching": 0,
-        "NumberMatchingAccepted": 0,
-        "NumberMatchingDeclined": 0,
-        "AverageMatchingRate": 0
-    },
-    {
-        "Id": "4OLHL9scdsWqL4kX4rj0xMpOVpFsk5s3",
-        "Name": "Pins Prestilien",
-        "Email": "pinsdev24@gmail.com",
-        "Groups": [
-            "Foot"
-        ],
-        "Genre": "Male",
-        "Birthday": "10/01",
-        "Hobbies": [
-            "Dance"
-        ],
-        "MatchPreference": [
-            "pretty girl"
-        ],
-        "MatchPreferenceTime": [
-            "14:00PM"
-        ],
-        "PositionHeld": "Chef",
-        "MultiMatch": false,
-        "PhoneNumber": "699999999",
-        "Departement": "Biology",
-        "Location": "Soa",
-        "Seniority": "",
-        "Role": "user",
-        "NumberOfMatching": 0,
-        "NumberMatchingAccepted": 0,
-        "NumberMatchingDeclined": 0,
-        "AverageMatchingRate": 0
-    }
+  {
+    "Id": "Q2qEUybRmXkEa9KDjvuM3u!AEdaPpBYA",
+    "Name": "Pins Prestilien",
+    "Email": "pinsdev24@gmail.com",
+    "Tags": [""],
+    "Genre": "Male",
+    "Birthday": "10/01",
+    "Hobbies": ["Data science", "Space", "Télévison"],
+    "MatchPreference": ["girls"],
+    "MatchPreferenceTime": ["14:00PM"],
+    "PositionHeld": "CEO",
+    "MultiMatch": false,
+    "PhoneNumber": "699999999",
+    "Departement": "Informatique",
+    "Location": "Kao",
+    "Seniority": "",
+    "Role": "super-user",
+    "NumberOfMatching": 0,
+    "NumberMatchingAccepted": 0,
+    "NumberMatchingDeclined": 0,
+    "AverageMatchingRate": 0
+  },
+  {
+    "Id": "xGeYbIyWkeMxQ7shkmFflctz5zD#@G4@",
+    "Name": "Pins Prestilien",
+    "Email": "pinsdev24@gmail.com",
+    "Tags": ["DS", "IA", "SPACE"],
+    "Genre": "Male",
+    "Birthday": "10/01",
+    "Hobbies": ["Jeux vidéos", "Musique"],
+    "MatchPreference": ["same groups"],
+    "MatchPreferenceTime": ["14:00PM"],
+    "PositionHeld": "Admin",
+    "MultiMatch": false,
+    "PhoneNumber": "699999999",
+    "Departement": "Math",
+    "Location": "Fpol",
+    "Seniority": "",
+    "Role": "user",
+    "NumberOfMatching": 0,
+    "NumberMatchingAccepted": 0,
+    "NumberMatchingDeclined": 0,
+    "AverageMatchingRate": 0
+  },
+  {
+    "Id": "4OLHL9scdsWqL4kX4rj0xMpOVpFsk5s3",
+    "Name": "Pins Prestilien",
+    "Email": "pinsdev24@gmail.com",
+    "Tags": ["Foot"],
+    "Genre": "Male",
+    "Birthday": "10/01",
+    "Hobbies": ["Dance"],
+    "MatchPreference": ["pretty girl"],
+    "MatchPreferenceTime": ["14:00PM"],
+    "PositionHeld": "Chef",
+    "MultiMatch": false,
+    "PhoneNumber": "699999999",
+    "Departement": "Biology",
+    "Location": "Soa",
+    "Seniority": "",
+    "Role": "user",
+    "NumberOfMatching": 0,
+    "NumberMatchingAccepted": 0,
+    "NumberMatchingDeclined": 0,
+    "AverageMatchingRate": 0
+  }
 ]

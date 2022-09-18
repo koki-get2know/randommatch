@@ -12,13 +12,19 @@
     [slidesPerView]="1"
     [pagination]="true"
     [initialSlide]="0"
-    [allowSlideNext]="false"
+    [allowTouchMove]="false"
     (swiper)="setSwiperInstance($event)"
   >
     <ng-template swiperSlide>
       <div class="slide-container vertical-center">
-        <h2 class="slide-title">{{"QUESTION_GROUP_SIZE" | translate}}</h2>
-        <form [formGroup]="matchingForm" (submit)="nextSlide()">
+        <h2 class="slide-title" *ngIf="users?.length >0">
+          {{"QUESTION_GROUP_SIZE" | translate}}
+        </h2>
+        <form
+          [formGroup]="matchingForm"
+          (submit)="nextSlide()"
+          *ngIf="users?.length > 0"
+        >
           <ion-item class="ion-text-center matching-size-item">
             <ion-input
               class="matching-size-input"
@@ -52,6 +58,27 @@
             ></ion-icon
           ></ion-button>
         </form>
+        <ion-grid *ngIf="noUsersToShow" routerLink="/users-list">
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-icon
+                class="no-people-icon"
+                name="cloud-upload-outline"
+              ></ion-icon
+            ></ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="ion-text-center">
+              <ion-label lines="none">
+                <p>
+                  <ion-text color="primary">
+                    {{ "NO_ONE_UPLOAD_TO_START" | translate }}
+                  </ion-text>
+                </p>
+              </ion-label>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </div>
     </ng-template>
     <ng-template swiperSlide>
@@ -101,14 +128,13 @@
             slot="start"
           ></ion-checkbox>
           <ion-avatar slot="start">
-            <div [innerHTML]="user.avatar"></div>
+            <!-- <div [innerHTML]="user.avatar"></div> -->
+            <img [src]="user.avatar" />
           </ion-avatar>
           <div class="user-tags">
             <ion-label class="no-overflow"> {{user.name}} </ion-label>
             <div>
-              <ion-chip
-                *ngFor="let tag of user.groups"
-                [color]="ColorsTags[i%2]"
+              <ion-chip *ngFor="let tag of user.tags" [color]="ColorsTags[i%2]"
                 >{{tag}}
               </ion-chip>
             </div>
@@ -138,6 +164,7 @@
         >
           {{ "MATCH" | translate}}
           <ion-icon name="checkmark-done-outline" slot="end"></ion-icon>
+          <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
         </ion-button>
         <ion-grid>
           <ion-row class="ion-justify-content-center">
@@ -175,13 +202,14 @@
                   slot="start"
                 ></ion-checkbox>
                 <ion-avatar slot="start">
-                  <div [innerHTML]="user.avatar"></div>
+                  <!-- <div [innerHTML]="user.avatar"></div> -->
+                  <img [src]="user.avatar" />
                 </ion-avatar>
                 <div class="user-tags">
                   <ion-label class="no-overflow"> {{user.name}} </ion-label>
                   <div class="tags">
                     <ion-chip
-                      *ngFor="let tag of user.groups"
+                      *ngFor="let tag of user.tags"
                       [color]="ColorsTags[i%2]"
                       >{{tag}}
                     </ion-chip>
