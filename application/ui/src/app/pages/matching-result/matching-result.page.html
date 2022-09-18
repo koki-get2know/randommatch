@@ -29,7 +29,7 @@
         <ion-list>
           <ion-item>
             <ion-button color="primary" id="open-modal2" fill="clear">
-              {{ "PERIODE_OF_MATCH" | translate}}
+              {{ "MATCHING_PERIOD" | translate | uppercase }}
               <ion-icon slot="end" name="alarm"></ion-icon>
             </ion-button>
           </ion-item>
@@ -69,7 +69,7 @@
     <ng-template>
       <ion-content>
         <ion-toolbar>
-          <ion-title>{{ "MATCHING_PERIODE" | translate}}</ion-title>
+          <ion-title>{{ "MATCHING_PERIOD" | translate}}</ion-title>
           <ion-buttons slot="end">
             <ion-button color="light" (click)="modal.dismiss()">{{ "CLOSE" | translate}}</ion-button>
           </ion-buttons>
