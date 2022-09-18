@@ -37,10 +37,14 @@ func TestAdd(t *testing.T) {
 
 	n1 := entity.User{Id: "4"}
 	n2 := entity.User{Id: "5"}
-	A := []*entity.User{&n1, &n2}
+	n3 := entity.User{Id: "6"}
+	//n4 := entity.User{Id: "7"}
+	A := []*entity.User{&n1, &n2, &n3}
 
 	sub := g.Subgraph(A)
 	fmt.Println(sub.users)
+
 	sub.RemoveUser(&n2)
+
 	fmt.Println(sub.users)
 }
