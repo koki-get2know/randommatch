@@ -36,106 +36,99 @@ export class MatchingResultPage implements OnInit {
   allpatterns: any[] = [
     {
       value: "every_minute",
-      label:"EVERY_MINUTE"
+      label: "EVERY_MINUTE",
     },
     {
       value: "hourly",
-      label:"HOURLY"
+      label: "HOURLY",
     },
     {
       value: "daily",
-      label:"DAILY"
+      label: "DAILY",
     },
     {
       value: "weekly",
-      label:"WEEKLY"
+      label: "WEEKLY",
     },
     {
       value: "monthly",
-      label:"MONTHLY"
+      label: "MONTHLY",
     },
   ];
 
   everyPattern: any[] = [
     {
       value: "monday",
-      label:"MONDAY"
+      label: "MONDAY",
     },
     {
       value: "tuesday",
-      label:"TUESDAY"
+      label: "TUESDAY",
     },
     {
       value: "wednesday",
-      label:"WEDNESDAY"
+      label: "WEDNESDAY",
     },
     {
       value: "thursday",
-      label:"THURSDAY"
+      label: "THURSDAY",
     },
     {
       value: "friday",
-      label:"FRIDAY"
+      label: "FRIDAY",
     },
     {
       value: "saturday",
-      label:"SATURDAY"
+      label: "SATURDAY",
     },
     {
       value: "sunday",
-      label:"SUNDAY"
+      label: "SUNDAY",
     },
   ];
-  
 
   weeks: any[] = [
     {
       value: "week1",
-      label:"WEEK1"
+      label: "WEEK1",
     },
     {
       value: "week2",
-      label:"WEEK2"
+      label: "WEEK2",
     },
     {
       value: "week3",
-      label:"WEEK3"
+      label: "WEEK3",
     },
     {
       value: "week4",
-      label:"WEEK4"
+      label: "WEEK4",
     },
-   
+    {
+      value: "last_week",
+      label: "LAST_WEEK",
+    },
   ];
   selectedPeriodes: String[] = [];
-  allPeriodes: String[] = [
-    "EVERY_DAY","EVERY_MONTH","EVERY_YEAR"
-  ]
-  oneMatchselected:Matching;
+  allPeriodes: String[] = ["EVERY_DAY", "EVERY_MONTH", "EVERY_YEAR"];
+  oneMatchselected: Matching;
 
   noRecurentDate: String;
   startDate: String;
-  endDate: String ="2023-05-17";
+  endDate: String = "2023-05-17";
   time = "14:00";
 
-  ngOnInit () {
-    setTimeout( () => {
+  ngOnInit() {
+    setTimeout(() => {
       this.noRecurentDate = new Date().toISOString();
       this.startDate = new Date().toISOString();
-      this.time = new Date().getHours().toString()+":"+new Date().getMinutes().toString();
-    } );
-    
-    this.matchings = history.state.matchings;
+      this.time =
+        new Date().getHours().toString() +
+        ":" +
+        new Date().getMinutes().toString();
+    });
 
-    /*this.matchings?.forEach((match) =>
-      match.users.forEach((user) => {
-        if (user.avatar) {
-          user.avatar = this.sanitizer.bypassSecurityTrustHtml(
-            user.avatar["changingThisBreaksApplicationSecurity"]
-          );
-        }
-      })
-    );*/
+    this.matchings = history.state.matchings;
     this.matchingRequest = history.state.matchingRequest;
     this.matchingGroupRequest = history.state.matchingGroupRequest;
   }
