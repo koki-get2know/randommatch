@@ -228,14 +228,14 @@ func matchingBySchedule(c *gin.Context) {
 	}
 
 	schedule, err := database.GetSchedule(req.Uid, req.Organization)
-	log.Println(schedule)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	switch schedule.MatchingType {
-	case "simple":
+	case entity.Simple:
 		techTag := "dummy_" + schedule.Name
 		users, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag)
 
@@ -246,7 +246,8 @@ func matchingBySchedule(c *gin.Context) {
 		tuples := matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
 			[][]entity.User{}, uint(schedule.Size), []entity.User{}, []entity.User{})
 		c.JSON(http.StatusCreated, gin.H{"data": tuples})
-	case "group":
+
+	case entity.Groups:
 
 		techTag1 := "dummy_group_" + strconv.Itoa(0) + "_" + schedule.Name
 		techTag2 := "dummy_group_" + strconv.Itoa(1) + "_" + schedule.Name
@@ -263,7 +264,7 @@ func matchingBySchedule(c *gin.Context) {
 		tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
 			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
 		c.JSON(http.StatusCreated, gin.H{"data": tuples})
-	case "tag":
+	case entity.Tags:
 
 		tags, err := database.GetTagBySchedule(schedule.Id)
 		if err != nil {
@@ -284,6 +285,8 @@ func matchingBySchedule(c *gin.Context) {
 			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
 		c.JSON(http.StatusCreated, gin.H{"data": tuples})
 	}
+	database.UpdateSchedule(schedule, req.Organization)
+
 }
 func main() {
 	_, exists := os.LookupEnv("NEO4J_AUTH")
@@ -309,17 +312,16 @@ func main() {
 	public.POST("/albums", handler.PostAlbums)
 
 	protected := router.Group("")
-	protected.Use(middlewares.JwtAuth())
+	//protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/tag-matchings", generateMatchingByTag)
 	protected.POST("/upload-users", handler.UploadUsers)
 	protected.POST("/organizations", handler.CreateOrganization)
 	protected.POST("/email-matches", emailMatches)
-	protected.POST("/schedule-simple", handler.CreateSchedule)
-	protected.POST("/schedule-group", handler.CreateScheduleGroup)
-	protected.POST("/schedule-tag", handler.CreateScheduleTag)
+
 	protected.POST("/matchings-schedule", matchingBySchedule)
+	protected.POST("/schedule", handler.CreateScheduleType)
 
 	protected.GET("/users-creation-job/:id", handler.GetJobStatus)
 	protected.GET("/matching-email-job/:id", handler.GetJobStatus)

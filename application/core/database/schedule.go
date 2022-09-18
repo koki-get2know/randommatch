@@ -1,11 +1,9 @@
 package database
 
 import (
-	"log"
 	"strings"
 	"time"
 
-	"github.com/fatih/structs"
 	"github.com/koki/randommatch/entity"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -70,13 +68,19 @@ func GetSchedule(uid string, orga string) (entity.Schedule, error) {
 			schedule = entity.Schedule{
 				Id:           sch["uid"].(string),
 				Name:         sch["name"].(string),
-				CreateDate:   sch["creation_date"].(time.Time),
-				LastUpdate:   sch["last_update"].(time.Time),
-				StartDate:    sch["start_time"].(time.Time),
-				EndDate:      sch["end_time"].(time.Time),
+				CreateDate:   sch["creationDate"].(time.Time),
+				Time:         sch["time"].(string),
+				Duration:     sch["duration"].(string),
+				StartDate:    sch["startTime"].(string),
+				EndDate:      sch["endTime"].(string),
 				Size:         sch["size"].(int64),
-				MatchingType: sch["matching_type"].(string),
+				Frequency:    entity.Frequency(sch["frequency"].(string)),
+				MatchingType: entity.MatchingType(sch["matchingType"].(string)),
 				Active:       sch["active"].(bool),
+				Week:         entity.Week(sch["week"].(string)),
+				Days:         sch["days"].(string),
+				LastRun:      sch["lastRun"].(string),
+				NextRun:      sch["nextRun"].(string),
 			}
 		}
 
@@ -100,18 +104,22 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
-	log.Println(structs.Map(schedule))
+	schedule.UdapteLastRun(time.Now(), "_")
+	schedule.UdapteNextRun()
+
 	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run("MATCH (o: Organization{lower_name: $lower_org_name})"+
 			"MERGE (n: Schedule{uid: $uid})"+
-			"ON CREATE SET n += {uid: $uid, name:$name,active: $active, "+
-			"creation_date: datetime({timezone: 'Z'}), last_update: datetime({timezone: 'Z'}), "+
-			"start_time: datetime({timezone: 'Z'}),"+
-			"end_time: datetime({timezone: 'Z'}),"+
-			"size:$size,frequency:$frequency,matching_type: $matchingType}"+
+			"ON CREATE SET n += {uid: $uid, name:$name,active: $active,"+
+			"creationDate: datetime({timezone: 'Z'}), "+
+			"startTime: $start,"+
+			"endTime: $end,"+
+			"size:$size,frequency:$frequency,matchingType:$matchingType,"+
+			"week:$week, days:$days, lastRun:$lastRun, nextRun:$nextRun,"+
+			"time:$time, duration:$duration}"+
 			"MERGE (n)-[r:SCHEDULE_FOR]->(o)",
 
-			map[string]interface{}{"size": schedule.Size, "frequency": schedule.Frequency, "uid": schedule.Id, "name": schedule.Name, "active": schedule.Active, "matchingType": schedule.MatchingType, "lower_org_name": strings.ToLower(orga)})
+			map[string]interface{}{"start": schedule.StartDate, "end": schedule.EndDate, "time": schedule.Time, "duration": schedule.Duration, "lastRun": schedule.LastRun, "nextRun": schedule.NextRun, "week": schedule.Week, "days": schedule.Days, "size": schedule.Size, "frequency": schedule.Frequency, "uid": schedule.Id, "name": schedule.Name, "active": schedule.Active, "matchingType": schedule.MatchingType, "lower_org_name": strings.ToLower(orga)})
 		if err != nil {
 			return nil, err
 		}
@@ -127,4 +135,29 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 		return err
 	}
 	return nil
+}
+
+func UpdateSchedule(schedule entity.Schedule, orga string) error {
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	schedule.UdapteLastRun(time.Now(), "_")
+	schedule.UdapteNextRun()
+
+	defer session.Close()
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		_, err := tx.Run(
+			"MATCH (s:Schedule{uid:$uid})-[r:SCHEDULE_FOR]->(:Organization{lower_name:$orga})"+
+				"SET s.LastRun = $lastRun"+
+				"SET s.NextRun = $nextRun",
+
+			map[string]interface{}{"nextRun": schedule.NextRun, "lastRun": schedule.LastRun, "uid": schedule.Id, "orga": strings.ToLower(orga)})
+		return "", err
+	})
+
+	return err
+
 }
