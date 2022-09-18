@@ -14,12 +14,12 @@
       <ion-icon name="chevron-down"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="bottom">
-      <ion-fab-button (click)="sendMail()"
-        ><ion-icon name="mail" aria-label="mail the selection"></ion-icon
-      ></ion-fab-button>
-      <ion-fab-button (click)="reloadSelectedMatches()"
-        ><ion-icon name="reload" aria-label="rematch the selection"></ion-icon
-      ></ion-fab-button>
+      <ion-fab-button id="open-modal" (click)="sendMail()">
+        <ion-icon name="mail" aria-label="mail the selection"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="reloadSelectedMatches()">
+        <ion-icon name="reload" aria-label="rematch the selection"></ion-icon>
+      </ion-fab-button>
     </ion-fab-list>
   </ion-fab>
 
@@ -27,16 +27,18 @@
     <ion-row>
       <ion-col>
         <ion-list>
+          <ion-item>
+            <ion-button color="primary" id="open-modal2" fill="clear">
+              {{ "MATCHING_PERIOD" | translate | uppercase }}
+              <ion-icon slot="end" name="alarm"></ion-icon>
+            </ion-button>
+          </ion-item>
           <ion-item-group *ngFor="let match of matchings; let i=index">
             <ion-item-divider sticky>
               <ion-label> Match {{i+1}} </ion-label>
             </ion-item-divider>
             <ion-item>
-              <ion-checkbox
-                color="primary"
-                (click)="selectTuple($event, match)"
-                slot="start"
-              ></ion-checkbox>
+              <ion-checkbox color="primary" (click)="selectTuple($event, match)" slot="start"></ion-checkbox>
               <ion-grid>
                 <ion-row>
                   <ion-col *ngFor="let user of match.users">
@@ -57,4 +59,142 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+</ion-content>
+
+
+
+
+<ion-content class="ion-padding">
+  <ion-modal #modal trigger="open-modal2">
+    <ng-template>
+      <ion-content>
+        <ion-toolbar>
+          <ion-title>{{ "MATCHING_PERIOD" | translate}}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button color="light" (click)="modal.dismiss()">{{ "CLOSE" | translate}}</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+        <ion-list class="list-style">
+          <ion-item>
+            <ion-label slot="end">{{ "MAKE_RECCURENT" | translate}}</ion-label>
+            <ion-toggle color="primary" [(ngModel)]="isrecurrence"></ion-toggle>
+          </ion-item>
+        </ion-list>
+        <div *ngIf="!isrecurrence">
+          <ion-row>
+            <ion-col col-md-12>
+              <ion-item button="true" id="open-date-input">
+                <ion-label> {{ "DATE_TIME" | translate}} </ion-label>
+                <ion-text slot="end">{{ noRecurentDate | date: 'mediumDate' }}</ion-text>
+                <ion-popover id="date-input-popover" trigger="open-date-input" [showBackdrop]="false" side="top" alignment="end">
+                  <ng-template>
+                    <ion-datetime [min]="noRecurentDate" max="2056" [(ngModel)]="noRecurentDate" presentation="date-time"></ion-datetime>
+                  </ng-template>
+                </ion-popover>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-list>
+            <ion-item class="ion-text-center matching-size-item">
+              <ion-input slot="end" class="matching-size-input" id="matching-size" type="number" [autofocus]="true" clearInput></ion-input>
+              <ion-label>
+                {{ "DURATION" | translate}}
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+        <div *ngIf="isrecurrence">
+          <ion-row>
+            <ion-col col-md-12>
+              <ion-item button="true" id="open-time">
+                <ion-label> {{ "TIME" | translate}} </ion-label>
+                <ion-text slot="end">{{ time}}</ion-text>
+                <ion-popover id="date-input-popover" trigger="open-time" [showBackdrop]="false" side="top" alignment="end">
+                  <ng-template>
+                    <ion-datetime [min]="noRecurentDate" [(ngModel)]="time" presentation="time"></ion-datetime>
+                  </ng-template>
+                </ion-popover>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-list>
+            <ion-item class="ion-text-center matching-size-item">
+              <ion-input slot="end" class="matching-size-input" id="matching-size" type="number" [autofocus]="true" clearInput></ion-input>
+              <ion-label>
+                {{ "DURATION" | translate}}
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          <ion-row>
+            <ion-col col-md-12>
+              <ion-item button="true" id="open-date-input1">
+                <ion-label> {{ "RECCURENCE_START_DATE" | translate}} </ion-label>
+                <ion-text slot="end">{{ startDate | date: 'mediumDate' }}</ion-text>
+                <ion-popover id="date-input-popover" trigger="open-date-input1" [showBackdrop]="false" side="top" alignment="end">
+                  <ng-template>
+                    <ion-datetime [min]="startDate" max="2056" [(ngModel)]="startDate" presentation="date"></ion-datetime>
+                  </ng-template>
+                </ion-popover>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col col-md-12>
+              <ion-item button="true" id="open-date-input2">
+                <ion-label> {{ "RECCURENCE_END_DATE" | translate}} </ion-label>
+                <ion-text slot="end">{{ endDate | date: 'mediumDate' }}</ion-text>
+                <ion-popover id="date-input-popover" trigger="open-date-input2" [showBackdrop]="false" side="top" alignment="end">
+                  <ng-template>
+                    <ion-datetime [min]="endDate" max="2056" [(ngModel)]="endDate" presentation="date"></ion-datetime>
+                  </ng-template>
+                </ion-popover>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-list tyle="max-width:400px">
+            <ion-item>
+              <ion-label>{{ "RECCURENCE_PATTERN" | translate}}</ion-label>
+              <ion-select multiple="false" [(ngModel)]="selectedPattern">
+                <ion-select-option [value]="day.value" *ngFor="let day of allpatterns">{{day.label | translate}}</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item *ngIf="selectedPattern!=='monthly'">
+              <ion-label>{{ "EVERY" | translate}}</ion-label>
+              <ion-select multiple=" false" [(ngModel)]="selectedEveryPattern">
+                <ion-select-option [value]="day.value" *ngFor="let day of everyPattern">{{day.label | translate}}</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-row *ngIf="selectedPattern==='monthly'">
+              <ion-col col-md-6>
+                <ion-item>
+                  <ion-label>{{ "ON_THE" | translate}}</ion-label>
+                  <ion-select multiple="false" [(ngModel)]="selectedWeek">
+                    <ion-select-option [value]="week.value" *ngFor="let week of weeks">{{week.label | translate}}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+              <ion-col col-md-6>
+                <ion-item>
+                  <ion-label>{{ "ON" | translate}}</ion-label>
+                  <ion-select multiple="false" [(ngModel)]="selectedEveryPattern">
+                    <ion-select-option [value]="pattern.value" *ngFor="let pattern of everyPattern">{{pattern.label | translate}}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-list>
+        </div>
+
+
+        <br />
+        <ion-button color="primary" fill="clear">
+          {{ "SEND_EMAIL" | translate}}
+          <ion-icon slot="end" name="mail"></ion-icon>
+        </ion-button>
+      </ion-content>
+    </ng-template>
+
+  </ion-modal>
 </ion-content>

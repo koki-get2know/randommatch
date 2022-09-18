@@ -28,7 +28,103 @@ export class MatchingResultPage implements OnInit {
     private translate: TranslateService
   ) {}
 
-  ngOnInit() {
+  isrecurrence: boolean = false;
+  selectedDays: String[] = [];
+  selectedPattern: String;
+  selectedEveryPattern: String;
+  selectedWeek: String;
+  allpatterns: any[] = [
+    {
+      value: "every_minute",
+      label:"EVERY_MINUTE"
+    },
+    {
+      value: "hourly",
+      label:"HOURLY"
+    },
+    {
+      value: "daily",
+      label:"DAILY"
+    },
+    {
+      value: "weekly",
+      label:"WEEKLY"
+    },
+    {
+      value: "monthly",
+      label:"MONTHLY"
+    },
+  ];
+
+  everyPattern: any[] = [
+    {
+      value: "monday",
+      label:"MONDAY"
+    },
+    {
+      value: "tuesday",
+      label:"TUESDAY"
+    },
+    {
+      value: "wednesday",
+      label:"WEDNESDAY"
+    },
+    {
+      value: "thursday",
+      label:"THURSDAY"
+    },
+    {
+      value: "friday",
+      label:"FRIDAY"
+    },
+    {
+      value: "saturday",
+      label:"SATURDAY"
+    },
+    {
+      value: "sunday",
+      label:"SUNDAY"
+    },
+  ];
+  
+
+  weeks: any[] = [
+    {
+      value: "week1",
+      label:"WEEK1"
+    },
+    {
+      value: "week2",
+      label:"WEEK2"
+    },
+    {
+      value: "week3",
+      label:"WEEK3"
+    },
+    {
+      value: "week4",
+      label:"WEEK4"
+    },
+   
+  ];
+  selectedPeriodes: String[] = [];
+  allPeriodes: String[] = [
+    "EVERY_DAY","EVERY_MONTH","EVERY_YEAR"
+  ]
+  oneMatchselected:Matching;
+
+  noRecurentDate: String;
+  startDate: String;
+  endDate: String ="2023-05-17";
+  time = "14:00";
+
+  ngOnInit () {
+    setTimeout( () => {
+      this.noRecurentDate = new Date().toISOString();
+      this.startDate = new Date().toISOString();
+      this.time = new Date().getHours().toString()+":"+new Date().getMinutes().toString();
+    } );
+    
     this.matchings = history.state.matchings;
 
     /*this.matchings?.forEach((match) =>
@@ -113,6 +209,9 @@ export class MatchingResultPage implements OnInit {
           }
         });
     }
+  }
+  sendMailByMatch(match) {
+    this.oneMatchselected = match;
   }
 
   reloadSelectedMatches() {
