@@ -100,7 +100,7 @@
   "WEEK2": "2nd Week",
   "WEEK3": "3rd Week",
   "WEEK4": "4th Week",
-  "ALL_DAY": "Every day",
-  "ALL_MONTH": "Every month",
-  "ALL_YEAR": "Every year"
+  "EVERY_DAY": "Every day",
+  "EVERY_MONTH": "Every month",
+  "EVERY_YEAR": "Every year"
 }
