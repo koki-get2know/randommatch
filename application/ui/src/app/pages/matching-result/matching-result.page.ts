@@ -35,81 +35,81 @@ export class MatchingResultPage implements OnInit {
   selectedWeek: String;
   allpatterns: any[] = [
     {
-      value: "minutly",
-      label:"Minutly"
+      value: "every_minute",
+      label:"EVERY_MINUTE"
     },
     {
       value: "hourly",
-      label:"Hourly"
+      label:"HOURLY"
     },
     {
       value: "daily",
-      label:"Daily"
+      label:"DAILY"
     },
     {
       value: "weekly",
-      label:"Weekly"
+      label:"WEEKLY"
     },
     {
       value: "monthly",
-      label:"Monthly"
+      label:"MONTHLY"
     },
   ];
 
   everyPattern: any[] = [
     {
       value: "monday",
-      label:"Monday"
+      label:"MONDAY"
     },
     {
-      value: "tuesdy",
-      label:"Tuesday"
+      value: "tuesday",
+      label:"TUESDAY"
     },
     {
-      value: "wenesday",
-      label:"Wenesday"
+      value: "wednesday",
+      label:"WEDNESDAY"
     },
     {
       value: "thursday",
-      label:"Thursday"
+      label:"THURSDAY"
     },
     {
       value: "friday",
-      label:"Friday"
+      label:"FRIDAY"
     },
     {
       value: "saturday",
-      label:"Saturday"
+      label:"SATURDAY"
     },
     {
       value: "sunday",
-      label:"Sunday"
+      label:"SUNDAY"
     },
   ];
   
 
   weeks: any[] = [
     {
-      value: "1week",
-      label:"1WEEK"
+      value: "week1",
+      label:"WEEK1"
     },
     {
-      value: "2week",
-      label:"2WEEK"
+      value: "week2",
+      label:"WEEK2"
     },
     {
-      value: "3week",
-      label:"3WEEK"
+      value: "week3",
+      label:"WEEK3"
     },
     {
-      value: "4week",
-      label:"4WEEK"
+      value: "week4",
+      label:"WEEK4"
     },
    
   ];
   selectedPeriodes: String[] = [];
   allPeriodes: String[] = [
-    "ALL_DAY","ALL_MONTH","ALL_YEAR"
+    "EVERY_DAY","EVERY_MONTH","EVERY_YEAR"
   ]
   oneMatchselected:Matching;
 
