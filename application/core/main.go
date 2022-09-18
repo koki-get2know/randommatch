@@ -312,7 +312,7 @@ func main() {
 	public.POST("/albums", handler.PostAlbums)
 
 	protected := router.Group("")
-	//protected.Use(middlewares.JwtAuth())
+	protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/tag-matchings", generateMatchingByTag)
