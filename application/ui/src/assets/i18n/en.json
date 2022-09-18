@@ -75,7 +75,7 @@
   "CLOSE": "Close",
   "MAKE_RECCURENT": "Make recurent",
   "DATE_TIME": "Date & time",
-  "DURATION": "Duration",
+  "DURATION": "Duration (minutes)",
   "TIME": "Time",
   "RECCURENCE_START_DATE": "Recurence start date",
   "RECCURENCE_END_DATE": "Recurrence end date",

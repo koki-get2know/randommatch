@@ -12,7 +12,7 @@
   <ion-grid>
     <ion-row class="ion-justify-content-center">
       <ion-col size-md="3" class="ion-text-center">
-        <ion-button color="primary" id="open-modal" fill="clear">
+        <ion-button color="primary" id="open-modal">
           {{ "SCHEDULE_INVITES" | translate }}
           <ion-icon slot="end" name="alarm-outline"></ion-icon>
         </ion-button>
@@ -21,7 +21,7 @@
         <ion-button
           color="primary"
           (click)="reloadSelectedMatches()"
-          fill="clear"
+          fill="outline"
         >
           {{ "REMATCH" | translate }}
           <ion-icon slot="end" name="shuffle-outline"></ion-icon>
@@ -80,9 +80,11 @@
           <ion-row>
             <ion-col>
               <ion-item button="true" id="open-date-input">
-                <ion-label> {{ "DATE_TIME" | translate}} </ion-label>
+                <ion-label class="ion-text-wrap">
+                  {{ "DATE_TIME" | translate}}
+                </ion-label>
                 <ion-text slot="end"
-                  >{{ noRecurentDate | date: 'mediumDate' }}</ion-text
+                  >{{ noRecurentDate | date: 'medium' }}</ion-text
                 >
                 <ion-popover
                   id="date-input-popover"
@@ -116,7 +118,9 @@
                     [autofocus]="true"
                     clearInput
                   ></ion-input>
-                  <ion-label> {{ "DURATION" | translate}} </ion-label>
+                  <ion-label class="ion-text-wrap">
+                    {{ "DURATION" | translate}}
+                  </ion-label>
                   <ion-icon slot="end" name="timer-outline"></ion-icon>
                 </ion-item>
               </ion-list>
@@ -128,7 +132,9 @@
           <ion-row>
             <ion-col>
               <ion-item button="true" id="open-time">
-                <ion-label> {{ "TIME" | translate}} </ion-label>
+                <ion-label class="ion-text-wrap">
+                  {{ "TIME" | translate}}
+                </ion-label>
                 <ion-text slot="end">{{ time}}</ion-text>
                 <ion-popover
                   id="date-input-popover"
@@ -161,7 +167,9 @@
                     [autofocus]="true"
                     clearInput
                   ></ion-input>
-                  <ion-label> {{ "DURATION" | translate}} </ion-label>
+                  <ion-label class="ion-text-wrap">
+                    {{ "DURATION" | translate}}
+                  </ion-label>
                   <ion-icon slot="end" name="timer-outline"></ion-icon>
                 </ion-item>
               </ion-list>
@@ -171,7 +179,7 @@
           <ion-row>
             <ion-col>
               <ion-item button="true" id="open-date-input1">
-                <ion-label>
+                <ion-label class="ion-text-wrap">
                   {{ "RECCURENCE_START_DATE" | translate}}
                 </ion-label>
                 <ion-text slot="end"
@@ -200,7 +208,9 @@
           <ion-row>
             <ion-col col-md-12>
               <ion-item button="true" id="open-date-input2">
-                <ion-label> {{ "RECCURENCE_END_DATE" | translate}} </ion-label>
+                <ion-label class="ion-text-wrap">
+                  {{ "RECCURENCE_END_DATE" | translate}}
+                </ion-label>
                 <ion-text slot="end"
                   >{{ endDate | date: 'mediumDate' }}</ion-text
                 >
@@ -226,9 +236,11 @@
           </ion-row>
           <ion-row>
             <ion-col>
-              <ion-list tyle="max-width:400px">
+              <ion-list>
                 <ion-item>
-                  <ion-label>{{ "RECCURENCE_PATTERN" | translate}}</ion-label>
+                  <ion-label class="ion-text-wrap"
+                    >{{ "RECCURENCE_PATTERN" | translate}}</ion-label
+                  >
                   <ion-select multiple="false" [(ngModel)]="selectedPattern">
                     <ion-select-option
                       [value]="day.value"
@@ -240,7 +252,9 @@
                 </ion-item>
 
                 <ion-item *ngIf="selectedPattern!=='monthly'">
-                  <ion-label>{{ "EVERY" | translate}}</ion-label>
+                  <ion-label class="ion-text-wrap"
+                    >{{ "EVERY" | translate}}</ion-label
+                  >
                   <ion-select
                     multiple=" false"
                     [(ngModel)]="selectedEveryPattern"
@@ -257,7 +271,9 @@
                 <ion-row *ngIf="selectedPattern==='monthly'">
                   <ion-col col-md-6>
                     <ion-item>
-                      <ion-label>{{ "ON_THE" | translate}}</ion-label>
+                      <ion-label class="ion-text-wrap"
+                        >{{ "ON_THE" | translate}}</ion-label
+                      >
                       <ion-select multiple="false" [(ngModel)]="selectedWeek">
                         <ion-select-option
                           [value]="week.value"
@@ -269,7 +285,9 @@
                   </ion-col>
                   <ion-col col-md-6>
                     <ion-item>
-                      <ion-label>{{ "ON" | translate}}</ion-label>
+                      <ion-label class="ion-text-wrap"
+                        >{{ "ON" | translate}}</ion-label
+                      >
                       <ion-select
                         multiple="false"
                         [(ngModel)]="selectedEveryPattern"
