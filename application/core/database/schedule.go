@@ -73,6 +73,7 @@ func GetSchedule(uid string, orga string) (entity.Schedule, error) {
 				Duration:     sch["duration"].(string),
 				StartDate:    sch["startTime"].(time.Time),
 				EndDate:      sch["endTime"].(time.Time),
+
 				Size:         sch["size"].(int64),
 				Frequency:    entity.Frequency(sch["frequency"].(string)),
 				MatchingType: entity.MatchingType(sch["matchingType"].(string)),
@@ -105,6 +106,7 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 	schedule.LastRun = time.Now().UTC()
+
 	schedule.UdapteNextRun()
 
 	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
@@ -120,6 +122,7 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 			"MERGE (n)-[r:SCHEDULE_FOR]->(o)",
 
 			map[string]interface{}{"lastRun": schedule.LastRun, "start": schedule.StartDate.UTC(), "end": schedule.EndDate.UTC(), "time": schedule.Time, "duration": schedule.Duration, "nextRun": schedule.NextRun, "week": schedule.Week, "days": schedule.Days, "size": schedule.Size, "frequency": schedule.Frequency, "uid": schedule.Id, "name": schedule.Name, "active": schedule.Active, "matchingType": schedule.MatchingType, "lower_org_name": strings.ToLower(orga)})
+
 		if err != nil {
 			return nil, err
 		}
@@ -145,6 +148,7 @@ func UpdateSchedule(schedule entity.Schedule, orga string) error {
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 	schedule.LastRun = time.Now().UTC()
+
 	schedule.UdapteNextRun()
 
 	defer session.Close()
@@ -155,6 +159,7 @@ func UpdateSchedule(schedule entity.Schedule, orga string) error {
 				"SET s.NextRun = $nextRun",
 
 			map[string]interface{}{"lastRun": schedule.LastRun, "nextRun": schedule.NextRun, "uid": schedule.Id, "orga": strings.ToLower(orga)})
+
 		return "", err
 	})
 
