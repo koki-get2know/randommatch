@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -61,3 +62,30 @@ func Minimum(a uint, b uint) uint {
 	}
 	return b
 }
+
+func HMDays(day1 string, day2 string) int {
+	days := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+	indx1 := 0
+	indx2 := 0
+	for i, d := range days {
+		if d == day1 {
+			indx1 = i
+			break
+		}
+	}
+	fmt.Println(indx1)
+	for i, d := range days {
+		if d == day2 {
+			indx2 = i
+			break
+		}
+	}
+	fmt.Println(indx2)
+	if indx1 > indx2 {
+
+		return 7 - indx1 + indx2
+	} else {
+		return indx1 - indx2
+	}
+}
+
