@@ -2,7 +2,6 @@ package entity
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/koki/randommatch/utils/helper"
