@@ -71,16 +71,16 @@ func GetSchedule(uid string, orga string) (entity.Schedule, error) {
 				CreateDate:   sch["creationDate"].(time.Time),
 				Time:         sch["time"].(string),
 				Duration:     sch["duration"].(string),
-				StartDate:    sch["startTime"].(string),
-				EndDate:      sch["endTime"].(string),
+				StartDate:    sch["startTime"].(time.Time),
+				EndDate:      sch["endTime"].(time.Time),
 				Size:         sch["size"].(int64),
 				Frequency:    entity.Frequency(sch["frequency"].(string)),
 				MatchingType: entity.MatchingType(sch["matchingType"].(string)),
 				Active:       sch["active"].(bool),
 				Week:         entity.Week(sch["week"].(string)),
-				Days:         sch["days"].(string),
-				LastRun:      sch["lastRun"].(string),
-				NextRun:      sch["nextRun"].(string),
+				Days:         sch["days"].([]string),
+				LastRun:      sch["lastRun"].(time.Time),
+				NextRun:      sch["nextRun"].(time.Time),
 			}
 		}
 
@@ -104,7 +104,7 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
-	schedule.UdapteLastRun(time.Now(), "_")
+	schedule.LastRun = time.Now().UTC()
 	schedule.UdapteNextRun()
 
 	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
@@ -115,11 +115,11 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 			"startTime: $start,"+
 			"endTime: $end,"+
 			"size:$size,frequency:$frequency,matchingType:$matchingType,"+
-			"week:$week, days:$days, lastRun:$lastRun, nextRun:$nextRun,"+
+			"week:$week, days:$days, lastRun:datetime({timezone: 'Z'}), nextRun:$nextRun,"+
 			"time:$time, duration:$duration}"+
 			"MERGE (n)-[r:SCHEDULE_FOR]->(o)",
 
-			map[string]interface{}{"start": schedule.StartDate, "end": schedule.EndDate, "time": schedule.Time, "duration": schedule.Duration, "lastRun": schedule.LastRun, "nextRun": schedule.NextRun, "week": schedule.Week, "days": schedule.Days, "size": schedule.Size, "frequency": schedule.Frequency, "uid": schedule.Id, "name": schedule.Name, "active": schedule.Active, "matchingType": schedule.MatchingType, "lower_org_name": strings.ToLower(orga)})
+			map[string]interface{}{"lastRun": schedule.LastRun, "start": schedule.StartDate.UTC(), "end": schedule.EndDate.UTC(), "time": schedule.Time, "duration": schedule.Duration, "nextRun": schedule.NextRun, "week": schedule.Week, "days": schedule.Days, "size": schedule.Size, "frequency": schedule.Frequency, "uid": schedule.Id, "name": schedule.Name, "active": schedule.Active, "matchingType": schedule.MatchingType, "lower_org_name": strings.ToLower(orga)})
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +144,7 @@ func UpdateSchedule(schedule entity.Schedule, orga string) error {
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
-	schedule.UdapteLastRun(time.Now(), "_")
+	schedule.LastRun = time.Now().UTC()
 	schedule.UdapteNextRun()
 
 	defer session.Close()
@@ -154,7 +154,7 @@ func UpdateSchedule(schedule entity.Schedule, orga string) error {
 				"SET s.LastRun = $lastRun"+
 				"SET s.NextRun = $nextRun",
 
-			map[string]interface{}{"nextRun": schedule.NextRun, "lastRun": schedule.LastRun, "uid": schedule.Id, "orga": strings.ToLower(orga)})
+			map[string]interface{}{"lastRun": schedule.LastRun, "nextRun": schedule.NextRun, "uid": schedule.Id, "orga": strings.ToLower(orga)})
 		return "", err
 	})
 
