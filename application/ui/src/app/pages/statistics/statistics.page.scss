@@ -1,0 +1,13 @@
+.title-size {
+  font-size: 2rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+.chart-container {
+  min-height: 28rem;
+}
+
+@media screen and (max-width: 74em) {
+  .chart-container {
+    min-height: 18rem;
+  }
+}

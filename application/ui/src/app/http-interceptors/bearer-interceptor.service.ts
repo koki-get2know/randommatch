@@ -48,7 +48,7 @@ export class BearerInterceptor implements HttpInterceptor {
       .pipe(
         switchMap((authResult) => {
           if (
-            new Date().getTime() - (authResult.idTokenClaims["exp"] as number) <
+            authResult.idTokenClaims["exp"] * 1000 - new Date().getTime() >=
             10000
           ) {
             return of(authResult.idToken);

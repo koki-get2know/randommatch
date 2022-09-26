@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -16,18 +17,18 @@ func Duration(msg string, start time.Time) {
 
 func Contains(s []any, e string) bool {
 	for _, a := range s {
-			if a.(string) == e {
-					return true
-			}
+		if a.(string) == e {
+			return true
+		}
 	}
 	return false
 }
 
 func ContainsString(s []string, e string) bool {
 	for _, a := range s {
-			if a == e {
-					return true
-			}
+		if a == e {
+			return true
+		}
 	}
 	return false
 }
@@ -35,9 +36,9 @@ func ContainsString(s []string, e string) bool {
 func ItemsWithPrefixInRole(s []any, prefix string) []string {
 	orgs := []string{}
 	for _, a := range s {
-			if strings.HasPrefix(a.(string), prefix) {
-					orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string),prefix)) )
-			}
+		if strings.HasPrefix(a.(string), prefix) {
+			orgs = append(orgs, strings.ToLower(strings.TrimPrefix(a.(string), prefix)))
+		}
 	}
 	return orgs
 }
@@ -61,3 +62,30 @@ func Minimum(a uint, b uint) uint {
 	}
 	return b
 }
+
+func HMDays(day1 string, day2 string) int {
+	days := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+	indx1 := 0
+	indx2 := 0
+	for i, d := range days {
+		if d == day1 {
+			indx1 = i
+			break
+		}
+	}
+	fmt.Println(indx1)
+	for i, d := range days {
+		if d == day2 {
+			indx2 = i
+			break
+		}
+	}
+	fmt.Println(indx2)
+	if indx1 > indx2 {
+
+		return 7 - indx1 + indx2
+	} else {
+		return indx1 - indx2
+	}
+}
+

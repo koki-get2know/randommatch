@@ -5,8 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/database"
 	"github.com/koki/randommatch/entity"
@@ -37,11 +40,17 @@ type tagMatchingReq struct {
 }
 
 type EmailReq struct {
-	Matches []matcher.Match `json:"matches"`
+	Matches      []matcher.Match `json:"matches"`
+	Organization string          `json:"organization"`
 }
 
 func getHealthCheck(c *gin.Context) {
 	c.Status(http.StatusNoContent)
+}
+
+type scheduleMatchingReq struct {
+	Uid          string `json:"code"`
+	Organization string `json:"organization"`
 }
 
 func linkfromMatching(tuples []matcher.Match) error {
@@ -72,7 +81,7 @@ func generateMatchings(c *gin.Context) {
 		return
 	}
 
-	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, matcher.Basic,
+	tuples := matcher.GenerateTuple(req.Users, [][]entity.User{}, entity.Basic,
 		req.ForbiddenConnections, req.Size, []entity.User{}, []entity.User{})
 	c.JSON(http.StatusCreated, gin.H{"data": tuples})
 
@@ -91,7 +100,7 @@ func generateGroupMatchings(c *gin.Context) {
 		return
 	}
 
-	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
 
 		req.ForbiddenConnections, req.Size, req.Groups[0], req.Groups[1])
 
@@ -111,12 +120,14 @@ func generateMatchingByTag(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 tags"})
 		return
 	}
+
 	usersTag1, err := database.GetUsersByTag(req.Organization, req.Tags[0])
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+
 	usersTag2, err := database.GetUsersByTag(req.Organization, req.Tags[1])
 
 	if err != nil {
@@ -125,13 +136,15 @@ func generateMatchingByTag(c *gin.Context) {
 	}
 
 	for _, u := range req.Exclude {
+
 		usersTag1 = u.RmUser(usersTag1)
 	}
 	for _, u := range req.Exclude {
 		usersTag2 = u.RmUser(usersTag2)
+
 	}
 
-	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, matcher.Group,
+	tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
 
 		req.ForbiddenConnections, req.Size, usersTag1, usersTag2)
 
@@ -168,10 +181,24 @@ func emailMatches(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid json sent " + err.Error()})
 		return
 	}
+	claims := c.MustGet("tokenClaims").(jwt.MapClaims)
+	roles := claims["roles"].([]interface{})
+	orgs := helper.ItemsWithPrefixInRole(roles, "Org.")
+
+	orgaName := strings.ToLower(req.Organization)
+	if len(orgaName) > 0 && !helper.ContainsString(orgs, orgaName) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Operation denied permission missing"})
+		return
+	}
+	orgaUid, err := database.GetOrganizationByName(orgaName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
 
 	// http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
 
-	jobId, err := calendar.SendInvite(req.Matches)
+	jobId, err := calendar.SendInvite(req.Matches, orgaUid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "mails sending failed " + err.Error()})
 		return
@@ -181,8 +208,88 @@ func emailMatches(c *gin.Context) {
 
 }
 
+func matchingBySchedule(c *gin.Context) {
+
+	/*steps
+	   - Scan schedule
+	   - Load matchingtype
+	      -if simple search users connected to dummy+ uid of schedule
+		  -if group getUsersByTags(dummy_tag1+uid) , getUsersByTags(dummy_tag2+uid)
+		  -if tag  getUsersByTags(tag1), getUsersByTags(tag2)
+	   - Return
+	*/
+
+	defer helper.Duration(helper.Track("MatchingBySchedule"))
+	var req scheduleMatchingReq
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	schedule, err := database.GetSchedule(req.Uid, req.Organization)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	switch schedule.MatchingType {
+	case entity.Simple:
+		techTag := "dummy_" + schedule.Name
+		users, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		tuples := matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
+			[][]entity.User{}, uint(schedule.Size), []entity.User{}, []entity.User{})
+		c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
+	case entity.Groups:
+
+		techTag1 := "dummy_group_" + strconv.Itoa(0) + "_" + schedule.Name
+		techTag2 := "dummy_group_" + strconv.Itoa(1) + "_" + schedule.Name
+		userGroup1, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag1)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		userGroup2, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag2)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
+			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
+		c.JSON(http.StatusCreated, gin.H{"data": tuples})
+	case entity.Tags:
+
+		tags, err := database.GetTagBySchedule(schedule.Id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		userGroup1, err := database.GetUsersByTag(req.Organization, tags[0].Name)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		userGroup2, err := database.GetUsersByTag(req.Organization, tags[1].Name)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
+			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
+		c.JSON(http.StatusCreated, gin.H{"data": tuples})
+	}
+	database.UpdateSchedule(schedule, req.Organization)
+
+}
 func main() {
-	os.Setenv("NEO4J_AUTH", "neo4j/ubuntu")
+	//os.Setenv("NEO4J_AUTH", "neo4j/ubuntu")
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
 		driver, err := database.Driver()
@@ -214,16 +321,19 @@ func main() {
 	protected.POST("/organizations", handler.CreateOrganization)
 	protected.POST("/email-matches", emailMatches)
 
+	protected.POST("/matchings-schedule", matchingBySchedule)
+	protected.POST("/schedule", handler.CreateScheduleType)
+
 	protected.GET("/users-creation-job/:id", handler.GetJobStatus)
 	protected.GET("/matching-email-job/:id", handler.GetJobStatus)
 	protected.GET("/organizations/:id", handler.GetOrganization)
 	protected.GET("/users", handler.GetUsers)
-
-	protected.DELETE("/users", handler.DeleteUsers)
-	protected.DELETE("/users/:id", handler.DeleteUser)
 	protected.GET("/tags", getTags)
 	protected.GET("/matchings-stats", handler.GetMatchingStats)
 	protected.GET("/links", getLinks)
+
+	protected.DELETE("/users", handler.DeleteUsers)
+	protected.DELETE("/users/:id", handler.DeleteUser)
 
 	router.Run()
 }

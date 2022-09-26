@@ -9,8 +9,9 @@ import {
 import { NavController, ToastController } from "@ionic/angular";
 import { NavigationExtras, Router } from "@angular/router";
 import { ColorsTags } from "../../constants";
-import SwiperCore, { Pagination, Swiper } from "swiper";
 import { TranslateService } from "@ngx-translate/core";
+import { finalize } from "rxjs/operators";
+import SwiperCore, { Pagination, Swiper } from "swiper";
 
 SwiperCore.use([Pagination]);
 
@@ -33,6 +34,8 @@ export class MatchingSimplePage implements OnInit {
   isIndeterminate: boolean;
   masterCheck: boolean;
   checkBoxList: any;
+  isLoading = false;
+  noUsersToShow = false;
 
   private slides: Swiper;
 
@@ -48,6 +51,7 @@ export class MatchingSimplePage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
+      this.noUsersToShow = this.users.length === 0;
     });
     this.initForm();
   }
@@ -70,10 +74,9 @@ export class MatchingSimplePage implements OnInit {
   }
 
   prevSlide() {
-    this.slides.allowSlideNext = true;
     this.slides.slidePrev();
-    this.slides.allowSlideNext = false;
   }
+
   nextSlide() {
     if (
       this.slides.activeIndex === 1 &&
@@ -106,9 +109,7 @@ export class MatchingSimplePage implements OnInit {
         }
         return true;
       });
-      this.slides.allowSlideNext = true;
       this.slides.slideNext();
-      this.slides.allowSlideNext = false;
     }
   }
 
@@ -315,8 +316,10 @@ export class MatchingSimplePage implements OnInit {
       forbiddenConnections,
     };
 
+    this.isLoading = true;
     this.matchService
       .makematch(matchingRequest)
+      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe((matchings: Matching[]) => {
         if (matchings !== null) {
           matchings.forEach((match) =>

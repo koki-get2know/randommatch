@@ -56,6 +56,11 @@ func Validate(jwtToken string) (jwt.MapClaims, error) {
 	if err != nil {
 		return nil, err
 	}
+	audClientId := "50afc41f-4647-4787-9d61-6c8bec34091c"
+	issuerTenant := "https://login.microsoftonline.com/5806938e-ea7d-4345-85fb-6239156b78d6/v2.0"
+	if !claims.VerifyIssuer(issuerTenant, true) ||	!claims.VerifyAudience(audClientId, true) {
+		return nil, fmt.Errorf("issuer or audience invalid")
+	}
 	return claims, nil
 }
 

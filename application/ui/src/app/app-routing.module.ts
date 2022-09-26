@@ -71,6 +71,10 @@ const routes: Routes = [
         (m) => m.UserFilterPageModule
       ),
   },
+  {
+    path: 'statistics',
+    loadChildren: () => import('./pages/statistics/statistics.module').then( m => m.StatisticsPageModule)
+  },
 ];
 
 const isIframe = window !== window.parent && !window.opener;
