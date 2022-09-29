@@ -288,6 +288,84 @@ func matchingBySchedule(c *gin.Context) {
 	database.UpdateSchedule(schedule, req.Organization)
 
 }
+func scheduleJob(c *gin.Context) {
+	/*steps
+	   - Scan schedule
+	   - Load matchingtype
+	      -if simple search users connected to dummy+ uid of schedule
+		  -if group getUsersByTags(dummy_tag1+uid) , getUsersByTags(dummy_tag2+uid)
+		  -if tag  getUsersByTags(tag1), getUsersByTags(tag2)
+	   - Return
+	*/
+
+	defer helper.Duration(helper.Track("ScheduleJob"))
+
+	organization := c.Param("organization")
+
+	schedules, err := database.GetScheduleJob(organization)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	var result [][]matcher.Match
+	for _, schedule := range schedules {
+		switch schedule.MatchingType {
+		case entity.Simple:
+			techTag := "dummy_" + schedule.Name
+			users, err := database.GetUsersByTechTag(schedule.Id, organization, techTag)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				return
+			}
+			tuples := matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
+				[][]entity.User{}, uint(schedule.Size), []entity.User{}, []entity.User{})
+			result = append(result, tuples)
+
+		case entity.Groups:
+
+			techTag1 := "dummy_group_" + strconv.Itoa(0) + "_" + schedule.Name
+			techTag2 := "dummy_group_" + strconv.Itoa(1) + "_" + schedule.Name
+			userGroup1, err := database.GetUsersByTechTag(schedule.Id, organization, techTag1)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				return
+			}
+			userGroup2, err := database.GetUsersByTechTag(schedule.Id, organization, techTag2)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				return
+			}
+			tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
+				[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
+			result = append(result, tuples)
+
+		case entity.Tags:
+
+			tags, err := database.GetTagBySchedule(schedule.Id)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				return
+			}
+			userGroup1, err := database.GetUsersByTag(organization, tags[0].Name)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				return
+			}
+			userGroup2, err := database.GetUsersByTag(organization, tags[1].Name)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+				return
+			}
+			tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
+				[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
+			result = append(result, tuples)
+		}
+		database.UpdateSchedule(schedule, organization)
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": result})
+}
 func main() {
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
@@ -330,6 +408,7 @@ func main() {
 	protected.GET("/tags", getTags)
 	protected.GET("/matchings-stats", handler.GetMatchingStats)
 	protected.GET("/links", getLinks)
+	protected.GET("/execute-schedule/:organization", scheduleJob)
 
 	protected.DELETE("/users", handler.DeleteUsers)
 	protected.DELETE("/users/:id", handler.DeleteUser)

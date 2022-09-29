@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/koki/randommatch/entity"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -104,6 +105,7 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
+	schedule.Id = uuid.New().String()
 	schedule.LastRun = time.Now().UTC()
 	schedule.UdapteNextRun()
 
@@ -135,6 +137,66 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 		return err
 	}
 	return nil
+}
+
+func GetScheduleJob(organization string) ([]entity.Schedule, error) {
+	driver, err := Driver()
+	if err != nil {
+		return []entity.Schedule{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	schedules, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run(
+			"MATCH (s:Schedule)-[:SCHEDULE_FOR]->(o:Organization{lower_name: $lower_orga}) "+
+				"Where s.nextRun <= datetime()"+
+				"RETURN  s",
+			map[string]interface{}{"lower_orga": strings.ToLower(organization)})
+		var schedules []entity.Schedule
+
+		if err != nil {
+			return schedules, err
+		}
+		for result.Next() {
+
+			sch := result.Record().Values[0].(dbtype.Node).Props
+
+			var Days []string
+			for _, day := range sch["days"].([]interface{}) {
+				Days = append(Days, day.(string))
+			}
+			schedules = append(schedules,
+				entity.Schedule{
+					Id:           sch["uid"].(string),
+					Name:         sch["name"].(string),
+					CreateDate:   sch["creationDate"].(time.Time),
+					Time:         sch["time"].(string),
+					Duration:     sch["duration"].(string),
+					StartDate:    sch["startTime"].(time.Time),
+					EndDate:      sch["endTime"].(time.Time),
+					Size:         sch["size"].(int64),
+					Frequency:    entity.Frequency(sch["frequency"].(string)),
+					MatchingType: entity.MatchingType(sch["matchingType"].(string)),
+					Active:       sch["active"].(bool),
+					Week:         entity.Week(sch["week"].(string)),
+					Days:         Days,
+					LastRun:      sch["lastRun"].(time.Time),
+					NextRun:      sch["nextRun"].(time.Time),
+				})
+		}
+
+		if result.Err() != nil {
+			return schedules, result.Err()
+		}
+
+		return schedules, nil
+
+	})
+	if err != nil {
+		return []entity.Schedule{}, err
+	}
+	return schedules.([]entity.Schedule), nil
 }
 
 func UpdateSchedule(schedule entity.Schedule, orga string) error {
