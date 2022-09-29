@@ -65,14 +65,16 @@ type Schedule struct {
 	Duration     string       `json:"duration"`
 	StartDate    time.Time    `json:"startDate"`
 	EndDate      time.Time    `json:"endDate"`
+
 	Size         int64        `json:"size"`
 	MatchingType MatchingType `json:"matchingType"`
 	Active       bool         `json:"active"`
 	Frequency    Frequency    `json:"frequency"`
 	Week         Week         `json:"week"`
-	Days         []string     `json:"days"` // format day1_day2_day3.....
+	Days         []string     `json:"days"`
 	LastRun      time.Time    `json:"-"`
 	NextRun      time.Time    `json:"-"`
+
 }
 type MatchingStat struct {
 	Id               string    `json:"id"`
