@@ -70,7 +70,6 @@
   "GROUP_MATCH_INSTR": "Créer vos groupes",
   "CREATE_GROUP": "Créer groupe",
   "SEARCH_BY_NAME_OR_TAG": "Recherche par nom ou par tag",
-  "MATCHING_PERIODE": "Periode de Match",
   "MATCH_POSSIBILITY_EXHAUSTED": "Vous avez épuisé l'ensemble des possibilités de connections entre les personnes sélectionnées. Ils ont été enlevé du résultat final. Pour les refaire apparaître, aller à la page précédente et simuler un nouveau match global",
   "SCHEDULE_INVITES": "Planifier les invitations",
   "CLOSE": "Fermer",

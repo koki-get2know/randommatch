@@ -89,8 +89,7 @@ export class UsersService {
        switchMap( ( orga ) => {
          ShedulingReq.organization = orga;
          return this.http
-           .post<any>( `${ this.urlApi }/schedule`, ShedulingReq )
-           .pipe( map( ( res ) => res ) );
+           .post<any>( `${ this.urlApi }/schedule`, ShedulingReq );
       }
           
       ),
@@ -184,7 +183,7 @@ export class UsersService {
     );
   }
 
-  sendEmail(matches: Matching[],time:string,frequency:string) {
+  sendEmail(matches: Matching[],time:string,duration:string) {
     return this.getOrganizations().pipe(
       map((orgs) => {
         let organization = "";
@@ -194,7 +193,7 @@ export class UsersService {
         return organization;
       }),
       switchMap((organization) =>
-        this.http.post(`${this.urlApi}/email-matches`, { matches, organization,time,frequency })
+        this.http.post(`${this.urlApi}/email-matches`, { matches, organization,time,duration })
       ),
       shareReplay(1)
     );

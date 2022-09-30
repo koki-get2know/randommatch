@@ -69,12 +69,16 @@
         <ion-grid *ngIf="!isrecurrence">
           <ion-row>
             <ion-col>
-              <ion-item button="tr  ue" id="open-date-input">
+              <ion-item button="true" id="open-date-input">
                 <ion-label class="ion-text-wrap">
                   {{ "DATE_TIME" | translate}}
                 </ion-label>
+              </ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-item button="true" id="open-date-input">
                 <ion-text slot="end">{{ noRecurentDate | date: 'medium' }}</ion-text>
-                <ion-popover id="date-input-popover" trigger="open-date-input" [showBackdrop]="false" side="top" alignment="end">
+                <ion-popover id="date-input-popover" trigger="open-date-input" [showBackdrop]="false"  alignment="end">
                   <ng-template>
                     <ion-datetime [min]="dateofDay" max="2056" [(ngModel)]="noRecurentDate" presentation="date-time"></ion-datetime>
                   </ng-template>
@@ -101,18 +105,20 @@
         <ion-grid *ngIf="isrecurrence">
           <ion-row>
             <ion-col>
-              <ion-item button="true" id="open-time">
-                <ion-label class="ion-text-wrap">
-                  {{ "TIME" | translate}}
-                </ion-label>
-                <ion-text slot="end">{{ time}}</ion-text>
-                <ion-popover id="date-input-popover" trigger="open-time" [showBackdrop]="false" side="top" alignment="end">
-                  <ng-template>
-                    <ion-datetime [min]="noRecurentDate" [(ngModel)]="time" presentation="time"></ion-datetime>
-                  </ng-template>
-                </ion-popover>
-                <ion-icon slot="end" name="time-outline"></ion-icon>
-              </ion-item>
+              <ion-list>
+                <ion-item button="true" id="open-time">
+                  <ion-label class="ion-text-wrap">
+                    {{ "TIME" | translate}}
+                  </ion-label>
+                  <ion-text slot="end">{{ time}}</ion-text>
+                  <ion-popover id="date-input-popover" trigger="open-time" [showBackdrop]="false" side="top" alignment="end">
+                    <ng-template>
+                      <ion-datetime [min]="noRecurentDate" [(ngModel)]="time" presentation="time"></ion-datetime>
+                    </ng-template>
+                  </ion-popover>
+                  <ion-icon slot="end" name="time-outline"></ion-icon>
+                </ion-item>
+              </ion-list>
             </ion-col>
           </ion-row>
           <ion-row>
@@ -128,15 +134,18 @@
               </ion-list>
             </ion-col>
           </ion-row>
-
           <ion-row>
             <ion-col>
-              <ion-item button="true"  id="open-date-input1">
+              <ion-item button="true" id="open-date-input1">
                 <ion-label class="ion-text-wrap">
                   {{ "RECCURENCE_START_DATE" | translate}}
                 </ion-label>
+              </ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-item>
                 <ion-text slot="end">{{ startDate | date: 'mediumDate' }}</ion-text>
-                <ion-popover id="date-input-popover" trigger="open-date-input1" [showBackdrop]="false" side="top" alignment="end">
+                <ion-popover id="date-input-popover" trigger="open-date-input1" [showBackdrop]="false" alignment="end">
                   <ng-template>
                     <ion-datetime [min]="dateofDay" max="2056" [(ngModel)]="startDate" presentation="date-time"></ion-datetime>
                   </ng-template>
@@ -151,9 +160,14 @@
                 <ion-label class="ion-text-wrap">
                   {{ "RECCURENCE_END_DATE" | translate}}
                 </ion-label>
-                <ion-text slot="end" *ngIf="isactive==true">{{ "POSSIBLE_MATCH_TEXT" | translate}}</ion-text>
-                <ion-text slot="end" *ngIf="isactive==false">{{ endDate | date: 'mediumDate' }}</ion-text>
-                <ion-popover id="date-input-popover" trigger="open-date-input2" [showBackdrop]="false" side="top" alignment="end">
+
+              </ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-item>
+                <ion-text slot="end" *ngIf="isactive">{{ "POSSIBLE_MATCH_TEXT" | translate}}</ion-text>
+                <ion-text slot="end" *ngIf="!isactive">{{ endDate | date: 'mediumDate' }}</ion-text>
+                <ion-popover id="date-input-popover" trigger="open-date-input2" [showBackdrop]="false"  alignment="end">
                   <ng-template>
                     <ion-datetime [(ngModel)]="endDate" [min]="dateofDay" max="2056" [(ngModel)]="endDate" presentation="date-time"></ion-datetime>
                     <ion-item>

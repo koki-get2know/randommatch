@@ -123,7 +123,7 @@ export class MatchingResultPage implements OnInit {
   noRecurentDate: String;
   dateofDay: string;
   startDate: string;
-  endDate: string = "2023-05-17";
+  endDate: string;
   time = "14:00";
 
   ngOnInit() {
@@ -145,7 +145,7 @@ export class MatchingResultPage implements OnInit {
   }
 
   sendMail() {
-    this.matchingService.sendEmail(this.matchings,this.time,this.selectedPattern).subscribe();
+    this.matchingService.sendEmail(this.matchings,this.time,this.duration).subscribe();
   }
 
   makeSheduling () {

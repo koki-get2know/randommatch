@@ -70,7 +70,6 @@
   "GROUP_MATCH_INSTR": "Create the groups",
   "CREATE_GROUP": "Create Group",
   "SEARCH_BY_NAME_OR_TAG": "Search by name or tag",
-  "MATCHING_PERIODE": "Periode of Match",
   "MATCH_POSSIBILITY_EXHAUSTED": "You have exhausted all the possibilities for rematch of the selected people, hence they have been remove from your results. To add everyone back go back to the previous page and simulate a new global match",
   "SCHEDULE_INVITES": "Schedule invites",
   "CLOSE": "Close",
