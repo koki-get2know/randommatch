@@ -58,7 +58,7 @@ export interface ScheduleParam{
 }
 export interface SchedulingReq {
  
-  organization: string,
+  organization?: string,
   schedule: ScheduleParam,
   users?: User[],
   group?: User[][],
@@ -77,10 +77,25 @@ export class UsersService {
 
   urlApi = environment.serverBaseUrl;
 
-  makesheduling(ShedulingReq: SchedulingReq): Observable<any> {
-    return this.http
-      .post<any>(`${this.urlApi}/schedule`, ShedulingReq)
-      .pipe(map((res) => res));
+  makesheduling ( ShedulingReq: SchedulingReq ): Observable<any> {
+     return this.getOrganizations().pipe(
+      map((orgs) => {
+        let orga = "";
+        if (orgs && orgs.length > 0) {
+          orga = orgs[0];
+        }
+        return orga;
+      }),
+       switchMap( ( orga ) => {
+         ShedulingReq.organization = orga;
+         return this.http
+           .post<any>( `${ this.urlApi }/schedule`, ShedulingReq )
+           .pipe( map( ( res ) => res ) );
+      }
+          
+      ),
+      shareReplay(1)
+    );
   }
 
   makematch(matchingReq: MatchingReq): Observable<Matching[]> {
@@ -169,7 +184,7 @@ export class UsersService {
     );
   }
 
-  sendEmail(matches: Matching[]) {
+  sendEmail(matches: Matching[],time:string,frequency:string) {
     return this.getOrganizations().pipe(
       map((orgs) => {
         let organization = "";
@@ -179,7 +194,7 @@ export class UsersService {
         return organization;
       }),
       switchMap((organization) =>
-        this.http.post(`${this.urlApi}/email-matches`, { matches, organization })
+        this.http.post(`${this.urlApi}/email-matches`, { matches, organization,time,frequency })
       ),
       shareReplay(1)
     );

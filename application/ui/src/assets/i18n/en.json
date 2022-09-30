@@ -70,7 +70,6 @@
   "GROUP_MATCH_INSTR": "Create the groups",
   "CREATE_GROUP": "Create Group",
   "SEARCH_BY_NAME_OR_TAG": "Search by name or tag",
-  "PERIODE_OF_MATCH": "PERIODE OF MATCH",
   "MATCHING_PERIODE": "Periode of Match",
   "MATCH_POSSIBILITY_EXHAUSTED": "You have exhausted all the possibilities for rematch of the selected people, hence they have been remove from your results. To add everyone back go back to the previous page and simulate a new global match",
   "SCHEDULE_INVITES": "Schedule invites",
@@ -105,5 +104,6 @@
   "LAST_WEEK": "Last Week",
   "EVERY_DAY": "Every day",
   "EVERY_MONTH": "Every month",
-  "EVERY_YEAR": "Every year"
+  "EVERY_YEAR": "Every year",
+  "POSSIBLE_MATCH_TEXT": "When all possible matches met"
 }

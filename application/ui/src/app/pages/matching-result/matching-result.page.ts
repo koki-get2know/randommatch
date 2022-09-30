@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { AlertController, ToastController } from "@ionic/angular";
 import { TranslateService } from "@ngx-translate/core";
+import { parseISO } from 'date-fns';
+
 import {
   Matching,
   MatchingGroupReq,
@@ -32,6 +34,7 @@ export class MatchingResultPage implements OnInit {
   ) {}
 
   isrecurrence: boolean = false;
+  isactive: boolean = false;
   duration: string;
   selectedDays: string[] = [];
   selectedPattern: string;
@@ -118,6 +121,7 @@ export class MatchingResultPage implements OnInit {
   oneMatchselected: Matching;
 
   noRecurentDate: String;
+  dateofDay: string;
   startDate: string;
   endDate: string = "2023-05-17";
   time = "14:00";
@@ -125,12 +129,15 @@ export class MatchingResultPage implements OnInit {
   ngOnInit() {
     setTimeout(() => {
       this.noRecurentDate = new Date().toISOString();
+      this.dateofDay = new Date().toISOString();
       this.startDate = new Date().toISOString();
       this.time =
         new Date().getHours().toString() +
         ":" +
         new Date().getMinutes().toString();
-    });
+    } );
+    
+    
 
     this.matchings = history.state.matchings;
     this.matchingRequest = history.state.matchingRequest;
@@ -138,12 +145,12 @@ export class MatchingResultPage implements OnInit {
   }
 
   sendMail() {
-    this.matchingService.sendEmail(this.matchings).subscribe();
+    this.matchingService.sendEmail(this.matchings,this.time,this.selectedPattern).subscribe();
   }
 
   makeSheduling () {
-    let matchSize;
-    let matchType;
+    let matchSize: number;
+    let matchType: string;
      
     if ( this.matchingRequest !== undefined ) {
       matchSize = this.matchingRequest.size;
@@ -153,26 +160,25 @@ export class MatchingResultPage implements OnInit {
       matchSize = this.matchingGroupRequest.size;
       matchType = "group";
     }
-    console.log( "Bonjour" );
     const sheduleParam: ScheduleParam = {
       size: matchSize,
       matchingType: matchType,
       duration: this.duration+"",
       time:this.time,
-      active: this.isrecurrence,
-      startDate: "2012-04-23T18:25:43.511Z",
-      endDate: "2012-04-23T18:25:43.511Z",
+      active: this.isactive,
+      startDate: parseISO(this.startDate).toISOString(),
+      endDate: parseISO(this.endDate).toISOString(),
       week: this.selectedWeek,
       frequency: this.selectedPattern,
       days: this.selectedEveryPattern
     };
     const schedulingRequest: SchedulingReq = {
-      organization: "dummy",
       schedule: sheduleParam,
       ...( matchType === "simple" && { users: this.matchingRequest.users } ),
       ...( matchType === "group" && { group: this.matchingGroupRequest.groups } ),
 
     };
+   
     this.matchingService.makesheduling( schedulingRequest ).subscribe(
       ( res: any ) => {
         console.log( res );
