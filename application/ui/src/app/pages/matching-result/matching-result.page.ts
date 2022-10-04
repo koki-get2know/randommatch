@@ -1,11 +1,15 @@
 import { Component, OnInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
-import { ToastController } from "@ionic/angular";
+import { AlertController, ToastController } from "@ionic/angular";
 import { TranslateService } from "@ngx-translate/core";
+import { parseISO } from 'date-fns';
+
 import {
   Matching,
   MatchingGroupReq,
   MatchingReq,
+  ScheduleParam,
+  SchedulingReq,
   User,
   UsersService,
 } from "../../services/users.service";
@@ -25,14 +29,17 @@ export class MatchingResultPage implements OnInit {
     private sanitizer: DomSanitizer,
     private matchingService: UsersService,
     private toastController: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private alertController: AlertController
   ) {}
 
   isrecurrence: boolean = false;
-  selectedDays: String[] = [];
-  selectedPattern: String;
-  selectedEveryPattern: String;
-  selectedWeek: String;
+  isactive: boolean = false;
+  duration: string;
+  selectedDays: string[] = [];
+  selectedPattern: string;
+  selectedEveryPattern: string[] = [];
+  selectedWeek: string;
   allpatterns: any[] = [
     {
       value: "every_minute",
@@ -58,54 +65,54 @@ export class MatchingResultPage implements OnInit {
 
   everyPattern: any[] = [
     {
-      value: "monday",
+      value: "Monday",
       label: "MONDAY",
     },
     {
-      value: "tuesday",
+      value: "Tuesday",
       label: "TUESDAY",
     },
     {
-      value: "wednesday",
+      value: "Wednesday",
       label: "WEDNESDAY",
     },
     {
-      value: "thursday",
+      value: "Thursday",
       label: "THURSDAY",
     },
     {
-      value: "friday",
+      value: "Friday",
       label: "FRIDAY",
     },
     {
-      value: "saturday",
+      value: "Saturday",
       label: "SATURDAY",
     },
     {
-      value: "sunday",
+      value: "Sunday",
       label: "SUNDAY",
     },
   ];
 
   weeks: any[] = [
     {
-      value: "week1",
+      value: "first",
       label: "WEEK1",
     },
     {
-      value: "week2",
+      value: "second",
       label: "WEEK2",
     },
     {
-      value: "week3",
+      value: "third",
       label: "WEEK3",
     },
     {
-      value: "week4",
+      value: "fourth",
       label: "WEEK4",
     },
     {
-      value: "last_week",
+      value: "last",
       label: "LAST_WEEK",
     },
   ];
@@ -114,19 +121,23 @@ export class MatchingResultPage implements OnInit {
   oneMatchselected: Matching;
 
   noRecurentDate: String;
-  startDate: String;
-  endDate: String = "2023-05-17";
+  dateofDay: string;
+  startDate: string;
+  endDate: string;
   time = "14:00";
 
   ngOnInit() {
     setTimeout(() => {
       this.noRecurentDate = new Date().toISOString();
+      this.dateofDay = new Date().toISOString();
       this.startDate = new Date().toISOString();
       this.time =
         new Date().getHours().toString() +
         ":" +
         new Date().getMinutes().toString();
-    });
+    } );
+    
+    
 
     this.matchings = history.state.matchings;
     this.matchingRequest = history.state.matchingRequest;
@@ -134,7 +145,63 @@ export class MatchingResultPage implements OnInit {
   }
 
   sendMail() {
-    this.matchingService.sendEmail(this.matchings).subscribe();
+    this.matchingService.sendEmail(this.matchings,this.time,this.duration).subscribe();
+  }
+
+  makeSheduling () {
+    let matchSize: number;
+    let matchType: string;
+     
+    if ( this.matchingRequest !== undefined ) {
+      matchSize = this.matchingRequest.size;
+      matchType = "simple";
+    }
+    else{
+      matchSize = this.matchingGroupRequest.size;
+      matchType = "group";
+    }
+    const sheduleParam: ScheduleParam = {
+      size: matchSize,
+      matchingType: matchType,
+      duration: this.duration+"",
+      time:this.time,
+      active: this.isactive,
+      startDate: parseISO(this.startDate).toISOString(),
+      endDate: parseISO(this.endDate).toISOString(),
+      week: this.selectedWeek,
+      frequency: this.selectedPattern,
+      days: this.selectedEveryPattern
+    };
+    const schedulingRequest: SchedulingReq = {
+      schedule: sheduleParam,
+      ...( matchType === "simple" && { users: this.matchingRequest.users } ),
+      ...( matchType === "group" && { group: this.matchingGroupRequest.groups } ),
+
+    };
+   
+    this.matchingService.makesheduling( schedulingRequest ).subscribe(
+      ( res: any ) => {
+        console.log( res );
+      }
+    );
+    this.presentAlert();
+  }
+
+  async presentAlert() {
+    const alert = await this.alertController.create({
+      header: 'Votre planification a été bien prise en compte!',
+      buttons: [
+        
+        {
+          text: 'OK',
+          role: 'confirm',
+        },
+      ],
+    });
+
+    await alert.present();
+
+
   }
 
   groupReloadSelectedMatches() {
@@ -206,6 +273,7 @@ export class MatchingResultPage implements OnInit {
   sendMailByMatch(match) {
     this.oneMatchselected = match;
   }
+
 
   reloadSelectedMatches() {
     if (this.matchesSelected.length === 0) {
@@ -297,5 +365,7 @@ export class MatchingResultPage implements OnInit {
       const index = this.matchesSelected.findIndex((m) => match.id === m.id);
       this.matchesSelected.splice(index, 1);
     }
+  
+  
   }
 }

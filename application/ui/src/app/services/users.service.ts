@@ -7,6 +7,7 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { MsalService } from "@azure/msal-angular";
 import { appConstants } from "../constants";
 import { AvatarGenerator } from "random-avatar-generator";
+import { internals } from "@azure/msal-browser";
 
 export class User {
   id: string;
@@ -42,6 +43,28 @@ interface JobResponse {
   status: string;
 }
 
+export interface ScheduleParam{
+  duration: string;
+  time?: string, 
+  active: boolean, // is reccurent
+  startDate?: string,
+  endDate?: string,
+  size: number,
+  matchingType: string,
+  week?: string,
+  frequency?: string,
+  days?: string[],  
+
+}
+export interface SchedulingReq {
+ 
+  organization?: string,
+  schedule: ScheduleParam,
+  users?: User[],
+  group?: User[][],
+  tags?: string[]
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -53,6 +76,26 @@ export class UsersService {
   ) {}
 
   urlApi = environment.serverBaseUrl;
+
+  makesheduling ( ShedulingReq: SchedulingReq ): Observable<any> {
+     return this.getOrganizations().pipe(
+      map((orgs) => {
+        let orga = "";
+        if (orgs && orgs.length > 0) {
+          orga = orgs[0];
+        }
+        return orga;
+      }),
+       switchMap( ( orga ) => {
+         ShedulingReq.organization = orga;
+         return this.http
+           .post<any>( `${ this.urlApi }/schedule`, ShedulingReq );
+      }
+          
+      ),
+      shareReplay(1)
+    );
+  }
 
   makematch(matchingReq: MatchingReq): Observable<Matching[]> {
     return this.http
@@ -140,7 +183,7 @@ export class UsersService {
     );
   }
 
-  sendEmail(matches: Matching[]) {
+  sendEmail(matches: Matching[],time:string,duration:string) {
     return this.getOrganizations().pipe(
       map((orgs) => {
         let organization = "";
@@ -150,7 +193,7 @@ export class UsersService {
         return organization;
       }),
       switchMap((organization) =>
-        this.http.post(`${this.urlApi}/email-matches`, { matches, organization })
+        this.http.post(`${this.urlApi}/email-matches`, { matches, organization,time,duration })
       ),
       shareReplay(1)
     );
@@ -218,4 +261,5 @@ export class UsersService {
   removeConnection(usersconnexionforbidden: User[][], index) {
     usersconnexionforbidden.splice(index, 1);
   }
+  
 }
