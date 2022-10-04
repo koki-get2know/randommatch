@@ -9,8 +9,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name                = "agentpool"
     enable_auto_scaling = true
     min_count           = 1
-    max_count           = 3
-    vm_size             = "Standard_DS2_v2"
+    max_count           = 2
+    vm_size             = "D2as_v4"
     zones               = local.aks_zones
   }
 
