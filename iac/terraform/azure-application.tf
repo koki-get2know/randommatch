@@ -21,6 +21,10 @@ resource "azuread_application" "koki_app_ui" {
     value                = "Privilege.Approve"
   }
 
+  feature_tags {
+    enterprise = true
+  }
+
   single_page_application {
     redirect_uris = ["https://koki.sheno.ca/", "http://localhost:4200/"]
   }
