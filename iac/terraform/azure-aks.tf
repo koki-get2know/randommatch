@@ -10,7 +10,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     enable_auto_scaling = true
     min_count           = 1
     max_count           = 2
-    vm_size             = "D2as_v4"
+    vm_size             = "Standard_D2as_v4"
     zones               = local.aks_zones
   }
 
