@@ -170,7 +170,7 @@ func GetScheduleJob(organization string) ([]entity.Schedule, error) {
 	schedules, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run(
 			"MATCH (s:Schedule)-[:SCHEDULE_FOR]->(o:Organization{lower_name: $lower_orga}) "+
-				//"Where s.nextRun <= datetime()"+
+				"Where s.nextRun <= datetime()"+
 				"RETURN  s",
 			map[string]interface{}{"lower_orga": strings.ToLower(organization)})
 		var schedules []entity.Schedule
