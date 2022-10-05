@@ -41,11 +41,13 @@ resource "azuread_application" "koki_app_ui" {
     id                   = random_uuid.demo_role_id.result
     value                = "Org.Demo"
   }
-  feature_tags {
-    enterprise = true
-  }
 
   single_page_application {
     redirect_uris = ["https://koki.sheno.ca/", "http://localhost:4200/"]
   }
+}
+
+resource "azuread_service_principal" "koki_app_ui" {
+  application_id = azuread_application.koki_app_ui.application_id
+  use_existing   = true
 }
