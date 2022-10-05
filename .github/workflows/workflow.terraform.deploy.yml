@@ -22,7 +22,7 @@ jobs:
           result-encoding: string
           script: return context.repo.repo.toLowerCase()
 
-    # Usage for current job: ${{ steps.resources_prefix.outputs.result }}
+      # Usage for current job: ${{ steps.resources_prefix.outputs.result }}
   build:
       needs: [resource_prefix]
       runs-on: ubuntu-latest

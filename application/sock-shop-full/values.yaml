@@ -1,5 +1,5 @@
 global:
-  registry: "randommatch3akscr.azurecr.io"
+  registry: "randommatchakscr.azurecr.io"
 
 ingress:
   annotations:

@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      ACR_NAME: "randommatch3akscr"
+      ACR_NAME: "randommatchakscr"
     steps:
       - uses: actions/checkout@v3
 

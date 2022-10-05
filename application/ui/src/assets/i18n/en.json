@@ -103,5 +103,6 @@
   "LAST_WEEK": "Last Week",
   "EVERY_DAY": "Every day",
   "EVERY_MONTH": "Every month",
-  "EVERY_YEAR": "Every year"
+  "EVERY_YEAR": "Every year",
+  "POSSIBLE_MATCH_TEXT": "When all possible matches met"
 }
