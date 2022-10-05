@@ -36,7 +36,7 @@ jobs:
         docker build -t ionic-tag .
         docker run --name some-nginx -d ionic-tag
         until [ "`docker inspect -f '{{.State.Running}}' some-nginx`"=="true" ]; do
-          sleep 0.1;
+          sleep 0.5;
         done;
         docker exec some-nginx curl localhost
         docker exec some-nginx cat /etc/nginx/conf.d/default.conf
