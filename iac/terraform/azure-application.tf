@@ -7,7 +7,7 @@ data "azuread_client_config" "current" {}
 resource "random_uuid" "app_role_id" {}
 
 resource "azuread_application" "koki_app_ui" {
-  display_name     = "koki-app-ui"
+  display_name     = "koki-app"
   sign_in_audience = "AzureADMyOrg"
   owners           = [data.azuread_client_config.current.object_id, local.tenant_owner_object_id]
 
@@ -21,6 +21,23 @@ resource "azuread_application" "koki_app_ui" {
     value                = "Privilege.Approve"
   }
 
+  app_role {
+    allowed_member_types = ["User", "Application"]
+    description          = "Dummy organization"
+    display_name         = "Dummy Organization"
+    enabled              = true
+    id                   = random_uuid.app_role_id.result
+    value                = "Org.Dummy"
+  }
+
+  app_role {
+    allowed_member_types = ["User", "Application"]
+    description          = "Demo organization"
+    display_name         = "Demo Organization"
+    enabled              = true
+    id                   = random_uuid.app_role_id.result
+    value                = "Org.Demo"
+  }
   feature_tags {
     enterprise = true
   }
