@@ -64,6 +64,9 @@ jobs:
           until [ "`docker inspect -f {{.State.Running}} some-nginx`"=="true" ]; do
             sleep 0.1;
           done;
+          docker inspect -f {{.State.Running}}
+          docker inspect -f {{.State.Running}} some-nginx
+          sleep 1
           docker exec some-nginx curl localhost
           docker exec some-nginx cat /etc/nginx/conf.d/default.conf
           docker stop some-nginx && docker rm -f some-nginx
