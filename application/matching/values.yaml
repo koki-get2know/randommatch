@@ -1,5 +1,5 @@
 global:
-  registry: "randommatch3akscr.azurecr.io"
+  registry: "randommatchakscr.azurecr.io"
 
 ingress:
   labels: {}
@@ -54,4 +54,4 @@ cert-manager:
 ingress-nginx:
   controller:
     service:
-      loadBalancerIP: "20.49.143.20"
+      loadBalancerIP: "20.254.17.180"

@@ -5,9 +5,9 @@
 export const environment = {
   production: false,
   redirectUri: "http://localhost:4200",
-  clientId: "50afc41f-4647-4787-9d61-6c8bec34091c",
+  clientId: "fabd1d1a-da77-4b3a-bead-b9dedd119334",
   authority:
-    "https://login.microsoftonline.com/5806938e-ea7d-4345-85fb-6239156b78d6",
+    "https://login.microsoftonline.com/869ede11-a6a1-484a-af04-18fdcd469c4d",
   serverBaseUrl: "http://localhost:8080",
 };
 
