@@ -5,6 +5,9 @@
 data "azuread_client_config" "current" {}
 
 resource "random_uuid" "app_role_id" {}
+resource "random_uuid" "dummy_role_id" {}
+resource "random_uuid" "demo_role_id" {}
+
 
 resource "azuread_application" "koki_app_ui" {
   display_name     = "koki-app-ui"
@@ -26,7 +29,7 @@ resource "azuread_application" "koki_app_ui" {
     description          = "Dummy organization"
     display_name         = "Dummy Organization"
     enabled              = true
-    id                   = random_uuid.app_role_id.result
+    id                   = random_uuid.dummy_role_id.result
     value                = "Org.Dummy"
   }
 
@@ -35,7 +38,7 @@ resource "azuread_application" "koki_app_ui" {
     description          = "Demo organization"
     display_name         = "Demo Organization"
     enabled              = true
-    id                   = random_uuid.app_role_id.result
+    id                   = random_uuid.demo_role_id.result
     value                = "Org.Demo"
   }
   feature_tags {
