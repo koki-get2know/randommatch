@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/koki/randommatch/calendar"
 	"github.com/koki/randommatch/database"
 	"github.com/koki/randommatch/entity"
@@ -208,7 +209,7 @@ func emailMatches(c *gin.Context) {
 
 }
 
-func matchingBySchedule(c *gin.Context) {
+func matchingBySchedule(schedule entity.Schedule, organization string) ([]matcher.Match, error, database.JobStatus) {
 
 	/*steps
 	   - Scan schedule
@@ -218,75 +219,69 @@ func matchingBySchedule(c *gin.Context) {
 		  -if tag  getUsersByTags(tag1), getUsersByTags(tag2)
 	   - Return
 	*/
-
-	defer helper.Duration(helper.Track("MatchingBySchedule"))
-	var req scheduleMatchingReq
-
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
-	schedule, err := database.GetSchedule(req.Uid, req.Organization)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-
+	var tuples []matcher.Match
+	var out database.JobStatus
 	switch schedule.MatchingType {
 	case entity.Simple:
 		techTag := "dummy_" + schedule.Name
-		users, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag)
+		users, err := database.GetUsersByTechTag(schedule.Id, organization, techTag)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
+			out = database.Failed
+			return nil, err, out
 		}
-		tuples := matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
+
+		tuples = matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
 			[][]entity.User{}, uint(schedule.Size), []entity.User{}, []entity.User{})
-		c.JSON(http.StatusCreated, gin.H{"data": tuples})
 
 	case entity.Groups:
 
 		techTag1 := "dummy_group_" + strconv.Itoa(0) + "_" + schedule.Name
 		techTag2 := "dummy_group_" + strconv.Itoa(1) + "_" + schedule.Name
-		userGroup1, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag1)
+		userGroup1, err := database.GetUsersByTechTag(schedule.Id, organization, techTag1)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
+			out = database.Failed
+			return nil, err, out
 		}
-		userGroup2, err := database.GetUsersByTechTag(req.Uid, req.Organization, techTag2)
+		userGroup2, err := database.GetUsersByTechTag(schedule.Id, organization, techTag2)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
+			out = database.Failed
+			return nil, err, out
 		}
-		tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
+
+		tuples = matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
 			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
-		c.JSON(http.StatusCreated, gin.H{"data": tuples})
+
 	case entity.Tags:
 
 		tags, err := database.GetTagBySchedule(schedule.Id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-		userGroup1, err := database.GetUsersByTag(req.Organization, tags[0].Name)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-		userGroup2, err := database.GetUsersByTag(req.Organization, tags[1].Name)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-		tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
-			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
-		c.JSON(http.StatusCreated, gin.H{"data": tuples})
-	}
-	database.UpdateSchedule(schedule, req.Organization)
+			out = database.Failed
 
+			return nil, err, out
+		}
+		userGroup1, err := database.GetUsersByTag(organization, tags[0].Name)
+		if err != nil {
+			out = database.Failed
+			return nil, err, out
+		}
+		userGroup2, err := database.GetUsersByTag(organization, tags[1].Name)
+		if err != nil {
+			out = database.Failed
+			return nil, err, out
+		}
+		tuples = matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
+			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
+
+	}
+
+	err := database.UpdateSchedule(schedule, organization)
+	if err != nil {
+		out = database.Failed
+		return nil, err, out
+	}
+	out = database.Done
+	return tuples, nil, out
 }
 func scheduleJob(c *gin.Context) {
 	/*steps
@@ -308,63 +303,41 @@ func scheduleJob(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+
 	var result [][]matcher.Match
+
 	for _, schedule := range schedules {
-		switch schedule.MatchingType {
-		case entity.Simple:
-			techTag := "dummy_" + schedule.Name
-			users, err := database.GetUsersByTechTag(schedule.Id, organization, techTag)
 
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				return
-			}
-			tuples := matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
-				[][]entity.User{}, uint(schedule.Size), []entity.User{}, []entity.User{})
-			result = append(result, tuples)
+		jobId := uuid.New().String()
 
-		case entity.Groups:
+		if err := database.CreateJobStatus(jobId); err != nil {
+			log.Println("Error while creating job", jobId, err)
+		}
 
-			techTag1 := "dummy_group_" + strconv.Itoa(0) + "_" + schedule.Name
-			techTag2 := "dummy_group_" + strconv.Itoa(1) + "_" + schedule.Name
-			userGroup1, err := database.GetUsersByTechTag(schedule.Id, organization, techTag1)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				return
-			}
-			userGroup2, err := database.GetUsersByTechTag(schedule.Id, organization, techTag2)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				return
-			}
-			tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
-				[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
-			result = append(result, tuples)
+		var status database.JobStatus
 
-		case entity.Tags:
-
-			tags, err := database.GetTagBySchedule(schedule.Id)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				return
+		tuples, err, status := matchingBySchedule(schedule, organization)
+		log.Println(status)
+		if err != nil {
+			if er := database.UpdateJobErrors(jobId, []string{err.Error()}); er != nil {
+				log.Println("Error while updating job", jobId, er)
 			}
-			userGroup1, err := database.GetUsersByTag(organization, tags[0].Name)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				return
-			}
-			userGroup2, err := database.GetUsersByTag(organization, tags[1].Name)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				return
-			}
-			tuples := matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
-				[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
+		} else {
 			result = append(result, tuples)
 		}
-		database.UpdateSchedule(schedule, organization)
+
+		if err := database.UpdateJobStatus(jobId, status); err != nil {
+			log.Println("Error while updating job", jobId, err)
+
+		}
+		if err := database.ScheduleLinkJobs(jobId, schedule.Id); err != nil {
+			log.Println("Error while build a relationship schedule and job state", jobId, schedule.Id, err)
+		}
+
 	}
+
 	c.JSON(http.StatusCreated, gin.H{"data": result})
+
 }
 func main() {
 	_, exists := os.LookupEnv("NEO4J_AUTH")
@@ -390,7 +363,7 @@ func main() {
 	public.POST("/albums", handler.PostAlbums)
 
 	protected := router.Group("")
-	protected.Use(middlewares.JwtAuth())
+	//protected.Use(middlewares.JwtAuth())
 	protected.POST("/matchings", generateMatchings)
 	protected.POST("/group-matchings", generateGroupMatchings)
 	protected.POST("/tag-matchings", generateMatchingByTag)
@@ -398,7 +371,6 @@ func main() {
 	protected.POST("/organizations", handler.CreateOrganization)
 	protected.POST("/email-matches", emailMatches)
 
-	protected.POST("/matchings-schedule", matchingBySchedule)
 	protected.POST("/schedule", handler.CreateScheduleType)
 
 	protected.GET("/users-creation-job/:id", handler.GetJobStatus)

@@ -28,6 +28,23 @@ func ScheduleLinkTTags(tag string, scheduleCode string) error {
 
 	return err
 }
+func ScheduleLinkJobs(jobId string, scheduleCode string) error {
+	driver, err := Driver()
+	if err != nil {
+		return err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		_, err := tx.Run("MATCH (j: Job{uid: $uidj})"+
+			"MATCH (n: Schedule{uid: $uid})"+
+			"MERGE (n)-[rut:HAS_JOB_STATE]->(j)",
+			map[string]interface{}{"uid": scheduleCode, "uidj": jobId})
+		return "", err
+	})
+
+	return err
+}
 func ScheduleLinkTags(tag string, scheduleCode string) error {
 	driver, err := Driver()
 	if err != nil {
@@ -67,13 +84,13 @@ func GetSchedule(uid string, orga string) (entity.Schedule, error) {
 			sch := result.Record().Values[0].(dbtype.Node).Props
 
 			schedule = entity.Schedule{
-				Id:           sch["uid"].(string),
-				Name:         sch["name"].(string),
-				CreateDate:   sch["creationDate"].(time.Time),
-				Time:         sch["time"].(string),
-				Duration:     sch["duration"].(string),
-				StartDate:    sch["startTime"].(time.Time),
-				EndDate:      sch["endTime"].(time.Time),
+				Id:         sch["uid"].(string),
+				Name:       sch["name"].(string),
+				CreateDate: sch["creationDate"].(time.Time),
+				Time:       sch["time"].(string),
+				Duration:   sch["duration"].(string),
+				StartDate:  sch["startTime"].(time.Time),
+				EndDate:    sch["endTime"].(time.Time),
 
 				Size:         sch["size"].(int64),
 				Frequency:    entity.Frequency(sch["frequency"].(string)),
@@ -99,10 +116,10 @@ func GetSchedule(uid string, orga string) (entity.Schedule, error) {
 	return schedule.(entity.Schedule), nil
 }
 
-func CreateSchedule(schedule entity.Schedule, orga string) error {
+func CreateSchedule(schedule entity.Schedule, orga string) (string, error) {
 	driver, err := Driver()
 	if err != nil {
-		return err
+		return "", err
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -137,9 +154,9 @@ func CreateSchedule(schedule entity.Schedule, orga string) error {
 
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return schedule.Id, nil
 }
 
 func GetScheduleJob(organization string) ([]entity.Schedule, error) {
@@ -153,7 +170,7 @@ func GetScheduleJob(organization string) ([]entity.Schedule, error) {
 	schedules, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run(
 			"MATCH (s:Schedule)-[:SCHEDULE_FOR]->(o:Organization{lower_name: $lower_orga}) "+
-				"Where s.nextRun <= datetime()"+
+				//"Where s.nextRun <= datetime()"+
 				"RETURN  s",
 			map[string]interface{}{"lower_orga": strings.ToLower(organization)})
 		var schedules []entity.Schedule
@@ -217,8 +234,8 @@ func UpdateSchedule(schedule entity.Schedule, orga string) error {
 	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		_, err := tx.Run(
 			"MATCH (s:Schedule{uid:$uid})-[r:SCHEDULE_FOR]->(:Organization{lower_name:$orga})"+
-				"SET s.LastRun = $lastRun"+
-				"SET s.NextRun = $nextRun",
+				"SET s += {LastRun:$lastRun,"+
+				"NextRun:$nextRun}",
 
 			map[string]interface{}{"lastRun": schedule.LastRun, "nextRun": schedule.NextRun, "uid": schedule.Id, "orga": strings.ToLower(orga)})
 

@@ -38,7 +38,7 @@ func CreateScheduleType(c *gin.Context) {
 				- Assign a dummy tag to schedule
 		*/
 		scheduleTag := "dummy_" + req.Schedule.Name
-		err := database.CreateSchedule(req.Schedule, req.Organization)
+		uid, err := database.CreateSchedule(req.Schedule, req.Organization)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
@@ -54,7 +54,7 @@ func CreateScheduleType(c *gin.Context) {
 			return
 		}
 
-		err = database.ScheduleLinkTTags(scheduleTag, req.Schedule.Id)
+		err = database.ScheduleLinkTTags(scheduleTag, uid)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
@@ -71,7 +71,7 @@ func CreateScheduleType(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
 			return
 		}
-		err := database.CreateSchedule(req.Schedule, req.Organization)
+		uid, err := database.CreateSchedule(req.Schedule, req.Organization)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
@@ -90,7 +90,7 @@ func CreateScheduleType(c *gin.Context) {
 				return
 			}
 
-			err = database.ScheduleLinkTTags(scheduleTagGroup, req.Schedule.Id)
+			err = database.ScheduleLinkTTags(scheduleTagGroup, uid)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 				return
@@ -108,14 +108,14 @@ func CreateScheduleType(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "you should send 2 groups"})
 			return
 		}
-		err := database.CreateSchedule(req.Schedule, req.Organization)
+		uid, err := database.CreateSchedule(req.Schedule, req.Organization)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
 		for _, tag := range req.Tags {
 
-			err = database.ScheduleLinkTags(tag, req.Schedule.Id)
+			err = database.ScheduleLinkTags(tag, uid)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 				return

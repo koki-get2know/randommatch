@@ -25,7 +25,7 @@ func GetOrganization(c *gin.Context) {
 	orga, err := database.GetOrganizationById(id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message":  err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	if len(orga.Id) == 0 {
