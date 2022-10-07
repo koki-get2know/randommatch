@@ -135,8 +135,6 @@ func mapMatches(tuples [][]entity.User) [][]map[string]interface{} {
 		result[index] = users
 	}
 
-	log.Println(result)
-
 	return result
 }
 func CreateUsers(users []entity.User, orgaUid string) (string, error) {

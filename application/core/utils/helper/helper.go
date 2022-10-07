@@ -73,7 +73,7 @@ func HMDays(day1 string, day2 string) int {
 			break
 		}
 	}
-	fmt.Println(indx1)
+
 	for i, d := range days {
 		if d == day2 {
 			indx2 = i
