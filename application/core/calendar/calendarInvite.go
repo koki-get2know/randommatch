@@ -21,8 +21,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func generateIcsInvitation(sender, subject, description string, attendees []string) ([]byte, error) {
-	startAt := time.Now()
+func generateIcsInvitation(sender, subject, description string, attendees []string, duration int64, startAt time.Time) ([]byte, error) {
 	language := "en-us"
 	location := "It's up to you"
 
@@ -33,7 +32,7 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	event.SetDtStampTime(time.Now())
 	event.SetModifiedAt(time.Now())
 	event.SetStartAt(startAt)
-	event.SetEndAt(startAt.Add(30 * time.Minute))
+	event.SetEndAt(startAt.Add(time.Duration(duration) * time.Minute))
 	event.SetSummary(subject, &ics.KeyValues{Key: string(ics.ParameterLanguage), Value: []string{language}})
 	event.SetLocation(location)
 	event.SetDescription(description)
@@ -70,7 +69,7 @@ func generateIcsInvitation(sender, subject, description string, attendees []stri
 	return emailRaw.Bytes(), err
 }
 
-func SendInvite(matches []matcher.Match, orgaUid string) (string, error) {
+func SendInvite(matches []matcher.Match, orgaUid string, duration int64, inviteDate time.Time) (string, error) {
 	jobId := uuid.New().String()
 	if err := database.CreateJobStatus(jobId); err != nil {
 		return "", err
@@ -86,7 +85,7 @@ func SendInvite(matches []matcher.Match, orgaUid string) (string, error) {
 		errors := []string{}
 		for _, match := range matches {
 			match := match
-			if err := sendInvite(&match); err != nil {
+			if err := sendInvite(&match, duration, inviteDate); err != nil {
 				uids := []string{}
 				for _, user := range match.Users {
 					uids = append(uids, user.Id)
@@ -140,7 +139,7 @@ func saveMatchingInfo(numGroups int, numFailed int, orgaUid string) (string, err
 	return database.CreateMatchingStat(matchingStat, orgaUid)
 }
 
-func sendInvite(match *matcher.Match) error {
+func sendInvite(match *matcher.Match, duration int64, inviteDate time.Time) error {
 	const (
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
@@ -179,7 +178,7 @@ func sendInvite(match *matcher.Match) error {
 	
 	Happy Koki!`, strings.Join(names, ", "))
 
-	rawMessage, err := generateIcsInvitation(sender, subject, description, emails)
+	rawMessage, err := generateIcsInvitation(sender, subject, description, emails, duration, inviteDate)
 	if err != nil {
 		log.Println(err)
 		return err

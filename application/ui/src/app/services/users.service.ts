@@ -46,7 +46,6 @@ interface JobResponse {
 export interface ScheduleParam{
   duration: string;
   time?: string, 
-  active: boolean, // is reccurent
   startDate?: string,
   endDate?: string,
   size: number,
@@ -183,7 +182,7 @@ export class UsersService {
     );
   }
 
-  sendEmail(matches: Matching[],time:string,duration:string) {
+  sendEmail(matches: Matching[], inviteDate:string, duration:number) {
     return this.getOrganizations().pipe(
       map((orgs) => {
         let organization = "";
@@ -193,7 +192,7 @@ export class UsersService {
         return organization;
       }),
       switchMap((organization) =>
-        this.http.post(`${this.urlApi}/email-matches`, { matches, organization,time,duration })
+        this.http.post(`${this.urlApi}/email-matches`, { matches, organization, inviteDate, duration })
       ),
       shareReplay(1)
     );
