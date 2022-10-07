@@ -1,7 +1,6 @@
 package database
 
 import (
-	"log"
 	"strings"
 
 	"github.com/koki/randommatch/entity"
@@ -33,7 +32,6 @@ func UserLinkTags(users []entity.User, tag string) error {
 	}
 	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
-	log.Println(MapUsers(users))
 	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		_, err := tx.Run(
 			"MATCH (t: TechTag{lower_name:$lower_tag_name})"+
