@@ -139,7 +139,7 @@
                 <ion-text slot="end">{{ startDate | date: 'mediumDate' }}</ion-text>
                 <ion-popover trigger="open-date-input1" [showBackdrop]="false"  alignment="end">
                   <ng-template>
-                    <ion-datetime [showDefaultButtons]="true" [min]="dateofDay" max="2056" [(ngModel)]="startDate" presentation="date-time"></ion-datetime>
+                    <ion-datetime [showDefaultButtons]="true" [min]="dateofDay" max="2056" [(ngModel)]="startDate" presentation="date"></ion-datetime>
                   </ng-template>
                 </ion-popover>
                 <ion-icon slot="end" name="play-circle-outline"></ion-icon>
@@ -160,7 +160,7 @@
                       <ion-checkbox [(ngModel)]="endedBySystem" slot="start"></ion-checkbox>
                       <ion-label>{{ "POSSIBLE_MATCH_TEXT" | translate}}</ion-label>
                     </ion-item>
-                    <ion-datetime [showDefaultButtons]="true" [(ngModel)]="endDate" [min]="dateofDay" max="2056" [(ngModel)]="endDate" presentation="date-time"></ion-datetime>
+                    <ion-datetime *ngIf="!endedBySystem" [showDefaultButtons]="true" [(ngModel)]="endDate" [min]="dateofDay" max="2056" [(ngModel)]="endDate" presentation="date"></ion-datetime>
                   </ng-template>
                 </ion-popover>
                 <ion-icon slot="end" name="pause-circle-outline"></ion-icon>
