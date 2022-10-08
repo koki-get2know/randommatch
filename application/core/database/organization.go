@@ -54,9 +54,9 @@ func GetOrganizationById(uid string) (entity.Organization, error) {
 		}
 		if result.Next() {
 			return entity.Organization{Id: result.Record().Values[0].(dbtype.Node).Props["uid"].(string),
-			 Name: result.Record().Values[0].(dbtype.Node).Props["name"].(string),
-			 Description: result.Record().Values[0].(dbtype.Node).Props["description"].(string),
-			 }, nil
+				Name:        result.Record().Values[0].(dbtype.Node).Props["name"].(string),
+				Description: result.Record().Values[0].(dbtype.Node).Props["description"].(string),
+			}, nil
 		}
 
 		return entity.Organization{}, result.Err()
@@ -89,4 +89,39 @@ func GetOrganizationByName(name string) (string, error) {
 	})
 
 	return res.(string), err
+}
+
+func GetOrganizations() ([]entity.Organization, error) {
+	driver, err := Driver()
+	if err != nil {
+		return []entity.Organization{}, err
+	}
+	session := (*driver).NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+	organizations, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		result, err := tx.Run("MATCH (n: Organization) RETURN n ",
+			map[string]interface{}{})
+
+		if err != nil {
+			return []entity.Organization{}, err
+		}
+		var organizations []entity.Organization
+		for result.Next() {
+			orga := result.Record().Values[0].(dbtype.Node).Props
+			organizations = append(organizations,
+				entity.Organization{Id: orga["uid"].(string),
+					Name:        orga["name"].(string),
+					Description: orga["description"].(string),
+				})
+		}
+		if result.Err() != nil {
+			return organizations, result.Err()
+		}
+		return organizations, result.Err()
+
+	})
+	if err != nil {
+		return []entity.Organization{}, err
+	}
+	return organizations.([]entity.Organization), nil
 }

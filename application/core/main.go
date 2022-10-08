@@ -209,7 +209,7 @@ func emailMatches(c *gin.Context) {
 
 }
 
-func matchingBySchedule(schedule entity.Schedule, organization string) ([]matcher.Match, error, database.JobStatus) {
+func matchingBySchedule(schedule entity.Schedule, organization string) ([]matcher.Match, database.JobStatus, error) {
 
 	/*steps
 	   - Scan schedule
@@ -228,7 +228,7 @@ func matchingBySchedule(schedule entity.Schedule, organization string) ([]matche
 
 		if err != nil {
 			out = database.Failed
-			return nil, err, out
+			return nil, out, err
 		}
 
 		tuples = matcher.GenerateTuple(users, [][]entity.User{}, entity.Basic,
@@ -241,12 +241,12 @@ func matchingBySchedule(schedule entity.Schedule, organization string) ([]matche
 		userGroup1, err := database.GetUsersByTechTag(schedule.Id, organization, techTag1)
 		if err != nil {
 			out = database.Failed
-			return nil, err, out
+			return nil, out, err
 		}
 		userGroup2, err := database.GetUsersByTechTag(schedule.Id, organization, techTag2)
 		if err != nil {
 			out = database.Failed
-			return nil, err, out
+			return nil, out, err
 		}
 
 		tuples = matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
@@ -258,17 +258,17 @@ func matchingBySchedule(schedule entity.Schedule, organization string) ([]matche
 		if err != nil {
 			out = database.Failed
 
-			return nil, err, out
+			return nil, out, err
 		}
 		userGroup1, err := database.GetUsersByTag(organization, tags[0].Name)
 		if err != nil {
 			out = database.Failed
-			return nil, err, out
+			return nil, out, err
 		}
 		userGroup2, err := database.GetUsersByTag(organization, tags[1].Name)
 		if err != nil {
 			out = database.Failed
-			return nil, err, out
+			return nil, out, err
 		}
 		tuples = matcher.GenerateTuple([]entity.User{}, [][]entity.User{}, entity.Group,
 			[][]entity.User{}, uint(schedule.Size), userGroup1, userGroup2)
@@ -278,33 +278,25 @@ func matchingBySchedule(schedule entity.Schedule, organization string) ([]matche
 	err := database.UpdateSchedule(schedule, organization)
 	if err != nil {
 		out = database.Failed
-		return nil, err, out
+		return nil, out, err
 	}
 	out = database.Done
-	return tuples, nil, out
+	return tuples, out, nil
 }
-func scheduleJob(c *gin.Context) {
-	/*steps
-	   - Scan schedule
-	   - Load matchingtype
-	      -if simple search users connected to dummy+ uid of schedule
-		  -if group getUsersByTags(dummy_tag1+uid) , getUsersByTags(dummy_tag2+uid)
-		  -if tag  getUsersByTags(tag1), getUsersByTags(tag2)
-	   - Return
-	*/
+func scheduleJob(organization string) {
 
-	defer helper.Duration(helper.Track("ScheduleJob"))
-
-	organization := c.Param("organization")
-
+	orgaUid, err := database.GetOrganizationByName(organization)
+	log.Println(orgaUid)
+	if err != nil {
+		log.Println("Error while get uid of organization", err.Error())
+		return
+	}
 	schedules, err := database.GetScheduleJob(organization)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		log.Println("Error while get schedules nodes in database", err)
 		return
 	}
-
-	var result [][]matcher.Match
 
 	for _, schedule := range schedules {
 
@@ -316,14 +308,20 @@ func scheduleJob(c *gin.Context) {
 
 		var status database.JobStatus
 
-		tuples, err, status := matchingBySchedule(schedule, organization)
-		log.Println(status)
+		tuples, status, err := matchingBySchedule(schedule, organization)
+		log.Println(tuples)
 		if err != nil {
 			if er := database.UpdateJobErrors(jobId, []string{err.Error()}); er != nil {
 				log.Println("Error while updating job", jobId, er)
 			}
 		} else {
-			result = append(result, tuples)
+			// sending mails
+			// TODO:add code for authenticating
+			//_, err := calendar.SendInvite(tuples, orgaUid)
+			//if err != nil {
+			//	log.Println("mails sending failed " + err.Error()) 681474948 kemayou fabrice , omer disgn
+
+			//}
 		}
 
 		if err := database.UpdateJobStatus(jobId, status); err != nil {
@@ -333,12 +331,24 @@ func scheduleJob(c *gin.Context) {
 		if err := database.ScheduleLinkJobs(jobId, schedule.Id); err != nil {
 			log.Println("Error while build a relationship schedule and job state", jobId, schedule.Id, err)
 		}
-
+		log.Println("execution of schedule is a success", schedule.Id)
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": result})
-
 }
+func processScheduledJob(c *gin.Context) {
+	defer helper.Duration(helper.Track("processScheduledJob"))
+	organisations, err := database.GetOrganizations()
+
+	if err != nil {
+		log.Println("Error while get all orga in database", err)
+		return
+	}
+	for _, orga := range organisations {
+		go scheduleJob(orga.Name)
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "schedule are being excecute with successfull"})
+}
+
 func main() {
 	_, exists := os.LookupEnv("NEO4J_AUTH")
 	if exists {
@@ -380,7 +390,7 @@ func main() {
 	protected.GET("/tags", getTags)
 	protected.GET("/matchings-stats", handler.GetMatchingStats)
 	protected.GET("/links", getLinks)
-	protected.GET("/execute-schedule/:organization", scheduleJob)
+	protected.GET("/execute-schedule", processScheduledJob)
 
 	protected.DELETE("/users", handler.DeleteUsers)
 	protected.DELETE("/users/:id", handler.DeleteUser)
