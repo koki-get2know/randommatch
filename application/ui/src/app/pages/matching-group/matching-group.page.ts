@@ -54,7 +54,8 @@ export class MatchingGroupPage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
-      this.noUsersToShow = users.length === 0;
+      this.noUsersToShow = this.users == null || this.users.length === 0;
+
     });
 
     this.initForm();

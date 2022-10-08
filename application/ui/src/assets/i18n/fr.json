@@ -80,6 +80,7 @@
   "RECCURENCE_START_DATE": "Date de début de la récurrence",
   "RECCURENCE_END_DATE": "Date de fin de la récurrence",
   "RECCURENCE_PATTERN": "Schéma de récurrence",
+  "SCHEDULE_TAKEN_INTO_ACCOUNT": "Votre planification a été bien prise en compte!",
   "EVERY": "Chaque",
   "ON_THE": "À la",
   "ON": "Le",

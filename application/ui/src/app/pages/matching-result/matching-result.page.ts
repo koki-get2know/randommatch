@@ -1,6 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { DomSanitizer } from "@angular/platform-browser";
-import { AlertController, ToastController } from "@ionic/angular";
+import { ToastController } from "@ionic/angular";
 import { TranslateService } from "@ngx-translate/core";
 import { parseISO } from 'date-fns';
 
@@ -26,16 +25,13 @@ export class MatchingResultPage implements OnInit {
   matchesSelected: Matching[] = [];
 
   constructor(
-    private sanitizer: DomSanitizer,
     private matchingService: UsersService,
     private toastController: ToastController,
-    private translate: TranslateService,
-    private alertController: AlertController
-  ) {}
+    private translate: TranslateService) {}
 
   isrecurrence: boolean = false;
-  isactive: boolean = false;
-  duration: string;
+  endedBySystem: boolean = false;
+  duration: number = 15;
   selectedDays: string[] = [];
   selectedPattern: string;
   selectedEveryPattern: string[] = [];
@@ -120,21 +116,18 @@ export class MatchingResultPage implements OnInit {
   allPeriodes: String[] = ["EVERY_DAY", "EVERY_MONTH", "EVERY_YEAR"];
   oneMatchselected: Matching;
 
-  noRecurentDate: String;
+  inviteDate: string;
   dateofDay: string;
   startDate: string;
   endDate: string;
-  time = "14:00";
+  time: string;
 
   ngOnInit() {
     setTimeout(() => {
-      this.noRecurentDate = new Date().toISOString();
+      this.inviteDate = new Date().toISOString();
       this.dateofDay = new Date().toISOString();
       this.startDate = new Date().toISOString();
-      this.time =
-        new Date().getHours().toString() +
-        ":" +
-        new Date().getMinutes().toString();
+      this.time = new Date().toISOString();
     } );
     
     
@@ -144,34 +137,45 @@ export class MatchingResultPage implements OnInit {
     this.matchingGroupRequest = history.state.matchingGroupRequest;
   }
 
+  scheduleInvites() {
+    if (this.isrecurrence) {
+      this.makeSheduling();
+    } else {
+      this.sendMail();
+    }
+  }
+
   sendMail() {
-    this.matchingService.sendEmail(this.matchings,this.time,this.duration).subscribe();
+    this.matchingService.sendEmail(this.matchings, this.inviteDate,this.duration).subscribe(
+      (_: Object) => {
+        this.presentToast("SCHEDULE_TAKEN_INTO_ACCOUNT");
+      }
+    );
   }
 
   makeSheduling () {
     let matchSize: number;
     let matchType: string;
-     
     if ( this.matchingRequest !== undefined ) {
       matchSize = this.matchingRequest.size;
       matchType = "simple";
     }
-    else{
+    else if (this.matchingGroupRequest !== undefined) {
       matchSize = this.matchingGroupRequest.size;
       matchType = "group";
     }
     const sheduleParam: ScheduleParam = {
-      size: matchSize,
-      matchingType: matchType,
+      time: parseISO(this.time).getUTCHours()+":"+parseISO(this.time).getUTCMinutes(),
       duration: this.duration+"",
-      time:this.time,
-      active: this.isactive,
       startDate: parseISO(this.startDate).toISOString(),
       endDate: parseISO(this.endDate).toISOString(),
-      week: this.selectedWeek,
+      size: matchSize,
+      matchingType: matchType,
       frequency: this.selectedPattern,
+      week: this.selectedWeek,
       days: this.selectedEveryPattern
     };
+
     const schedulingRequest: SchedulingReq = {
       schedule: sheduleParam,
       ...( matchType === "simple" && { users: this.matchingRequest.users } ),
@@ -180,29 +184,12 @@ export class MatchingResultPage implements OnInit {
     };
    
     this.matchingService.makesheduling( schedulingRequest ).subscribe(
-      ( res: any ) => {
-        console.log( res );
+      ( _: any ) => {
+        this.presentToast("SCHEDULE_TAKEN_INTO_ACCOUNT");
       }
     );
-    this.presentAlert();
   }
 
-  async presentAlert() {
-    const alert = await this.alertController.create({
-      header: 'Votre planification a été bien prise en compte!',
-      buttons: [
-        
-        {
-          text: 'OK',
-          role: 'confirm',
-        },
-      ],
-    });
-
-    await alert.present();
-
-
-  }
 
   groupReloadSelectedMatches() {
     if (this.matchesSelected.length > 1) {
