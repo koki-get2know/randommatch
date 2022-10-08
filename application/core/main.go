@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -43,6 +44,8 @@ type tagMatchingReq struct {
 type EmailReq struct {
 	Matches      []matcher.Match `json:"matches"`
 	Organization string          `json:"organization"`
+	Duration     int64           `json:"duration"`
+	Date         time.Time       `json:"date"`
 }
 
 func getHealthCheck(c *gin.Context) {
@@ -199,7 +202,11 @@ func emailMatches(c *gin.Context) {
 
 	// http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
 
-	jobId, err := calendar.SendInvite(req.Matches, orgaUid)
+	if req.Duration == 0 {
+		req.Duration = 15
+	}
+
+	jobId, err := calendar.SendInvite(req.Matches, orgaUid, req.Duration, req.Date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "mails sending failed " + err.Error()})
 		return

@@ -51,7 +51,7 @@ export class MatchingSimplePage implements OnInit {
   ngOnInit() {
     this.matchService.getUsersdata().subscribe((users) => {
       this.users = users;
-      this.noUsersToShow = this.users.length === 0;
+      this.noUsersToShow = this.users == null || this.users.length === 0;
     });
     this.initForm();
   }

@@ -71,7 +71,7 @@ export class UsersListPage implements OnInit {
   getUsers() {
     this.userService.getUsersdata().subscribe((users) => {
       this.users = users;
-      this.noUsersToShow = users.length === 0;
+      this.noUsersToShow = this.users == null || this.users.length === 0;
     });
   }
 }
